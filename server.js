@@ -1402,3 +1402,11 @@ initializeDtrTable().then(() => {
         console.log("Server is running on http://localhost:3000");
     });
 });
+
+// Hanapin mo ito sa server.js
+app.use(session({
+    secret: 'itaewon_kopi_secret_key_2026', // Maglagay ka ng kahit anong string dito
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // 'false' muna dahil naka-HTTP lang tayo sa simula
+}));
