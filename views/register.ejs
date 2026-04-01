@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGNUP YARN</title>
+    <LINk rel="stylesheet" href="/SIGNUP.CSS"></LINk>
+    <!-- LOAD FACE API -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+</head>
+<body>
+    <div class="CONTAINER">
+        <form class="LOGIN-FORM" action="/register" method="POST">
+            <img src="/Black White Minimalist Coffee Shop Logo-Photoroom.png" alt="COFFEE LOGO" class="LOGO">
+            <h1>SIGN UP</h1>
+
+            <!-- Para sa pag-display ng error/success messages -->
+            <% if (messages.error && messages.error.length > 0) { %>
+                <div style="color: red; background-color: #ffdddd; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                    <%= messages.error[0] %>
+                </div>
+            <% } %>
+            <p id="otp-status" style="font-weight: bold; margin-bottom: 15px;"></p>
+
+            <div class="INPUT-GROUP">
+                <label for="USERNAME">USERNAME</label>
+                <input type="text" id="USERNAME" name="USERNAME" required>
+            </div>
+            <div class="INPUT-GROUP">
+                <label for="PASSWORD">PASSWORD</label>
+                <input type="password" id="PASSWORD" name="PASSWORD" required>
+            </div>
+            <div class="INPUT-GROUP">
+                <label for="confirm_password">CONFIRM PASSWORD</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            <div class="INPUT-GROUP">
+                <label for="CATEGORY">CATEGORY</label>
+                <select id="CATEGORY" name="CATEGORY" required>
+                    <option value="" disabled selected>SELECT ROLE</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="USER">USER</option>
+                </select>
+            </div>
+            <div class="INPUT-GROUP">
+                <label for="EMAIL">EMAIL</label>
+                <input type="email" id="EMAIL" name="EMAIL" required>
+            </div>
+            <div class="INPUT-GROUP">
+                <label for="OTP">OTP</label>
+                <input type="text" id="OTP" name="OTP" required>
+                <!-- Gawing type="button" para hindi mag-submit ang form -->
+                <button type="button" id="sendOtpBtn" class="LOGIN-BUTTON">SEND OTP</button>
+            </div>
+
+            <!-- FACE REGISTRATION SECTION -->
+            <div class="INPUT-GROUP" style="text-align: center;">
+                <label>FACE REGISTRATION</label>
+                <div style="position: relative; width: 100%; height: 240px; background: #000; margin-bottom: 10px; border-radius: 5px; overflow: hidden;">
+                    <video id="register-video" autoplay muted playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+                    <canvas id="register-canvas" style="position: absolute; top: 0; left: 0;"></canvas>
+                    <div id="loading-models" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white;">Loading Face Models...</div>
+                </div>
+                <button type="button" id="captureFaceBtn" class="LOGIN-BUTTON" style="background: #555;" disabled>CAPTURE FACE</button>
+                <input type="hidden" id="face_descriptor" name="face_descriptor">
+                <p id="face-status" style="font-size: 12px; margin-top: 5px; color: red;">Face Not Registered</p>
+            </div>
+
+            <button type="submit" class="LOGIN-BUTTON" id="submitBtn" disabled>SIGN UP</button>
+            <p>ALREADY HAVE AN ACCOUNT? <a href="/login">LOGIN</a></p>
+        </form>
+    </div>
+    
+    <script>
+        // --- FACE API LOGIC FOR REGISTRATION ---
+        const video = document.getElementById('register-video');
+        const captureBtn = document.getElementById('captureFaceBtn');
+        const faceInput = document.getElementById('face_descriptor');
+        const faceStatus = document.getElementById('face-status');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingMsg = document.getElementById('loading-models');
+        let modelsLoaded = false;
+
+        // Load Models (Gumamit ng CDN para hindi na mag-download manually)
+        Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
+            faceapi.nets.faceRecognitionNet.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models')
+        ]).then(startVideo).catch(err => {
+            console.error("Model Error:", err);
+            if(loadingMsg) loadingMsg.innerText = "Error loading models. Check internet.";
+        });
+
+        function startVideo() {
+            modelsLoaded = true;
+            if(loadingMsg) loadingMsg.style.display = 'none';
+            navigator.mediaDevices.getUserMedia({ video: {} })
+                .then(stream => {
+                    video.srcObject = stream;
+                    captureBtn.disabled = false;
+                    captureBtn.style.background = ""; // Reset color
+                    captureBtn.innerText = "CAPTURE FACE";
+                })
+                .catch(err => {
+                    console.error("Camera Error:", err);
+                    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && window.location.protocol !== 'https:') {
+                        alert("CAMERA ERROR: Security Blocked!\n\nBrowsers block camera access on 'Not Secure' (HTTP) connections.\n\nSOLUTION:\nGo to 'chrome://flags', enable 'Insecure origins treated as secure', and add this IP address.");
+                    } else {
+                        alert("Could not access camera. Please allow permissions.");
+                    }
+                });
+        }
+
+        captureBtn.addEventListener('click', async () => {
+            if (!modelsLoaded) return;
+            
+            captureBtn.innerText = "Scanning...";
+            const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+
+            if (detections) {
+                // Success: Face Detected
+                const descriptor = detections.descriptor; // Float32Array
+                // Convert to Array for JSON storage
+                const descriptorArray = Array.from(descriptor);
+                
+                faceInput.value = JSON.stringify(descriptorArray);
+                
+                faceStatus.innerText = "✅ Face Registered Successfully!";
+                faceStatus.style.color = "green";
+                submitBtn.disabled = false; // Enable Sign Up
+                
+                // Stop Video to save resources
+                video.srcObject.getTracks().forEach(track => track.stop());
+                captureBtn.style.display = 'none';
+            } else {
+                alert("No face detected! Please look at the camera properly.");
+                captureBtn.innerText = "CAPTURE FACE";
+            }
+        });
+
+        // --- OTP LOGIC ---
+        document.getElementById('sendOtpBtn').addEventListener('click', async function() {
+            const emailInput = document.getElementById('EMAIL');
+            const otpStatus = document.getElementById('otp-status');
+
+            if (!emailInput.value) {
+                otpStatus.textContent = 'Please enter your email address first.';
+                otpStatus.style.color = 'red';
+                return;
+            }
+
+            this.disabled = true;
+            this.textContent = 'Sending...';
+            otpStatus.textContent = 'Sending OTP, please wait...';
+            otpStatus.style.color = 'blue';
+
+            try {
+                const response = await fetch('/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ EMAIL: emailInput.value }),
+                });
+                const result = await response.json();
+                otpStatus.textContent = result.message;
+                otpStatus.style.color = response.ok ? 'green' : 'red';
+            } catch (error) {
+                otpStatus.textContent = 'Failed to send OTP. Please try again later.';
+                otpStatus.style.color = 'red';
+            } finally {
+                this.disabled = false;
+                this.textContent = 'SEND OTP';
+            }
+        });
+    </script>
+</body>
+</html>

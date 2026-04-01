@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title >USERPAGE</title>
+    <link rel="icon" type="image/png" href="coffee-bean-solid-24.png">
+    <link rel="stylesheet" href="userpagev2.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <aside class="sidebar close">
+        <header>
+            <div class="image-text">
+                <span class="image">
+                    <img src="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.profile_pic) ? '/uploads/' + employeeProfile.profile_pic : 'https://img.icons8.com/fluent/1200/test-account.jpg' %>" alt="Profile Picture" class="profile-pic">
+                </span>
+                <div class="text header-text">
+                    <span class="name"><%= USERNAME %></span>
+                    <span class="role"><%= CATEGORY %></span>
+                </div>
+            </div>
+
+            <i class='bx bx-chevrons-right toggle' ></i>
+        </header>
+
+        <div class="menu-bar">
+            <div class="menu">
+
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="openSection('menu')">
+                            <i class='bx bxs-food-menu icon' ></i>
+                            <span class="text nav-text">MENU</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="openSection('inventory')">
+                            <i class='bx bxs-box icon' ></i>
+                            <span class="text nav-text">INVENTORY</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="openSection('transaction')">
+                            <i class='bx bx-history icon' ></i>
+                            <span class="text nav-text">TRANSACTION HISTORY</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="openSection('account')">
+                            <i class='bx bxs-user-account icon' ></i>
+                            <span class="text nav-text">ACCOUNT</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <DIV class="bottom-content">
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class='bx bx-log-out icon'></i>
+                            <span class="text nav-text">LOGOUT</span>
+                        </a>
+                        <form id="logout-form" action="/logout?_method=DELETE" method="POST"></form>
+                    </li>
+                </ul>
+            </DIV>
+        </div>
+    </aside>
+
+    <nav>
+        <div>
+            <h1>ITAEWON KOPI SHOP</h1>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+            <div class="alert alert-danger" role="alert">
+                <%- errors %>
+            </div>
+        <% } %>
+        
+        <% if (typeof success !== 'undefined' && success.length > 0) { %>
+            <div class="alert alert-success" role="alert">
+                <%- success %>
+            </div>
+        <% } %>
+
+        <section id="menu" class="tab-content">
+            <div class="headermenu">
+                <h2>MENU</h2>
+            </div>
+
+            <div class="container-menu">
+                <div class="container8">
+                    <div class="menu-filter">
+                        <!-- Gumamit ng div sa halip na form para hindi mag-submit/reload -->
+                        <div class="menu-filter-group"> 
+                            <label for="">Food :</label>
+                            <button type="button" onclick="filterMenu('Fried chicken')">Fried chicken</button>
+                            <button type="button" onclick="filterMenu('Ramen & Pasta')">Ramen & Pasta</button>
+                            <button type="button" onclick="filterMenu('Snack Bar')">Snack Bar</button>
+                            <button type="button" onclick="filterMenu('Rice Meal Bundle')">Rice Meal Bundle</button>
+                        </div>
+                    
+
+                        <div class="menu-filter-group">
+                            <label for="">Beverages :</label>
+                            <button type="button" onclick="filterMenu('Coffee Based Drinks')">Coffee Based Drinks</button>
+                            <button type="button" onclick="filterMenu('Milk Based Drinks')">Milk Based Drinks</button>
+                            <button type="button" onclick="filterMenu('Soda Drinks')">Soda Drinks</button>
+                            <button type="button" onclick="filterMenu('Cheese Cake Series')">Cheese Cake Series</button>
+                            <button type="button" onclick="filterMenu('Smoothies')">Smoothies</button>
+                        </div>
+                    </div>
+
+                    <!-- Dito lalabas ang Menu Items galing Database -->
+                    <div id="dynamic-menu-container">
+                        <% if (typeof menuItems !== 'undefined' && menuItems.length > 0) { %>
+                            <% menuItems.forEach(function(item) { %>
+                                <div class="menu-card" 
+                                     data-category="<%= item['Category 2'] %>" 
+                                     data-main-category="<%= item['Category'] %>"
+                                     data-name="<%= item['Menu Name'] %>" 
+                                     data-price="<%= item['Price'] %>" 
+                                     onclick="addToOrder(this.dataset.name, this.dataset.price, this.dataset.mainCategory, this.dataset.category)">
+                                    <!-- Pwede mong lagyan ng image dito kung meron -->
+                                    <h3 class="menu-card-title"><%= item['Menu Name'] || 'Unknown' %></h3>
+                                    <p class="menu-card-category"><%= item['Category'] %></p>
+                                    <p class="menu-card-price">₱ <%= item['Price'] %></p>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p>No menu items found.</p>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="container2 order-list-panel">
+                    <h3 class="order-list-header">ORDER LIST</h3>
+                    <div id="cart-items">
+                        <p class="cart-empty-message">No items selected.</p>
+                    </div>
+                    <div class="cart-footer">
+                        <div class="cart-total-section">
+                            <span>TOTAL:</span>
+                            <span>₱ <span id="cart-total">0.00</span></span>
+                        </div>
+                        <button class="place-order-btn" onclick="placeOrder()">PLACE ORDER</button>
+                    </div>
+                </div>
+            </div>
+
+        </section> 
+
+        <section id="inventory" class="tab-content">
+            <div class="headermenu">
+                <h2>INVENTORY</h2>
+                <form action="" class="add">
+                    <button type="button" onclick="toggleForm('myAddItemForm')" class="add-btn">Add Item</button >
+                </form>
+            </div>
+
+            <div class="container-menu">
+                <div class="container4">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Item Name</th>
+                                <th>Item Category</th>
+                                <th>Unit of Measurement</th>
+                                <th>Stock On Hand</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                           <% if (typeof items !== 'undefined' && items.length > 0) { %>
+                               <% items.forEach(function(item) { %>
+                                   <tr>
+                                       <td><%= item.DATE %></td>
+                                       <td><%= item.ITEM_NAME %></td>
+                                       <td><%= item.ITEM_CATEGORY %></td>
+                                       <td><%= item.UNIT_OF_MEASURE %></td>
+                                       <td><%= item.STOCK_ONHAND %></td>
+                                   </tr>
+                                <% }); %>
+                            <% } else { %>
+                             <tr>
+                                <td colspan="5">No items found.</td>
+                            </tr>
+                          <% } %>
+                        </tbody>
+                        
+                    </table>
+                </div>
+
+                <div class="container10" id="myAddItemForm">
+                    <div class="container3" >
+
+                        <form action="/add-item" method="POST" class="inventory-actions">
+                            <div class="input-group">
+                                <label for="">Date</label>
+                                <input type="date" name="DATE" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="">Item Name</label>
+                                <input type="text" name="ITEM_NAME" required>
+                            </div>
+
+                            <div class="input-group">
+                               <label for="item-category">Item Category</label>
+                               <select name="ITEM_CATEGORY" id="item-category" class="dropdown" required>
+                                  <option value="">-- Select Category --</option>
+                                  <option value="COFFEE">Coffee</option>
+                                  <option value="NON-COFFEE">Non-Coffee</option>
+                                  <option value="FOOD">Food</option>
+                                  <option value="DAIRY">Dairy</option>
+                                  <option value="SUPPLIES">Supplies</option>
+                               </select>
+                            </div>
+
+                            <div class="input-group">
+                               <label for="unit-measurement">Unit of Measurement</label>
+                               <select name="UNIT_OF_MEASURE" id="unit-measurement" class="dropdown" required>
+                                  <option value="">-- Select Measurement --</option>
+                                  <option value="KG">KG</option>
+                                  <option value="ML">ML</option>
+                                  <option value="CARTON">CARTON</option>
+                                  <option value="BOTTLE">BOTTLE</option>
+                                  <option value="TUB">TUB</option>    
+                                  <option value="PIECE">PIECE</option>  
+                               </select>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="">Stock On Hand</label>
+                                <input type="number" name="STOCK_ONHAND" required>
+                            </div>
+
+                            <button type="submit" class="add-item-btn">Add Item</button>
+
+                        </form>
+                   </div>     
+               </div>
+            </div>
+        </section>
+
+        <section id="transaction" class="tab-content">
+            <div class="headermenu">
+                <h2>TRANSACTION HISTORY</h2>
+            </div>
+
+            <div class="container-menu">
+                <div class="container1">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Menu Name</th>
+                                <th>Category</th>
+                                <th>Category 2</th>
+                                <th>Price</th>
+                                <th>Qty</th>
+                                <th>Total Sellout</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <% if (typeof transactionData !== 'undefined' && transactionData.length > 0) { %>
+                                <% transactionData.forEach(function(trans) { %>
+                                    <tr>
+                                        <td><%= new Date(trans.TIMESTAMP).toLocaleString() %></td>
+                                        <td><%= trans.MENU %></td>
+                                        <td><%= trans.CATEGORY %></td>
+                                        <td><%= trans['CATEGORY 2'] %></td>
+                                        <td>₱ <%= trans.Price %></td>
+                                        <td><%= trans.Qty %></td>
+                                        <td>₱ <%= trans['Total Sellout'] %></td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="8" class="text-center">No transactions found.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="account" class="tab-content">
+            <div class="headermenu">
+                <h2>ACCOUNT</h2>
+                <form action="" class="add">
+                    <button type="button" onclick="toggleForm('edit_profile')" class="add-btn">Edit Profile</button>
+                </form>
+                <form action="" class="add">
+                    <button type="button" onclick="toggleForm('Attendance')" class="add-btn">Attendance</button>
+                </form>
+            </div>
+
+            <div class="container-menu">
+                <div class="container5">
+                    <div class="Profile">
+                        <!-- Logic: Kung may uploaded picture, gamitin yun. Kung wala, gamitin ang default. -->
+                        <img src="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.profile_pic) ? '/uploads/' + employeeProfile.profile_pic : 'https://img.icons8.com/fluent/1200/test-account.jpg' %>" alt="Profile Picture" class="profile-pic">
+                        <span class="name1"><%= USERNAME %></span>
+                        <span class="role1"><%= CATEGORY %></span>
+                    </div>
+
+                    <div class="details">
+                        <p>Full Name : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.full_name) ? employeeProfile.full_name : 'Not Set' %></p>
+                        <p>Position : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.position) ? employeeProfile.position : 'Not Set' %></p>
+                        <p>Contact Number : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.contact_no) ? employeeProfile.contact_no : 'Not Set' %></p>
+                        <p>Home Address : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.home_address) ? employeeProfile.home_address : 'Not Set' %></p>
+                    </div>
+                </div>
+
+                <div class="container7" id="edit_profile">
+                    <section>
+                        <!-- Importante: 'enctype="multipart/form-data"' ay kailangan para sa file upload -->
+                        <form action="/update-profile" method="POST" class="edit" enctype="multipart/form-data">
+
+                            <div>
+                                <label for="">Full Name</label>
+                                <input type="text" name="full_name" id="name" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.full_name) ? employeeProfile.full_name : '' %>" placeholder="Full Name">
+                            </div>
+
+                            <div>
+                                <label for="">Position</label>
+                                <input type="text" name="position" id="position" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.position) ? employeeProfile.position : '' %>" placeholder="Position">
+                            </div>
+
+                            <div>
+                                <label for="">Contact Number</label>
+                                <input type="text" name="contact_no" id="contact" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.contact_no) ? employeeProfile.contact_no : '' %>" placeholder="Contact Number">
+                            </div>
+
+                            <div>
+                                <label for="">Home Address</label>
+                                <input type="text" name="home_address" id="address" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.home_address) ? employeeProfile.home_address : '' %>" placeholder="Home Address">
+                            </div>
+
+                            <div>
+                                <label for="Profile">Upload Profile Picture</label>
+                                <input type="file" name="profile_pic" id="Profile" accept="image/*">
+                            </div>
+
+                            <button type="submit" class="add-item-btn">Save Changes</button>
+                        </form>
+                    </section>
+                </div>
+
+                <div class="container6" id="Attendance">
+                    <section class="tab-attendance">
+                        <div>
+                            <form id="attendance-form" class="Attendance1">
+
+                                <div class="time">
+                                    <label for="">Attendance</label>
+                                    
+                                    <!-- Automatic Date & Time upon button click -->
+                                    <button type="button" onclick="startAttendanceCamera('in')" class="add-item-btn attendance-btn-in">Time in</button>
+                                    <button type="button" onclick="startAttendanceCamera('out')" class="add-item-btn attendance-btn-out">Time out</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="dtr">
+                            <h2>Daily Time Record</h2>
+                            <div class="filter">
+                                <label for="month">Select Month:</label>
+                                <select name="Month" id="month" class="dropdown" required onchange="filterDtrTable()">
+                                    <option value="">-- Choose Month --</option>
+                                    <option value="01">January</option>
+                                    <option value="02">February</option>
+                                    <option value="03">March</option>
+                                    <option value="04">April</option>
+                                    <option value="05">May</option>
+                                    <option value="06">June</option>
+                                    <option value="07">July</option>
+                                    <option value="08">August</option>
+                                    <option value="09">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                                <button type="button" class="add-item-btn" onclick="downloadDTR()">DOWNLOAD PDF</button>
+                            </div>
+
+                            <table id="dtrTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time In</th>
+                                        <th>Time Out</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dtrTableBody">
+                                   <% if (typeof dtrData !== 'undefined' && dtrData.length > 0) { %>
+                                       <% dtrData.forEach(function(row) { 
+                                            // Helper to convert 24h string to AM/PM
+                                            function formatAMPM(timeStr) {
+                                                if (!timeStr) return "--:--";
+                                                let [hours, minutes] = timeStr.split(':');
+                                                let ampm = hours >= 12 ? 'PM' : 'AM';
+                                                hours = hours % 12;
+                                                hours = hours ? hours : 12; // the hour '0' should be '12'
+                                                return hours + ':' + minutes + ' ' + ampm;
+                                            }
+                                       %>
+                                           <tr data-month="<%= row.month %>">
+                                               <td><%= row.formattedDate %></td>
+                                               <td>
+                                                    <% if (row.time_in_image) { %>
+                                                        <a href="/uploads/<%= row.time_in_image %>" target="_blank" class="dtr-image-link" title="View Time In Photo">
+                                                            <%= formatAMPM(row['TIME IN']) %> 📷
+                                                        </a>
+                                                    <% } else { %>
+                                                        <%= formatAMPM(row['TIME IN']) %>
+                                                    <% } %>
+                                               </td>
+                                               <td>
+                                                    <% if (row.time_out_image) { %>
+                                                        <a href="/uploads/<%= row.time_out_image %>" target="_blank" class="dtr-image-link" title="View Time Out Photo">
+                                                            <%= formatAMPM(row['TIME OUT']) %> 📷
+                                                        </a>
+                                                    <% } else { %>
+                                                        <%= formatAMPM(row['TIME OUT']) %>
+                                                    <% } %>
+                                               </td>
+                                           </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                     <tr>
+                                        <td colspan="3" class="dtr-no-records">No records found.</td>
+                                    </tr>
+                                  <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- CAMERA MODAL -->
+    <div id="camera-modal">
+        <div class="camera-modal-content">
+            <h3 id="camera-title">Take Attendance Photo</h3>
+            
+            <div class="camera-video-container">
+                <video id="camera-stream" autoplay playsinline></video>
+            </div>
+            
+            <canvas id="camera-canvas"></canvas>
+            
+            <div class="camera-controls">
+                <button type="button" onclick="closeCameraModal()" class="camera-btn-cancel">Cancel</button>
+                <button type="button" onclick="captureAndSubmit()" class="camera-btn-submit">Capture & Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- LOAD FACE API -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    <!-- HIDDEN INPUT FOR FACE DATA (Bridge between Server EJS and External JS) -->
+    <input type="hidden" id="userFaceDescriptorData" value="<%= (typeof faceDescriptor !== 'undefined' && faceDescriptor) ? faceDescriptor : '' %>">
+
+    <script src="userpagev2_script.js"></script>
+    
+</body>
+</html>

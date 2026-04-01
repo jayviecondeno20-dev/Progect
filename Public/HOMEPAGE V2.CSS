@@ -1,0 +1,240 @@
+:root {
+    --primary-brown: #4E342E;
+    --secondary-brown: #795548;
+    --accent-gold: #D4AF37;
+    --bg-cream: #FAF9F6;
+    --text-dark: #2C2C2C;
+    --text-light: #FFFFFF;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Poppins', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--bg-cream);
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* Navigation */
+.NAV {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 5%;
+    background-color: var(--primary-brown);
+    color: var(--text-light);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.nav1{
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo_img {
+    height: 50px;
+    width: auto;
+    border-radius: 50%;
+}
+
+.text {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 25px;
+    align-items: center;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-light);
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: var(--accent-gold);
+}
+
+.btn-login, .btn-signup {
+    text-transform: uppercase;
+}
+
+.btn-signup {
+    background-color: var(--accent-gold);
+    padding: 8px 20px;
+    border-radius: 4px;
+    color: var(--primary-brown) !important;
+    font-weight: 600 !important;
+    transition: background-color 0.3s;
+}
+
+.btn-signup:hover {
+    background-color: #bcaaa4;
+}
+
+/* Hero Section */
+.home {
+    height: 90vh;
+    /* Fallback color if image fails */
+    background-color: #3e2723; 
+    /* Add a background image here if you have one, e.g.: url('coffee-shop-bg.jpg') */
+    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--text-light);
+    padding: 0 20px;
+}
+
+.hero-content h1 {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    opacity: 0.9;
+}
+
+.cta-button {
+    padding: 14px 35px;
+    font-size: 1rem;
+    background-color: var(--accent-gold);
+    color: var(--primary-brown);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s, background-color 0.3s;
+}
+
+.cta-button:hover {
+    transform: scale(1.05);
+    background-color: #fff;
+}
+
+/* Offer Section */
+.section1 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 5rem 10%;
+    background-color: var(--bg-cream);
+}
+
+.card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+}
+
+.card .img {
+    height: 80px;
+    margin-bottom: 1.5rem;
+    object-fit: contain;
+}
+
+.card h3 {
+    font-family: var(--font-heading);
+    color: var(--primary-brown);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+/* Story Section */
+.section2 {
+    padding: 5rem 10%;
+    background-color: #EFEBE9; /* Light warm grey */
+    text-align: center;
+}
+
+.story-content h1 {
+    font-family: var(--font-heading);
+    color: var(--primary-brown);
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    display: inline-block;
+}
+
+.story-content h1::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: var(--accent-gold);
+    margin: 10px auto 0;
+}
+
+.story-content p {
+    margin-bottom: 1.5rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    color: #5D4037;
+    font-size: 1.1rem;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--primary-brown);
+    color: #BCAAA4;
+    text-align: center;
+    padding: 4rem 1rem;
+}
+
+.footer h3 {
+    color: var(--accent-gold);
+    margin-bottom: 1.5rem;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+}
+
+.footer p {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}

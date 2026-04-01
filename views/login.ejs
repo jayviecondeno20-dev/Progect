@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGIN PAGE</title>
+    <LINk rel="stylesheet" href="/LOGIN.CSS"></LINk>
+</head>
+<body>
+    <DIV class="CONTAINER">
+        <% if (messages.error) {%>
+            <%=messages.error %>
+        <% } %>
+        <FORm class="LOGIN-FORM" ACTION="/login" METHOD="POST">
+            <img src="/Black White Minimalist Coffee Shop Logo-Photoroom.png" alt="COFFEE LOGO" class="LOGO">
+            <H1>LOGIN</H1>
+            <DIV class="INPUT-GROUP">
+                <LABEL for="USERNAME">USERNAME</LABEL>
+                <INPUT type="text" id="USERNAME" name="USERNAME" required>
+            </DIV>
+            <DIV class="INPUT-GROUP">
+                <LABEL for="PASSWORD">PASSWORD</LABEL>
+                <INPUT type="password" id="PASSWORD" name="PASSWORD" required>
+            </DIV>
+            <DIV class="INPUT-GROUP">
+                <LABEL for="CATEGORY">CATEGORY</LABEL>
+                <SELECT id="CATEGORY" name="CATEGORY" required>
+                    <OPTION value="" disabled selected>SELECT ROLE</OPTION>
+                    <OPTION value="ADMIN">ADMIN</OPTION>
+                    <OPTION value="USER">USER</OPTION>
+                </SELECT>
+            </DIV>
+            <BUTTON type="submit" class="LOGIN-BUTTON">LOGIN</BUTTON>
+            <P>DON'T HAVE AN ACCOUNT? <A href="/register">SIGN UP</A></P>
+        </FORm>
+    </DIV>
+</body>
+</html>

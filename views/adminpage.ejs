@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title >ADMINPAGE</title>
+    <link rel="icon" type="image/png" href="coffee-bean-solid-24.png">
+    <link rel="stylesheet" href="adminpage.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <aside class="sidebar close">
+        <header>
+            <div class="image-text">
+                <span class="image">
+                    <img src="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.profile_pic) ? '/uploads/' + employeeProfile.profile_pic : 'https://img.icons8.com/fluent/1200/test-account.jpg' %>" alt="Profile Picture" class="profile-pic">
+                </span>
+                <div class="text header-text">
+                    <span class="name"><%= USERNAME %></span>
+                    <span class="role"><%= CATEGORY %></span>
+                </div>
+            </div>
+
+            <i class='bx bx-chevrons-right toggle' ></i>
+        </header>
+
+        <div class="menu-bar">
+            <div class="menu">
+
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="openSection('analytics')">
+                            <i class='bx bx-line-chart icon'></i>
+                            <span class="text nav-text">ANALYTICS</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="openSection('attendance')">
+                            <i class='bx bx-calendar-check icon' ></i>
+                            <span class="text nav-text">ATTENDANCE REPORTS</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="openSection('inventory')">
+                            <i class='bx bxs-box icon' ></i>
+                            <span class="text nav-text">INVENTORY REPORTS</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="openSection('sellout')">
+                            <i class='bx bx-dollar-circle icon' ></i>
+                            <span class="text nav-text">SELLOUT REPORTS</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="openSection('menu')">
+                            <i class='bx bxs-food-menu icon' ></i>
+                            <span class="text nav-text">MENU</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="openSection('account')">
+                            <i class='bx bxs-user-account icon' ></i>
+                            <span class="text nav-text">ACCOUNT</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <DIV class="bottom-content">
+                <ul class="menu-links">
+                    <li class="nav-links">
+                        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class='bx bx-log-out icon'></i>
+                            <span class="text nav-text">LOGOUT</span>
+                        </a>
+                        <form id="logout-form" action="/logout?_method=DELETE" method="POST" style="display: none;"></form>
+                    </li>
+                </ul>
+            </DIV>
+        </div>
+    </aside>
+
+    <nav>
+        <div>
+            <h1>ITAEWON KOPI SHOP</h1>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+            <div class="alert alert-danger" role="alert">
+                <%- errors %>
+            </div>
+        <% } %>
+        
+        <% if (typeof success !== 'undefined' && success.length > 0) { %>
+            <div class="alert alert-success" role="alert">
+                <%- success %>
+            </div>
+        <% } %>
+
+        <section id="analytics" class="tab-content">
+            <div class="headermenu">
+                <h2>DASHBOARD</h2>
+            </div>
+            
+            <!-- FILTER FORM -->
+            <div class="filter-section">
+                <form action="/adminpage" method="GET">
+                    <input type="hidden" name="tab" value="analytics">
+                    
+                    <select name="month" class="search-input-styled">
+                        <option value="">-- All Months --</option>
+                        <% const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']; %>
+                        <% months.forEach((m, index) => { %>
+                            <option value="<%= index + 1 %>" <%= (typeof selectedMonth !== 'undefined' && selectedMonth == (index + 1)) ? 'selected' : '' %>><%= m %></option>
+                        <% }); %>
+                    </select>
+                    
+                    <select name="year" class="search-input-styled">
+                        <option value="">-- All Years --</option>
+                        <option value="2023" <%= (typeof selectedYear !== 'undefined' && selectedYear == '2023') ? 'selected' : '' %>>2023</option>
+                        <option value="2024" <%= (typeof selectedYear !== 'undefined' && selectedYear == '2024') ? 'selected' : '' %>>2024</option>
+                        <option value="2025" <%= (typeof selectedYear !== 'undefined' && selectedYear == '2025') ? 'selected' : '' %>>2025</option>
+                        <option value="2026" <%= (typeof selectedYear !== 'undefined' && selectedYear == '2026') ? 'selected' : '' %>>2026</option>
+                    </select>
+                    <button type="submit" class="add-item-btn">Filter</button>
+                    <a href="/adminpage?tab=analytics" class="add-item-btn clear-btn" style="text-decoration: none; text-align: center;">Clear</a>
+                </form>
+            </div>
+
+            <!-- Stat Cards -->
+            <div class="analytics-grid">
+                <div class="stat-card">
+                    <h4>Total Sales</h4>
+                    <p>₱ <%= analyticsData.totalSales.toFixed(2) %></p>
+                </div>
+                <div class="stat-card">
+                    <h4>Items Sold</h4>
+                    <p><%= analyticsData.totalItemsSold %></p>
+                </div>
+                <div class="stat-card">
+                    <h4>Transactions</h4>
+                    <p><%= analyticsData.transactionCount %></p>
+                </div>
+                <div class="stat-card">
+                    <h4>Best Seller</h4>
+                    <p><%= analyticsData.bestSeller %></p>
+                </div>
+                <div class="stat-card low-stock-card">
+                    <h4>Low Stock Items</h4>
+                    <p><%= analyticsData.lowStockCount %></p>
+                </div>
+            </div>
+
+            <!-- Charts Container -->
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3>Sales by Category</h3>
+                    <% if (analyticsData.salesByCategory.length > 0) { %>
+                        <canvas id="salesByCategoryChart"></canvas>
+                    <% } else { %>
+                        <p style="text-align: center; padding: 20px;">No sales data available to generate chart.</p>
+                    <% } %>
+                </div>
+
+                <!-- NEW: Sales by Category 2 Chart -->
+                <div class="chart-wrapper">
+                    <h3>Sales by Category 2</h3>
+                    <% if (analyticsData.salesByCategory2 && analyticsData.salesByCategory2.length > 0) { %>
+                        <canvas id="salesByCategory2Chart"></canvas>
+                    <% } else { %>
+                        <p style="text-align: center; padding: 20px;">No data available for Category 2.</p>
+                    <% } %>
+                </div>
+
+                <!-- NEW: Monthly Sales Comparison Chart -->
+                <div class="chart-wrapper">
+                    <h3>Monthly Sales Trend</h3>
+                    <% if (analyticsData.salesByMonth && analyticsData.salesByMonth.length > 0) { %>
+                        <canvas id="salesByMonthChart"></canvas>
+                    <% } else { %>
+                        <p style="text-align: center; padding: 20px;">No monthly data available.</p>
+                    <% } %>
+                </div>
+
+                <!-- NEW: Daily Sales Trend Chart -->
+                <div class="chart-wrapper">
+                    <h3>Daily Sales Trend</h3>
+                    <% if (analyticsData.salesByDaily && analyticsData.salesByDaily.length > 0) { %>
+                        <canvas id="salesByDailyChart"></canvas>
+                    <% } else { %>
+                        <p style="text-align: center; padding: 20px;">No daily data available.</p>
+                    <% } %>
+                </div>
+
+                <!-- NEW: Monthly Sales Trend (Category 2) Chart -->
+                <div class="chart-wrapper">
+                    <h3>Monthly Sales Trend (Category 2)</h3>
+                    <% if (analyticsData.salesByMonthCat2 && analyticsData.salesByMonthCat2.length > 0) { %>
+                        <canvas id="salesByMonthCat2Chart"></canvas>
+                    <% } else { %>
+                        <p style="text-align: center; padding: 20px;">No monthly data available for Category 2.</p>
+                    <% } %>
+                </div>
+
+                <!-- NEW: Daily Sales Trend (Category 2) Chart -->
+                <div class="chart-wrapper">
+                    <h3>Daily Sales Trend (Category 2)</h3>
+                    <% if (analyticsData.salesByDailyCat2 && analyticsData.salesByDailyCat2.length > 0) { %>
+                        <canvas id="salesByDailyCat2Chart"></canvas>
+                    <% } else { %>
+                        <p style="text-align: center; padding: 20px;">No daily data available for Category 2.</p>
+                    <% } %>
+                </div>
+
+                <!-- MOVED: Attendance Overview Chart -->
+                <div class="chart-wrapper">
+                    <h3>Attendance Overview</h3>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- NEW: Late Attendance per User Chart -->
+                <div class="chart-wrapper">
+                    <h3>Late Attendance per User</h3>
+                    <% if (analyticsData.latesPerUser && Object.keys(analyticsData.latesPerUser).length > 0) { %>
+                        <canvas id="latesPerUserChart"></canvas>
+                    <% } else { %>
+                        <p style="text-align: center; padding: 20px;">No late records found.</p>
+                    <% } %>
+                </div>
+            </div>
+        </section>
+
+        <section id="attendance" class="tab-content">
+            <div class="headermenu">
+                <h2>ATTENDANCE REPORTS</h2>
+                <form action="/download-attendance" method="GET" class="download-btn">
+                    <button type="submit">Download</button>
+                </form>
+            </div>
+
+            <div class="container-menu">
+                <!-- TABLE SECTION -->
+                <div class="container11">
+                    <table class="inventory-table" id="attendanceTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Username</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                                <th>Status</th>
+                                <th>Overtime</th>
+                            </tr>
+                            <tr class="filter-row">
+                                <th><select class="filter-input" onchange="filterTable('attendanceTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('attendanceTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('attendanceTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('attendanceTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('attendanceTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('attendanceTable')"><option value="">All</option></select></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (typeof dtrData !== 'undefined' && dtrData.length > 0) { %>
+                                <% dtrData.forEach(function(row) { %>
+                                    <tr>
+                                        <td><%= row.formattedDate %></td>
+                                        <td><%= row.USERNAME %></td>
+                                        <td><%= row['TIME IN'] %></td>
+                                        <td><%= row['TIME OUT'] %></td>
+                                        <td class="<%= (row.computedStatus && row.computedStatus.includes('LATE')) ? 'status-warning' : 'status-present' %>"><%= row.computedStatus %></td>
+                                        <td><%= row.computedOvertime %></td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr><td colspan="6">No attendance records found.</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="menu" class="tab-content">
+            <div class="headermenu">
+                <h2>MENU</h2>
+                <div class="add-menubtn">
+                    <button type="button" onclick="toggleForm('add-menu')">Add Menu</button>
+                </div>
+            </div>
+
+            <div class="container-menu">
+                <div class="container8">
+                    <div class="search-container">
+                        <input type="text" id="menuSearchInput" class="search-input-styled" onkeyup="searchMenuTable()" placeholder="Search menu name, category...">
+                    </div>
+                    <table id="menuTable">
+                        <thead>
+                            <tr>
+                                <th>Menu Name</th>
+                                <th>Category</th>
+                                <th>Category 2</th>
+                                <th>Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <% if (typeof menuItems !== 'undefined' && menuItems.length > 0) { %>
+                                <% menuItems.forEach(function(menu) { %>
+                                    <tr>
+                                        <td><%= menu['Menu Name'] %></td>
+                                        <td><%= menu['Category'] %></td>
+                                        <td><%= menu['Category 2'] %></td>
+                                        <td>₱ <%= menu['Price'] %></td>
+                                        <td>
+                                            <!-- Edit Button (Triggers JS) -->
+                                            <button type="button" 
+                                                data-id="<%= menu.id %>" 
+                                                data-name="<%= menu['Menu Name'] %>" 
+                                                data-category="<%= menu['Category'] %>" 
+                                                data-category2="<%= menu['Category 2'] %>" 
+                                                data-price="<%= menu['Price'] %>"
+                                                onclick="openEditMenu(this.dataset.id, this.dataset.name, this.dataset.category, this.dataset.category2, this.dataset.price)" 
+                                                class="action-btn-edit">
+                                                <i class='bx bx-edit'></i>
+                                            </button>
+                                            
+                                            <!-- Delete Button (Form) -->
+                                            <form action="/delete-menu/<%= menu.id %>?_method=DELETE" method="POST" class="form-delete">
+                                                <button type="submit" onclick="return confirm('Are you sure you want to delete this item?')" class="action-btn-delete">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5">No menu items found.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- ADD MENU FORM (Existing) -->
+                <div class="container9" id="add-menu">
+                    <div>
+                        <!-- ACTION: /add-menu, METHOD: POST -->
+                        <form action="/add-menu" method="POST" class="add-menu">
+                            <h1>ADD MENU</h1>
+                            <div>
+                                <label for="">Menu Name :</label>
+                                <input type="text" name="menu" required>
+                            </div>
+
+                            <div>
+                                <label for="">Category :</label>
+                                <select name="category" class="category" required>
+                                    <!-- Lagyan ng value="" ang default option para gumana ang 'required' -->
+                                    <option value="">-- Choose Category --</option>
+                                    <option >Food</option>
+                                    <option >Beverages</option>
+                                    <option >Adds On</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="">Category 2 :</label>
+                                <select name="category2" class="category" required>
+                                    <!-- Lagyan ng value="" ang default option para gumana ang 'required' -->
+                                    <option value="">-- Choose Category --</option>
+                                    <option >Fried chicken</option>
+                                    <option >Snack bar</option>
+                                    <option >Ramen & Pasta</option>
+                                    <option >Rice Meal Bundle</option>
+                                    <option >Coffee Based Drinks</option>
+                                    <option >Milk Based Drinks</option>
+                                    <option >Soda Drinks</option>
+                                    <option >Cheese Cake Series</option>
+                                    <option >Smoothies</option>
+                                    <option >Adds On</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="price">Price :</label>
+                                <input type="number" id="price" name="Price" step="0.01" min="0" placeholder="0.00" required>
+                            </div>
+
+                            <button>Add Menu</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- EDIT MENU FORM (New Hidden Form) -->
+                <div class="container9" id="edit-menu">
+                    <div>
+                        <!-- ACTION: /update-menu, METHOD: PUT -->
+                        <form action="/update-menu?_method=PUT" method="POST" class="add-menu" id="edit-menu-form">
+                            <h1>EDIT MENU</h1>
+                            <!-- Hidden Input for ID -->
+                            <input type="hidden" name="id">
+
+                            <div>
+                                <label for="">Menu Name :</label>
+                                <input type="text" name="menu" required>
+                            </div>
+ 
+                            <div>
+                                <label for="">Category :</label>
+                                <select name="category" class="category" required>
+                                    <option value="">-- Choose Category --</option>
+                                    <option value="Food">Food</option>
+                                    <option value="Beverages">Beverages</option>
+                                    <option value="Adds On">Adds On</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="">Category 2 :</label>
+                                <select name="category2" class="category" required>
+                                    <option value="">-- Choose Category --</option>
+                                    <option >Fried chicken</option>
+                                    <option >Snack bar</option>
+                                    <option >Ramen & Pasta</option>
+                                    <option >Rice Meal Bundle</option>
+                                    <option >Coffee Based Drinks</option>
+                                    <option >Milk Based Drinks</option>
+                                    <option >Soda Drinks</option>
+                                    <option >Cheese Cake Series</option>
+                                    <option >Smoothies</option>
+                                    <option >Adds On</option>
+                                </select>
+                            </div>
+                            
+
+                            <div>
+                                <label for="edit-price">Price :</label>
+                                <input type="number" id="edit-price" name="Price" step="0.01" min="0" placeholder="0.00" required>
+                            </div>
+
+                            <button type="submit" class="btn-blue">Update Menu</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </section> 
+
+        <section id="inventory" class="tab-content">
+            <div class="headermenu">
+                <h2>INVENTORY</h2>
+            </div>
+
+            <div class="container-menu">
+                <div class="container4">
+                    <table class="inventory-table" id="inventoryTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Item Name</th>
+                                <th>Item Category</th>
+                                <th>Unit of Measurement</th>
+                                <th>Stock On Hand</th>
+                                <th>User</th>
+                                <th>Remarks</th>
+                                <th>Action</th>
+                            </tr>
+                            <tr class="filter-row">
+                                <th><select class="filter-input" onchange="filterTable('inventoryTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('inventoryTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('inventoryTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('inventoryTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('inventoryTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('inventoryTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('inventoryTable')"><option value="">All</option></select></th>
+                                <th></th> <!-- No filter for Action -->
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                           <% if (typeof items !== 'undefined' && items.length > 0) { %>
+                               <% items.forEach(function(item) { %>
+                                   <tr>
+                                       <td><%= item.DATE %></td>
+                                       <td><%= item.ITEM_NAME %></td>
+                                       <td><%= item.ITEM_CATEGORY %></td>
+                                       <td><%= item.UNIT_OF_MEASURE %></td>
+                                       <td><%= item.STOCK_ONHAND %></td>
+                                       <td><%= item.USERNAME || 'N/A' %></td>
+                                       <td class="remarks-cell <%= item.REMARKS === 'LOW STOCK' ? 'low-stock' : (item.REMARKS ? 'in-stock' : 'no-remarks') %>">
+                                           <%= item.REMARKS || 'N/A' %>
+                                       </td>
+                                       <td>
+                                           <!-- Action Form: Mag-aadd ng stock -->
+                                           <form action="/mark-new-stock" method="POST" class="form-center-flex">
+                                               <input type="hidden" name="id" value="<%= item.id %>">
+                                               <!-- Check Box Button Action -->
+                                               <button type="submit" title="Mark as New Stock" class="btn-icon-transparent">
+                                                   <i class='bx <%= item.REMARKS === "NEW STOCKS" ? "bx-check-square" : "bx-square" %> icon-large'></i>
+                                               </button>
+                                           </form>
+                                       </td>
+                                   </tr>
+                                <% }); %>
+                            <% } else { %>
+                             <tr>
+                                <td colspan="8">No items found.</td>
+                            </tr>
+                          <% } %>
+                        </tbody>
+                        
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="sellout" class="tab-content">
+            <div class="headermenu">
+                <h2>SELLOUT REPORTS</h2>
+                <form action="/download-sellout" method="GET" class="download-btn">
+                    <button type="submit" >Download</button>
+                </form>
+            </div>
+
+            <div class="container-menu">
+                <div class="container11">
+                    <table class="inventory-table" id="selloutTable">
+                        <thead>
+                            <tr>
+                               <th>TIMESTAMP</th>
+                               <th>USERNAME</th>
+                               <th>MENU</th>
+                               <th>CATEGORY</th>
+                               <th>CATEGORY 2</th>
+                               <th>PRICE</th>
+                               <th>QTY</th>
+                               <th>TOTAL SELLOUT</th>
+                            </tr>
+                            <tr class="filter-row">
+                                <th><select class="filter-input" onchange="filterTable('selloutTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('selloutTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('selloutTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('selloutTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('selloutTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('selloutTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('selloutTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('selloutTable')"><option value="">All</option></select></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <% if (typeof selloutData !== 'undefined' && selloutData.length > 0) { %>
+                                <% selloutData.forEach(function(row) { %>
+                                    <tr>
+                                        <td><%= new Date(row.TIMESTAMP).toLocaleString() %></td>
+                                        <td><%= row.USERNAME %></td>
+                                        <td><%= row.MENU %></td>
+                                        <td><%= row.CATEGORY %></td>
+                                        <td><%= row['CATEGORY 2'] %></td>
+                                        <td>₱ <%= row.Price %></td>
+                                        <td><%= row.Qty %></td>
+                                        <td>₱ <%= row['Total Sellout'] %></td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="8">No sellout records found.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="account" class="tab-content">
+            <div class="headermenu">
+                <h2>ACCOUNT</h2>
+                <form action="" class="add">
+                    <button type="button" onclick="toggleForm('edit_profile')" class="add-btn">Edit Profile</button>
+                </form>
+            </div>
+
+            <div class="container-menu">
+                <div class="container5">
+                    <div class="Profile">
+                        <!-- Logic: Kung may uploaded picture, gamitin yun. Kung wala, gamitin ang default. -->
+                        <img src="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.profile_pic) ? '/uploads/' + employeeProfile.profile_pic : 'https://img.icons8.com/fluent/1200/test-account.jpg' %>" alt="Profile Picture" class="profile-pic">
+                        <span class="name1"><%= USERNAME %></span>
+                        <span class="role1"><%= CATEGORY %></span>
+                    </div>
+
+                    <div class="details">
+                        <p>Full Name : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.full_name) ? employeeProfile.full_name : 'Not Set' %></p>
+                        <p>Position : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.position) ? employeeProfile.position : 'Not Set' %></p>
+                        <p>Contact Number : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.contact_no) ? employeeProfile.contact_no : 'Not Set' %></p>
+                        <p>Home Address : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.home_address) ? employeeProfile.home_address : 'Not Set' %></p>
+                    </div>
+                </div>
+
+                <div class="container7" id="edit_profile">
+                    <section>
+                        <!-- Importante: 'enctype="multipart/form-data"' ay kailangan para sa file upload -->
+                        <form action="/update-profile" method="POST" class="edit" enctype="multipart/form-data">
+
+                            <div>
+                                <label for="">Full Name</label>
+                                <input type="text" name="full_name" id="name" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.full_name) ? employeeProfile.full_name : '' %>" placeholder="Full Name">
+                            </div>
+
+                            <div>
+                                <label for="">Position</label>
+                                <input type="text" name="position" id="position" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.position) ? employeeProfile.position : '' %>" placeholder="Position">
+                            </div>
+
+                            <div>
+                                <label for="">Contact Number</label>
+                                <input type="text" name="contact_no" id="contact" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.contact_no) ? employeeProfile.contact_no : '' %>" placeholder="Contact Number">
+                            </div>
+
+                            <div>
+                                <label for="">Home Address</label>
+                                <input type="text" name="home_address" id="address" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.home_address) ? employeeProfile.home_address : '' %>" placeholder="Home Address">
+                            </div>
+
+                            <div>
+                                <label for="Profile">Upload Profile Picture</label>
+                                <input type="file" name="profile_pic" id="Profile" accept="image/*">
+                            </div>
+
+                            <button type="submit" class="add-item-btn">Save Changes</button>
+                        </form>
+                    </section>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="userpagev2_script.js"></script>
+    <!-- Hidden data elements to pass server data to JavaScript without EJS parsing issues -->
+    <script id="salesByCategoryData" type="application/json"><%- JSON.stringify(analyticsData.salesByCategory || []) %></script>
+    <script id="salesByCategory2Data" type="application/json"><%- JSON.stringify(analyticsData.salesByCategory2 || []) %></script>
+    <script id="salesByMonthData" type="application/json"><%- JSON.stringify(analyticsData.salesByMonth || []) %></script>
+    <script id="salesByDailyData" type="application/json"><%- JSON.stringify(analyticsData.salesByDaily || []) %></script>
+    <script id="attendanceStatsData" type="application/json"><%- JSON.stringify(analyticsData.attendanceStats || { Present: 0, Late: 0, Undertime: 0, HalfDay: 0 }) %></script>
+    <script id="salesByMonthCat2Data" type="application/json"><%- JSON.stringify(analyticsData.salesByMonthCat2 || []) %></script>
+    <script id="salesByDailyCat2Data" type="application/json"><%- JSON.stringify(analyticsData.salesByDailyCat2 || []) %></script>
+    <script id="latesPerUserData" type="application/json"><%- JSON.stringify(analyticsData.latesPerUser || {}) %></script>
+
+    <script>
+        // Data from server - stored in data attributes to avoid JS parser issues
+        const salesByCategoryData = JSON.parse(document.getElementById('salesByCategoryData').textContent);
+        // Script para basahin ang ?tab= parameter sa URL
+        document.addEventListener("DOMContentLoaded", function() {
+            // --- CHART.JS INITIALIZATION ---
+            
+            if (salesByCategoryData && salesByCategoryData.length > 0) {
+                const ctx = document.getElementById('salesByCategoryChart').getContext('2d');
+                
+                const labels = salesByCategoryData.map(item => item.CATEGORY);
+                const data = salesByCategoryData.map(item => item.categorySales);
+
+                new Chart(ctx, {
+                    type: 'bar', // CHANGED TO BAR CHART
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Sales',
+                            data: data,
+                            backgroundColor: [
+                                '#4E342E', // secondary-brown
+                                '#795548', // primary-brown
+                                '#D4AF37', // accent-gold
+                                '#A1887F',
+                                '#BCAAA4',
+                            ],
+                            borderColor: '#FAF9F6',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false, // Hide legend for bar chart usually
+                            },
+                            tooltip: {
+                                callbacks: { label: function(c) { return ' Sales: ₱ ' + c.parsed.y.toLocaleString(); } }
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            // --- CHART 1.5: SALES BY CATEGORY 2 (NEW BAR CHART) ---
+            const salesByCategory2Data = JSON.parse(document.getElementById('salesByCategory2Data').textContent);
+            
+            if (salesByCategory2Data && salesByCategory2Data.length > 0) {
+                const ctxCat2 = document.getElementById('salesByCategory2Chart').getContext('2d');
+                
+                const labels2 = salesByCategory2Data.map(item => item.CATEGORY);
+                const data2 = salesByCategory2Data.map(item => item.categorySales);
+
+                new Chart(ctxCat2, {
+                    type: 'bar',
+                    data: {
+                        labels: labels2,
+                        datasets: [{
+                            label: 'Sales',
+                            data: data2,
+                            backgroundColor: '#4E342E', // Solid color for distinction
+                            borderColor: '#FAF9F6',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: function(c) { return ' Sales: ₱ ' + c.parsed.y.toLocaleString(); } } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            // --- CHART 2: MONTHLY SALES LINE GRAPH ---
+            // Kunin ang data galing sa server
+            const salesByMonthData = JSON.parse(document.getElementById('salesByMonthData').textContent);
+
+            if (salesByMonthData && salesByMonthData.length > 0) {
+                const ctx2 = document.getElementById('salesByMonthChart').getContext('2d');
+                
+                // I-map ang labels (Buwan) at data (Total Sales)
+                const labelsMonth = salesByMonthData.map(item => item.monthLabel);
+                const dataMonth = salesByMonthData.map(item => parseFloat(item.totalSales));
+
+                new Chart(ctx2, {
+                    type: 'line', // Line graph
+                    data: {
+                        labels: labelsMonth,
+                        datasets: [{
+                            label: 'Total Sales (₱)',
+                            data: dataMonth,
+                            backgroundColor: 'rgba(212, 175, 55, 0.2)', // Accent gold (transparent)
+                            borderColor: '#D4AF37', // Accent gold (solid)
+                            borderWidth: 3,
+                            fill: true, // Lagyan ng kulay sa ilalim ng linya
+                            tension: 0.3 // Gawing curve ang linya
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' Sales: ₱ ' + context.parsed.y.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) { return '₱' + value; }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- CHART 3: DAILY SALES TREND (NEW) ---
+            const salesByDailyData = JSON.parse(document.getElementById('salesByDailyData').textContent);
+
+            if (salesByDailyData && salesByDailyData.length > 0) {
+                const ctx3 = document.getElementById('salesByDailyChart').getContext('2d');
+                
+                const labelsDaily = salesByDailyData.map(item => item.dateLabel);
+                const dataDaily = salesByDailyData.map(item => parseFloat(item.totalSales));
+
+                new Chart(ctx3, {
+                    type: 'line',
+                    data: {
+                        labels: labelsDaily,
+                        datasets: [{
+                            label: 'Daily Sales (₱)',
+                            data: dataDaily,
+                            backgroundColor: 'rgba(78, 52, 46, 0.2)', // Secondary brown (transparent)
+                            borderColor: '#4E342E', // Secondary brown (solid)
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3 // Smooth curves
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: { label: function(c) { return ' Sales: ₱ ' + c.parsed.y.toLocaleString(); } }
+                            }
+                        },
+                        scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '₱' + v; } } } }
+                    }
+                });
+            }
+
+            // --- CHART 4: ATTENDANCE STATUS (BAR CHART) ---
+            const attendanceStats = JSON.parse(document.getElementById('attendanceStatsData').textContent);
+            const ctxAtt = document.getElementById('attendanceChart').getContext('2d');
+            
+            new Chart(ctxAtt, {
+                type: 'bar',
+                data: {
+                    labels: ['Present (On Time)', 'Late', 'Undertime', 'Half Day'],
+                    datasets: [{
+                        label: 'Count',
+                        data: [
+                            attendanceStats.Present,
+                            attendanceStats.Late,
+                            attendanceStats.Undertime,
+                            attendanceStats.HalfDay
+                        ],
+                        backgroundColor: [
+                            '#4E342E', // Present (Dark Brown)
+                            '#D4AF37', // Late (Gold - Warning)
+                            '#795548', // Undertime (Primary Brown)
+                            '#A1887F'  // Half Day (Light Brown)
+                        ],
+                        borderColor: '#FAF9F6',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+
+            // --- CHART 5: MONTHLY SALES TREND CATEGORY 2 (LINE CHART) ---
+            const salesByMonthCat2Data = JSON.parse(document.getElementById('salesByMonthCat2Data').textContent);
+
+            // --- HELPER: Process Data for Multi-Category Charts (Grouped Bar) ---
+            function transformDataForChart(data, labelKey, categoryKey, valueKey) {
+                // 1. Unique Labels (Dates) for X-Axis
+                const labels = [...new Set(data.map(d => d[labelKey]))];
+                // 2. Unique Categories for Series/Legend
+                const categories = [...new Set(data.map(d => d[categoryKey]))];
+                
+                // 3. Colors Palette
+                const colors = ['#4E342E', '#D4AF37', '#795548', '#A1887F', '#5D4037', '#8D6E63', '#3E2723'];
+
+                // 4. Create Datasets
+                const datasets = categories.map((cat, i) => {
+                    return {
+                        label: cat, // Category Name appears in Legend
+                        data: labels.map(lbl => {
+                            const found = data.find(d => d[labelKey] === lbl && d[categoryKey] === cat);
+                            return found ? parseFloat(found[valueKey]) : 0;
+                        }),
+                        borderColor: colors[i % colors.length],
+                        backgroundColor: colors[i % colors.length],
+                        fill: false,
+                        tension: 0.3,
+                        borderWidth: 2
+                    };
+                });
+                return { labels, datasets };
+            }
+
+            if (salesByMonthCat2Data && salesByMonthCat2Data.length > 0) {
+                const ctxM2 = document.getElementById('salesByMonthCat2Chart').getContext('2d');
+                
+                const chartData = transformDataForChart(salesByMonthCat2Data, 'monthLabel', 'category', 'totalSales');
+
+                new Chart(ctxM2, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: chartData.datasets
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) { 
+                                        return context.dataset.label + ': ₱ ' + context.parsed.y.toLocaleString(); 
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { callback: function(value) { return '₱' + value; } } }
+                        }
+                    }
+                });
+            }
+
+            // --- CHART 6: DAILY SALES TREND CATEGORY 2 (LINE CHART) ---
+            const salesByDailyCat2Data = JSON.parse(document.getElementById('salesByDailyCat2Data').textContent);
+
+            if (salesByDailyCat2Data && salesByDailyCat2Data.length > 0) {
+                const ctxD2 = document.getElementById('salesByDailyCat2Chart').getContext('2d');
+                
+                const chartDataD = transformDataForChart(salesByDailyCat2Data, 'dateLabel', 'category', 'totalSales');
+
+                new Chart(ctxD2, {
+                    type: 'line',
+                    data: {
+                        labels: chartDataD.labels,
+                        datasets: chartDataD.datasets
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            tooltip: {
+                                callbacks: { label: function(c) { return c.dataset.label + ': ₱ ' + c.parsed.y.toLocaleString(); } }
+                            }
+                        },
+                        scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '₱' + v; } } } }
+                    }
+                });
+            }
+
+            // --- CHART 7: LATES PER USER (BAR CHART - LEGEND AS NAMES) ---
+            const latesRaw = JSON.parse(document.getElementById('latesPerUserData').textContent);
+            const latesUsers = Object.keys(latesRaw);
+
+            if (latesUsers.length > 0) {
+                const ctxLates = document.getElementById('latesPerUserChart').getContext('2d');
+                const coffeeColors = ['#4E342E', '#D4AF37', '#795548', '#A1887F', '#5D4037', '#8D6E63', '#3E2723'];
+
+                // Create a separate dataset for each user so they appear in the Legend
+                const datasetsLates = latesUsers.map((user, index) => {
+                    return {
+                        label: user, // Name in Legend
+                        data: [latesRaw[user]], // Late Count
+                        backgroundColor: coffeeColors[index % coffeeColors.length],
+                        borderColor: '#FAF9F6',
+                        borderWidth: 1
+                    };
+                });
+
+                new Chart(ctxLates, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Total Lates'], // X-Axis Label
+                        datasets: datasetsLates
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: true, position: 'top' } },
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                    }
+                });
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            const sub = urlParams.get('sub');
+            
+            if (tab) {
+                openSection(tab);
+            }
+
+            // Initialize Dropdowns for all tables
+            populateDropdowns('inventoryTable');
+            populateDropdowns('selloutTable');
+            populateDropdowns('attendanceTable');
+        });
+
+        // Function to populate dropdowns automatically based on table data
+        function populateDropdowns(tableId) {
+            var table = document.getElementById(tableId);
+            if (!table) return;
+            var tbody = table.querySelector("tbody");
+            var rows = tbody.getElementsByTagName("tr");
+            var filterRow = table.querySelector(".filter-row");
+            var selects = filterRow.getElementsByTagName("select");
+
+            // Loop through each filter column
+            for (var i = 0; i < selects.length; i++) {
+                var select = selects[i];
+                var uniqueValues = new Set();
+
+                // Collect unique values from this column
+                for (var r = 0; r < rows.length; r++) {
+                    var cells = rows[r].getElementsByTagName("td");
+                    if (cells.length > i) {
+                        var text = (cells[i].textContent || cells[i].innerText).trim();
+                        if (text && text !== "No items found." && text !== "No records found.") {
+                            uniqueValues.add(text);
+                        }
+                    }
+                }
+
+                // Add options to dropdown
+                Array.from(uniqueValues).sort().forEach(function(val) {
+                    var option = document.createElement("option");
+                    option.value = val.toUpperCase(); // Store as uppercase for easier filtering
+                    option.text = val;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        // Updated Filter Function (Multi-column support)
+        function filterTable(tableId) {
+            var table = document.getElementById(tableId);
+            var tbody = table.getElementsByTagName("tbody")[0];
+            var tr = tbody.getElementsByTagName("tr");
+            var filterRow = table.querySelector(".filter-row");
+            var selects = filterRow.getElementsByTagName("select");
+
+            // Loop through all table rows
+            for (var i = 0; i < tr.length; i++) {
+                var showRow = true;
+
+                // Check each filter dropdown
+                for (var j = 0; j < selects.length; j++) {
+                    var filterVal = selects[j].value;
+                    if (filterVal !== "") { // If a filter is selected
+                        var td = tr[i].getElementsByTagName("td")[j];
+                        if (td) {
+                            var txtValue = (td.textContent || td.innerText).trim().toUpperCase();
+                            // Exact match check
+                            if (txtValue !== filterVal) {
+                                showRow = false;
+                                break; // Stop checking other columns if one fails
+                            }
+                        }
+                    }
+                }
+
+                if (showRow) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+
+        // Global Search Function for Menu Table
+        function searchMenuTable() {
+            var input = document.getElementById("menuSearchInput");
+            var filter = input.value.toUpperCase();
+            var table = document.getElementById("menuTable");
+            var tbody = table.getElementsByTagName("tbody")[0];
+            var tr = tbody.getElementsByTagName("tr");
+
+            for (var i = 0; i < tr.length; i++) {
+                var tds = tr[i].getElementsByTagName("td");
+                var match = false;
+                // Check columns: Name(0), Cat(1), Cat2(2), Price(3)
+                if (tds.length > 0) {
+                    for (var j = 0; j < 4; j++) {
+                        if (tds[j] && (tds[j].textContent || tds[j].innerText).toUpperCase().indexOf(filter) > -1) {
+                            match = true;
+                            break;
+                        }
+                    }
+                    tr[i].style.display = match ? "" : "none";
+                }
+            }
+        }
+
+        // Page Load Logic (Para manatili sa tamang tab pagkatapos mag-refresh/redirect)
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            const sub = urlParams.get('sub');
+            
+            if (tab) openSection(tab);
+            if (sub === 'Attendance') {
+                toggleForm('Attendance');
+            }
+        });
+    </script>
+    
+</body>
+</html>

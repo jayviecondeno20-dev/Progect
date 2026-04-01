@@ -1,0 +1,133 @@
+:root {
+    --primary-brown: #4E342E;
+    --secondary-brown: #795548;
+    --accent-gold: #D4AF37;
+    --bg-cream: #FAF9F6;
+    --text-dark: #2C2C2C;
+    --text-light: #FFFFFF;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Poppins', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-body);
+}
+
+body {
+    background-color: var(--bg-cream);
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+.CONTAINER {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.LOGIN-FORM {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 450px;
+    background-color: var(--primary-brown);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 2px solid var(--bg-cream);
+    border-radius: 12px;
+    padding: 40px 30px;
+}
+
+.LOGO {
+    width: 100px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.LOGIN-FORM h1 {
+    font-family: var(--font-heading);
+    color: var(--bg-cream);
+    margin-bottom: 25px;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.INPUT-GROUP {
+    width: 100%;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.INPUT-GROUP label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--bg-cream);
+    font-size: 0.9rem;
+}
+
+.INPUT-GROUP input,
+.INPUT-GROUP select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--secondary-brown);
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: var(--bg-cream);
+    color: var(--text-dark);
+}
+
+.INPUT-GROUP input:focus,
+.INPUT-GROUP select:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+}
+
+.LOGIN-FORM button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--accent-gold);
+    color: var(--primary-brown);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    margin-top: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.LOGIN-FORM button:hover {
+    background-color: #fff;
+    transform: translateY(-2px);
+}
+
+.LOGIN-FORM p {
+    margin-top: 25px;
+    font-size: 0.9rem;
+    color: var(--bg-cream);
+    opacity: 0.9;
+}
+
+.LOGIN-FORM a {
+    color: var(--accent-gold);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.LOGIN-FORM a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
