@@ -7,7 +7,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const mysql = require('mysql2')
 const app = express()
-const bcrypt = require('bcrypt')
+const bcryptjs = require('bcryptjs')
 const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
@@ -708,7 +708,7 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
         }
 
         // --- Registration Logic (after OTP is verified) ---
-        const hashedPassword = await bcrypt.hash(PASSWORD, 10);
+        const hashedPassword = await bcryptjs.hash(PASSWORD, 10);
 
         // Siguraduhing may 'email' column sa iyong 'accounts' table
         const query = "INSERT INTO accounts (username, password, confirm_password, category, email, face_descriptor) VALUES (?, ?, ?, ?, ?, ?)";
