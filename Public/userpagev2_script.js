@@ -1,16 +1,16 @@
 function updateGrid() {
-    // Huwag pakialaman ang grid kung mobile/tablet (1024px pababa)
-    // Hayaan ang CSS media queries ang mag-handle nito
+    const sidebar = document.querySelector(".sidebar");
+    const body = document.querySelector("body");
+    if (!sidebar || !body) return;
+
     if (window.innerWidth <= 1024) {
         body.style.gridTemplateColumns = ""; 
         return;
     }
 
-    if (sidebar.classList.contains("close")) {
-        body.style.gridTemplateColumns = "75px 1fr";
-    } else {
-        body.style.gridTemplateColumns = "280px 1fr";
-    }
+    body.style.gridTemplateColumns = sidebar.classList.contains("close") 
+        ? "75px 1fr" 
+        : "280px 1fr";
 }
 
 //for section
@@ -79,9 +79,10 @@ function filterMenu(categoryName) {
     
     cards.forEach(card => {
         const itemCat = card.getAttribute('data-category');
+        const searchKey = categoryName.toLowerCase().trim();
         
-        // Case-insensitive comparison para sigurado
-        if (itemCat && itemCat.toLowerCase().trim() === categoryName.toLowerCase().trim()) {
+        // Kung 'all' ang pinili, ipakita lahat. Kung hindi, i-match ang category.
+        if (searchKey === 'all' || (itemCat && itemCat.toLowerCase().trim() === searchKey)) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
@@ -294,7 +295,7 @@ async function placeOrder() {
     // 2. GENERATE RECEIPT & PRINT
     let total = 0;
     // Display Philippine Time on the receipt
-    const dateStr = new Date().toLocaleString("en-GB", { timeZone: "Asia/Manila", hour12: false, hourCycle: 'h23' });
+     const dateStr = new Date().toLocaleString("en-GB", { timeZone: "Asia/Manila", hour12: false, hourCycle: 'h23' });
     
     // Buuin ang HTML content ng Resibo
     let receiptHtml = `
@@ -556,20 +557,8 @@ document.addEventListener("DOMContentLoaded", function() {
         if (hamburger) hamburger.addEventListener("click", toggleSidebar);
 
 
-        function updateGrid() {
-    // Huwag pakialaman ang grid kung mobile/tablet (1024px pababa)
-    // Hayaan ang CSS media queries ang mag-handle nito
-    if (window.innerWidth <= 1024) {
-        body.style.gridTemplateColumns = ""; 
-        return;
-    }
-
-            if (sidebar.classList.contains("close")) {
-                body.style.gridTemplateColumns = "75px 1fr";
-            } else {
-                body.style.gridTemplateColumns = "280px 1fr";
-            }
-        }
+        // Ang updateGrid ay tinatawag na sa global scope, 
+        // kaya tinanggal natin ang redundant definition dito sa loob.
     }
 
     // --- FACE DATA LOADING (User Page Only) ---
@@ -612,4 +601,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (sub === 'Attendance') {
         toggleForm('Attendance');
     }
+
+    // I-pakita lahat ng menu items sa simula
+    filterMenu('all');
 });
