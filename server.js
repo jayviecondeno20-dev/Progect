@@ -134,6 +134,11 @@ app.use((req, res, next) => {
 const accountsRoute = require('./src/routes/accounts.js')
 app.use('/accounts', accountsRoute)
 
+// Root Route: Redirect sa homepage kapag binisita ang main URL
+app.get('/', (req, res) => {
+    res.redirect('/homepage');
+});
+
 //HOMEPAGE 
 app.get('/homepage',checkNotAuthenticated, (req, res)=> {
     res.render('homepage')
@@ -800,13 +805,16 @@ app.post('/login', (req, res, next) => {
             const normalizedUser = normalizeUser(user);
             console.log("[LOGIN] User logged in:", normalizedUser);
 
-            // Note: Redirecting the user based on their 'category' from the database.
-            if (normalizedUser.CATEGORY === 'ADMIN') {
-                return res.redirect('/adminpage');
-            } else if (normalizedUser.CATEGORY === 'USER') {
-                return res.redirect('/userpage');
-            } else {
-                // Fallback if the user has no category.
+            // Importante: I-save ang session bago mag-redirect para siguradong pasok ang data sa database
+            req.session.save((err) => {
+                if (err) return next(err);
+
+                if (normalizedUser.CATEGORY === 'ADMIN') {
+                    return res.redirect('/adminpage');
+                } else if (normalizedUser.CATEGORY === 'USER') {
+                    return res.redirect('/userpage');
+                }
+                
                 req.logOut(err => {
                     if (err) return next(err);
                     req.flash('error', `User role is not defined. (DB Value: ${normalizedUser.CATEGORY})`);
