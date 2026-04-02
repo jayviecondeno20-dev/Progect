@@ -87,11 +87,18 @@ app.set('view engine', 'ejs');
 // Middleware: Pagsasaayos ng order at paglilinis
 app.use(express.json()); // Para sa pag-parse ng JSON bodies (galing sa fetch/AJAX)
 app.use(express.urlencoded({ extended: true })); // Para sa pag-parse ng form data
+
+// Render uses a reverse proxy (load balancer). Trusting it is required for secure cookies/sessions.
+app.set('trust proxy', 1);
+
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'supersecretkeyforlocaldev', // Fallback for local development, MUST be set in production
+    secret: String(process.env.SESSION_SECRET || 'supersecretkeyforlocaldev'), // Force to string to prevent falsy errors
     resave: false,
-    saveUninitialized: true, // Itakda sa 'true' para masigurong may session para sa OTP
-    cookie: { secure: false } // Gawing 'true' ito kung naka-HTTPS sa production
+    saveUninitialized: true, 
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production', // true if on Render (HTTPS), false for local dev
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 }))
 
 // Check if SESSION_SECRET is set, and warn if not (especially in production)
