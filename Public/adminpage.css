@@ -30,14 +30,14 @@ body{
         "sidebar main"
         "sidebar main"
         "footer footer";
-    transition: grid-template-columns 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: grid-template-columns 0.4s ease;
     grid-gap: 0;
     gap: 0;
 }
 
 /* Hamburger Button Style */
 .hamburger-toggle {
-    display: none;
+    display: none; /* Hidden on desktop */
     position: absolute;
     left: 20px;
     font-size: 30px;
@@ -46,22 +46,44 @@ body{
     z-index: 1001;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     body {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important; /* Force single column */
         grid-template-areas:
             "navbar"
             "main";
     }
+
+    .hamburger-toggle {
+        display: block; /* Show hamburger only on mobile/tablet */
+    }
+
     .sidebar {
-        left: -280px;
-        z-index: 2000;
-    }
-    .sidebar.open {
+        position: fixed;
+        top: 0;
         left: 0;
+        height: 100vh;
+        width: 280px;
+        z-index: 10000;
+        transform: translateX(-100%); /* Hidden by default */
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
     }
+
+    /* Show sidebar when it DOES NOT have the .close class */
+    .sidebar:not(.close) {
+        transform: translateX(0);
+    }
+
+    .sidebar header .toggle {
+        display: none; /* Hide desktop arrow toggle on mobile */
+    }
+
     .main-content {
+        padding: 10px;
         margin-top: 75px;
+        width: 100%;
+        grid-column: 1 / -1;
     }
 }
 
