@@ -355,7 +355,7 @@ nav div h1{
     background-color: rgba(250, 249, 246, 0.9);
     box-shadow: 0px 4px 10px 4px rgba(8, 8, 8, 0.3);
     flex: 1;
-    min-width: 300px;
+    width: 100%;
     height: auto;
     border-radius: 20px;
     text-align: center;
@@ -363,12 +363,12 @@ nav div h1{
 
 .container-menu .container2{
     background-color: #4E342E;
-    width: 350px;
+    width: 100%;
+    max-width: 350px;
     min-height: 500px;
     border-radius: 20px;
     text-align: center;
     padding-top: 0%;
-    flex: 0 0 350px; /* Fixed width for cart */
 }
 
 .container-menu .container10{
@@ -618,7 +618,8 @@ nav div h1{
     display: flex;
     flex-direction: column;
     gap: 15px;
-    flex: 0 0 400px; /* Fixed width to guarantee it fits beside the table */
+    width: 100%;
+    max-width: 400px;
     margin: 0; 
     padding: 25px; /* Panatilihin ang padding sa loob */
     background-color: #FAF9F6; /* Cream background */
@@ -727,7 +728,8 @@ nav div h1{
     display: flex;
     flex-direction: column;
     align-items: stretch; /* Sinisiguro na sakop ng mga anak ang buong lapad */
-    flex: 0 0 400px; /* Fixed width like inventory-actions */
+    width: 100%;
+    max-width: 400px;
     margin-bottom: 15px;
     margin: 0; /* Tanggalin ang auto margin */
     gap: 15px; /* Consistent gap with inventory-actions */
@@ -839,7 +841,8 @@ nav div h1{
 }
 
 .container6{
-    flex: 0 0 450px; /* Fixed width para magkasya sa tabi ng report */
+    width: 100%;
+    max-width: 450px;
     margin: 0; /* Tanggalin ang auto margin */
     background-color: #FAF9F6; /* Mas solid na cream background */
     height: 100vh; /* Ibinabalik sa 100vh ayon sa request */
@@ -1038,16 +1041,21 @@ nav div h1{
 }
 
 /* Media Queries for Containers and Tables */
-@media (max-width: 992px) {
-    .container-menu .container2, 
-    .container-menu .container10,
-    .container-menu .container7 {
-        width: 100%;
-        height: auto;
-    }
-    
+@media (max-width: 1024px) {
     .container-menu {
         flex-direction: column;
+        align-items: center;
+    }
+
+    .container-menu > div, 
+    .inventory-actions, 
+    .edit, 
+    .container6,
+    .container5 {
+        width: 100%;
+        max-width: 100%;
+        flex: none;
+        height: auto;
     }
 
     .headermenu h2 {

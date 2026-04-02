@@ -436,7 +436,8 @@ nav div h1{
     display: flex;
     flex-direction: column;
     gap: 15px;
-    flex: 0 0 400px; 
+    width: 100%;
+    max-width: 400px;
     margin: 0;
     padding: 25px;
     background-color: #FAF9F6;
@@ -548,7 +549,8 @@ nav div h1{
     flex-direction: column;
     align-items: stretch;
     margin-bottom: 15px;
-    flex: 0 0 400px;
+    width: 100%;
+    max-width: 400px;
     margin: 0;
     gap: 15px;
     background-color: #FAF9F6;
@@ -608,8 +610,8 @@ nav div h1{
 }
 
 .container5{
-    flex: 1 1 0;
-    width: 0; /* Mahalaga para sa side-by-side alignment */
+    flex: 1;
+    width: 100%;
     min-width: 300px;
     background-color: #FAF9F6;
     height: calc(100vh - 125px);
@@ -828,8 +830,8 @@ nav div h1{
     position: sticky; /* Mananatili sa taas habang nag-o-overflow ang table */
     top: 20px; /* Offset mula sa main content area */
     background-color: var(--bg-cream);
-    flex: 0 0 400px; /* Fixed width para hindi ito ma-squeeze */
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
     border-radius: 20px;
     text-align: center;
     z-index: 10;
@@ -840,8 +842,9 @@ nav div h1{
     box-shadow: -5px 0px 15px rgba(0, 0, 0, 0.1);
     border-left: 4px solid var(--accent-gold);
     border-radius: 20px;
-    flex: 0 0 400px; /* Fixed width para sa form */
-    margin: 0; 
+    width: 100%;
+    max-width: 400px;
+    margin: 0;
     height: auto;
     padding: 25px; /* Consistent padding */
     overflow-y: auto; /* Magkakaroon ng scrollbar sa loob kung lumagpas ang content */
@@ -1135,15 +1138,20 @@ button:hover {
 
 
 /* Global Table and Filter Responsiveness */
-@media (max-width: 992px) {
+@media (max-width: 1024px) {
     .container-menu {
         flex-direction: column;
+        align-items: center;
     }
-    .container-menu .container1, 
-    .container-menu .container2,
-    .container-menu .container9 {
+    .container-menu > div,
+    .inventory-actions,
+    .edit,
+    .add-menu,
+    .container5 {
         width: 100%;
         max-width: 100%;
+        flex: none;
+        height: auto;
     }
     .filter-section form {
         flex-direction: column;
