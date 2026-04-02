@@ -525,11 +525,18 @@ document.addEventListener("DOMContentLoaded", function() {
     const sidebar = document.querySelector(".sidebar");
     const body = document.querySelector("body");
     const toggle = document.querySelector(".toggle");
+    const hamburger = document.querySelector(".hamburger-toggle");
 
-    if (sidebar && toggle) { // Run only if sidebar elements exist
+    if (sidebar) {
+        // Siguraduhing 'close' ang default sa mobile para nakatago ang sidebar
+        if (window.innerWidth <= 1024) {
+            sidebar.classList.add("close");
+        }
+
         let sidebarTimer;
 
-        toggle.addEventListener("click", () => {
+        // Helper function para sa pag-toggle
+        const toggleSidebar = () => {
             sidebar.classList.toggle("close");
             updateGrid();
             clearTimeout(sidebarTimer);
@@ -539,7 +546,14 @@ document.addEventListener("DOMContentLoaded", function() {
                     updateGrid();
                 }, 3000);
             }
-        });
+        };
+
+        // Makinig sa desktop arrow toggle
+        if (toggle) toggle.addEventListener("click", toggleSidebar);
+
+        // Makinig sa mobile hamburger toggle
+        if (hamburger) hamburger.addEventListener("click", toggleSidebar);
+
 
         function updateGrid() {
             if (sidebar.classList.contains("close")) {

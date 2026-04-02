@@ -23,7 +23,7 @@ body{
     background-repeat: no-repeat, repeat;
     background-attachment: fixed;
     animation: moveBackground 30s linear infinite;
-    grid-template-columns: 75px 1fr;
+    grid-template-columns: 75px 1fr; 
     grid-template-rows: 75px 1fr;
     grid-template-areas:
         "navbar navbar"
@@ -33,6 +33,17 @@ body{
     transition: grid-template-columns 0.9s cubic-bezier(0.4, 0, 0.2, 1);
     grid-gap: 0;
     gap: 0;
+}
+
+/* Hamburger Button Style */
+.hamburger-toggle {
+    display: none;
+    position: absolute;
+    left: 20px;
+    font-size: 30px;
+    color: var(--text-light);
+    cursor: pointer;
+    z-index: 1001;
 }
 
 @media (max-width: 768px) {
