@@ -14,8 +14,7 @@ const dbConfig = {
 
 const pool = mysql.createPool(dbConfig);
 
-// Simpler query wrapper using pool.query (automatically handles connection release)
-module.exports = (query, values) => {
+const dbQuery = (query, values) => {
     return new Promise((resolve, reject) => {
         pool.query(query, values, (err, result) => {
             if (err) return reject(err);
@@ -23,3 +22,8 @@ module.exports = (query, values) => {
         });
     });
 };
+
+dbQuery.pool = pool; // I-export ang pool para magamit sa session store
+
+// Simpler query wrapper using pool.query (automatically handles connection release)
+module.exports = dbQuery;

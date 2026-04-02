@@ -11,6 +11,7 @@ const bcryptjs = require('bcryptjs')
 const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
+const MySQLStore = require('express-mysql-session')(session);
 const methodOverride = require('method-override')
 const db = require('./src/database/connection.js')
 const { sendEmail } = require('./mailsend.js'); // 1. I-import ang sendEmail function
@@ -99,10 +100,14 @@ app.use(express.urlencoded({ extended: true })); // Para sa pag-parse ng form da
 // Render uses a reverse proxy (load balancer). Trusting it is required for secure cookies/sessions.
 app.set('trust proxy', 1);
 
+// Setup persistent session store gamit ang MySQL pool
+const sessionStore = new MySQLStore({}, db.pool);
+
 app.use(session({
+    store: sessionStore,
     secret: String(process.env.SESSION_SECRET || 'supersecretkeyforlocaldev'), // Force to string to prevent falsy errors
     resave: false,
-    saveUninitialized: true, 
+    saveUninitialized: false, // Iniiwasan ang paggawa ng empty sessions
     cookie: { 
         secure: process.env.NODE_ENV === 'production', // true if on Render (HTTPS), false for local dev
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
