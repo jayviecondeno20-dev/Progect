@@ -17,6 +17,7 @@
     "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "express-flash": "^0.0.2",
+    "express-mysql-session": "^3.0.1",
     "express-session": "^1.19.0",
     "method-override": "^3.0.0",
     "multer": "^2.1.1",

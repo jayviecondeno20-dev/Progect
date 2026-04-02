@@ -11,7 +11,7 @@ const bcryptjs = require('bcryptjs')
 const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
-const MySQLStore = require('express-mysql-session')(session);
+const MySQLStore = require('express-mysql-session');
 const methodOverride = require('method-override')
 const db = require('./src/database/connection.js')
 const { sendEmail } = require('./mailsend.js'); // 1. I-import ang sendEmail function
@@ -101,7 +101,7 @@ app.use(express.urlencoded({ extended: true })); // Para sa pag-parse ng form da
 app.set('trust proxy', 1);
 
 // Setup persistent session store gamit ang MySQL pool
-const sessionStore = new MySQLStore({}, db.pool);
+const sessionStore = new (MySQLStore(session))({}, db.pool);
 
 app.use(session({
     store: sessionStore,
