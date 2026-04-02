@@ -6,7 +6,7 @@ const dbConfig = {
   password: process.env.DB_PASSWORD || '58QdXykEx4EnQGXHWOm9',
   database: process.env.DB_NAME || 'bnivdbauhfdml9iyewd2',
   port: process.env.DB_PORT || 3306,
-  connectionLimit: 3, // Huwag hayaang lumagpas sa 5 para hindi mag-error sa Clever Cloud
+  connectionLimit: 2, // Set to 2 to allow for deployment overlaps (2 old + 2 new = 4 < 5)
   waitForConnections: true,
   queueLimit: 0
 };
