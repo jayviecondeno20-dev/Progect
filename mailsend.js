@@ -1,13 +1,16 @@
 const nodemailer = require('nodemailer');
 
-// Tandaan: Ang dotenv ay na-require na sa server.js, kaya hindi na kailangan dito
-// kapag ginagamit na sa main app.
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
+    // Dagdag na settings para sa cloud deployment (Render/Heroku)
+    tls: {
+        rejectUnauthorized: false
+    },
+    pool: true // Mas mabilis sa maraming requests
 });
 
 /**
@@ -18,13 +21,17 @@ const transporter = nodemailer.createTransport({
  * @returns {Promise<{success: boolean, error?: Error}>}
  */
 async function sendEmail(to, subject, html) {
+    // Siguraduhing may credentials bago mag-send
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.error("[MAIL ERROR] Missing EMAIL_USER or EMAIL_PASS in environment variables.");
         return { success: false, error: new Error("Email credentials are missing in Environment Variables") };
     }
 
+    console.log(`[MAILER] Attempting to send email to: ${to}`);
+
     const mailOptions = {
         from: `"ITAEWON KOPI SHOP" <${process.env.EMAIL_USER}>`,
-        to,
+        to: to,
         subject,
         html,
     };
@@ -32,6 +39,7 @@ async function sendEmail(to, subject, html) {
     try {
         await transporter.sendMail(mailOptions);
         // Ibalik ang success object
+        console.log(`[MAILER] Email successfully sent to ${to}`);
         return { success: true };
     } catch (error) {
         console.error('Nodemailer error:', error);

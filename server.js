@@ -660,7 +660,8 @@ app.get('/register',checkNotAuthenticated,(req,res) =>{
 
 // 3. Gumawa ng bagong route para sa pag-send ng OTP
 app.post('/send-otp', async (req, res) => {
-    const { EMAIL } = req.body;
+    // Tanggapin ang email kahit 'EMAIL' o 'email' ang gamit sa frontend
+    const EMAIL = req.body.EMAIL || req.body.email;
     if (!EMAIL) {
         return res.status(400).json({ message: 'Email is required.' });
     }
