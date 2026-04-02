@@ -895,16 +895,19 @@ app.post('/add-item', checkAuthenticated, async (req, res) => {
 // EMPLOYEE DETAILS / EDIT PROFILE ROUTE
 // =================================================================
 
-app.post('/update-profile', checkAuthenticated, (req, res, next) => {
-    // Middleware para i-handle ang upload bago ang database logic
-    upload(req, res, (err) => {
-        if (err) {
-            req.flash('error', 'Upload Error: ' + err.message);
-            return res.redirect('/userpage');
-        }
-        next();
+app.post('/update-profile', checkAuthenticated, async (req, res) => {
+    // Wrap upload in a promise to handle errors correctly in the async route
+    const processUpload = () => new Promise((resolve, reject) => {
+        upload(req, res, (err) => err ? reject(err) : resolve());
     });
-}, async (req, res) => {
+
+    try {
+        await processUpload();
+    } catch (err) {
+        req.flash('error', 'Upload Error: ' + err.message);
+        return res.redirect('/userpage');
+    }
+
     const user = normalizeUser(req.user);
     const TABLE_NAME = "`employee deatails`"; // Gumagamit ng backticks para sa table name na may space/typo
     

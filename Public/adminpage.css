@@ -37,13 +37,20 @@ body{
 
 /* Hamburger Button Style */
 .hamburger-toggle {
-    display: none; /* Hidden on desktop */
+    display: flex; /* Show on all screens */
     position: absolute;
     left: 20px;
-    font-size: 30px;
-    color: var(--text-light);
+    height: 45px;
+    width: 45px;
+    background: var(--accent-gold);
+    border-radius: 4px; /* Square */
+    color: var(--text-dark);
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
     cursor: pointer;
     z-index: 1001;
+    transition: var(--tran-03);
 }
 
 @media (max-width: 1024px) {
@@ -52,10 +59,6 @@ body{
         grid-template-areas:
             "navbar"
             "main";
-    }
-
-    .hamburger-toggle {
-        display: block; /* Show hamburger only on mobile/tablet */
     }
 
     .sidebar {
@@ -73,10 +76,6 @@ body{
     /* Show sidebar when it DOES NOT have the .close class */
     .sidebar:not(.close) {
         transform: translateX(0);
-    }
-
-    .sidebar header .toggle {
-        display: none; /* Hide desktop arrow toggle on mobile */
     }
 
     .main-content {
@@ -191,26 +190,7 @@ header .image-text .header-text{
 }
 
 .sidebar header .toggle{
-    position: absolute;
-    top: 100%; /* Tapat sa bottom border ng header */
-    transform: translateY(-50%); 
-    right: -20px; 
-    height: 40px;
-    width: 40px;
-    background: var(--accent-gold);
-    border-radius: 50%;
-    color: var(--text-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    cursor: pointer;
-    transition: var(--tran-05);
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-}
-
-.sidebar.close header .toggle {
-    right: -20px; /* Panatilihing half lang ang kita (overlap) kahit sarado */
+    display: none; /* Moved toggle to nav bar */
 }
 
 .sidebar li{
