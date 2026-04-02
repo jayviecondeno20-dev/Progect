@@ -442,7 +442,7 @@ nav div h1{
 
 /* --- Menu Card Design --- */
 .menu-card {
-    display: block; /* Ipakita lahat by default, JS na ang mag-tatago */
+    display: none; /* Hidden until a filter is clicked */
     border: 1px solid #ccc;
     padding: 15px;
     border-radius: 10px;

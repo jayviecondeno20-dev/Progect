@@ -601,7 +601,5 @@ document.addEventListener("DOMContentLoaded", function() {
     if (sub === 'Attendance') {
         toggleForm('Attendance');
     }
-
-    // I-pakita lahat ng menu items sa simula
-    filterMenu('all');
+    // Menu is hidden by default via CSS. filterMenu() must be called via button click.
 });
