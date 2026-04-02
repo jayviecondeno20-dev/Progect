@@ -110,11 +110,12 @@ body{
     grid-area: sidebar;
     position: fixed;
     width: 280px;
-    top: 75px;
+    top: 0;
     left: 0;
-    height: calc(100vh - 70px);
+    height: auto;
+    min-height: 100vh;
     background: var(--primary-brown);
-    padding: 10px 14px;
+    padding: 85px 14px 10px 14px; /* Clear navbar area */
     transition: var(--tran-05);
     z-index: 100;
     display: flex;
@@ -191,9 +192,9 @@ header .image-text .header-text{
 
 .sidebar header .toggle{
     position: absolute;
-    top: 50px;
+    top: 30px;
     transform: translateY(-50%);
-    right: -35px;
+    right: -20px; /* Original position when open */
     height: 40px;
     width: 40px;
     background: var(--accent-gold);
@@ -203,7 +204,13 @@ header .image-text .header-text{
     align-items: center;
     justify-content: center;
     font-size: 20px;
-    margin-top: 25px;
+    cursor: pointer;
+    transition: var(--tran-05);
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar.close header .toggle {
+    right: -50px; /* 100% out position when closed */
 }
 
 .sidebar li{
