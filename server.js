@@ -88,11 +88,17 @@ app.set('view engine', 'ejs');
 app.use(express.json()); // Para sa pag-parse ng JSON bodies (galing sa fetch/AJAX)
 app.use(express.urlencoded({ extended: true })); // Para sa pag-parse ng form data
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'supersecretkeyforlocaldev', // Fallback for local development, MUST be set in production
     resave: false,
     saveUninitialized: true, // Itakda sa 'true' para masigurong may session para sa OTP
     cookie: { secure: false } // Gawing 'true' ito kung naka-HTTPS sa production
 }))
+
+// Check if SESSION_SECRET is set, and warn if not (especially in production)
+if (!process.env.SESSION_SECRET) {
+    console.warn("WARNING: SESSION_SECRET environment variable is not set. Using a default secret. THIS IS INSECURE FOR PRODUCTION!");
+    console.warn("Please set SESSION_SECRET in your Render environment variables.");
+}
 app.use(flash()) // Dapat laging pagkatapos ng session
 app.use(passport.initialize())
 app.use(passport.session())
@@ -1402,9 +1408,3 @@ initializeDtrTable().then(() => {
         console.log("Server is running on http://localhost:3000");
     });
 });
-
-app.use(session({
-  secret: 'kahit-anong-string-dito', // Siguraduhin na meron nito sa server.js
-  resave: false,
-  saveUninitialized: true
-}));
