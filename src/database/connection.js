@@ -14,15 +14,12 @@ const dbConfig = {
 
 const pool = mysql.createPool(dbConfig);
 
+// Simpler query wrapper using pool.query (automatically handles connection release)
 module.exports = (query, values) => {
     return new Promise((resolve, reject) => {
-        pool.getConnection((err, sql) => {
+        pool.query(query, values, (err, result) => {
             if (err) return reject(err);
-            sql.query(query, values, (err, result) => {
-                sql.release();
-                if (err) return reject(err);
-                resolve(result); // Dito kinukuha ang data records
-            });
+            resolve(result);
         });
     });
 };

@@ -72,14 +72,22 @@ function normalizeUser(user) {
 initializePassport(
     passport,
     async (username) => {
-        const users = await db('SELECT * FROM accounts WHERE username = ?', [username]);
-        return users[0];
+        try {
+            const users = await db('SELECT * FROM accounts WHERE username = ?', [username]);
+            return users[0];
+        } catch (e) {
+            console.error("[PASSPORT ERROR] Fetch by username:", e);
+            return null;
+        }
     },
     async (id) => {
-        const users = await db('SELECT * FROM accounts WHERE id = ?', [id]);
-        // Debugging: I-log ang nakuha mula sa database para sa session na ito
-        console.log(`[DB LOAD] Fetching user ID ${id}:`, users[0]);
-        return users[0];
+        try {
+            const users = await db('SELECT * FROM accounts WHERE id = ?', [id]);
+            return users[0];
+        } catch (e) {
+            console.error("[PASSPORT ERROR] Fetch by ID:", e);
+            return null;
+        }
     }
 );
 
@@ -1411,7 +1419,8 @@ async function initializeDtrTable() {
 
 // Patakbuhin ang database check bago mag-start ang server
 initializeDtrTable().then(() => {
-    app.listen(3000, () => {
-        console.log("Server is running on http://localhost:3000");
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
     });
 });
