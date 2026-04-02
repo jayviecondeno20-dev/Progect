@@ -15,7 +15,7 @@
 body{
     margin: 0%;
     padding: 0%;
-    height: auto;
+    min-height: 100vh;
     display: grid;
     background-color: var(--bg-cream);
     /* Moving Coffee Background with transparent cream overlay */
@@ -34,6 +34,31 @@ body{
     transition: grid-template-columns 0.9s cubic-bezier(0.4, 0, 0.2, 1);
     grid-gap: 0;
     gap: 0;
+}
+
+/* Responsive Grid for Mobile */
+@media (max-width: 768px) {
+    body {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "navbar"
+            "main"
+            "footer";
+    }
+    .sidebar {
+        position: fixed;
+        left: -280px; /* Hide sidebar by default on mobile */
+        height: 100vh;
+        top: 0;
+        z-index: 2000;
+    }
+    .sidebar.open {
+        left: 0;
+    }
+    .main-content {
+        padding: 10px;
+        margin-top: 75px;
+    }
 }
 
 :root {
@@ -200,7 +225,6 @@ header .image-text .header-text{
 .sidebar li a .icon,
 .sidebar li a .text{
     color: var(--text-light);
-    font-size: auto ;
     margin-right: 30px;
     transition: var(--tran-05);
 }
@@ -318,21 +342,19 @@ nav div h1{
 
 .container-menu{
     display: flex;
-    flex-direction: row;
+    flex-flow: row wrap;
     justify-content: space-between;
     align-items: flex-start;
     gap: 20px;
     margin-top: 50px;
-    margin-left: 15px;
-    margin-right: 15px; 
-    border-radius: 20%;
+    padding: 0 15px;
 }
 
 .container-menu .container1{
     background-color: rgba(250, 249, 246, 0.9);
     box-shadow: 0px 4px 10px 4px rgba(8, 8, 8, 0.3);
-    width: 100%;
-    min-height: 100vh;
+    flex: 1;
+    min-width: 300px;
     height: auto;
     border-radius: 20px;
     text-align: center;
@@ -340,16 +362,16 @@ nav div h1{
 
 .container-menu .container2{
     background-color: #4E342E;
-    width: 30%;
-    height: 100vh;
+    width: 350px;
+    min-height: 500px;
     border-radius: 20px;
     text-align: center;
     padding-top: 0%;
 }
 
 .container-menu .container10{
-    width: 30%;
-    height: 100vh;
+    width: 100%;
+    max-width: 400px;
     border-radius: 20px;
     text-align: center;
     padding-top: 0%;
@@ -799,7 +821,9 @@ nav div h1{
 }
 
 .container6{
-    width: 50%;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
     background-color: rgba(250, 249, 246, 0.9);
     height: 100vh;
     border-radius: 20px;
@@ -890,9 +914,9 @@ nav div h1{
     background-color: var(--primary-brown);
     color: var(--bg-cream);
     border-radius: 20px;
-    padding: 7px 5px;
+    padding: 10px 15px;
     font-family: var(--font-body);
-
+    cursor: pointer;
 }
 
 .filter .add-item-btn:hover{
@@ -905,7 +929,8 @@ nav div h1{
 }
 
 .filter{
-    width: 80%;
+    width: 100%;
+    max-width: 800px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -939,9 +964,46 @@ nav div h1{
     gap: 20px;
 }
 
+/* Media Queries for Containers and Tables */
+@media (max-width: 992px) {
+    .container-menu .container2, 
+    .container-menu .container10,
+    .container-menu .container7 {
+        width: 100%;
+        height: auto;
+    }
+    
+    .container-menu {
+        flex-direction: column;
+    }
+
+    .headermenu h2 {
+        font-size: 32px;
+    }
+    
+    .filter {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .filter .dropdown {
+        width: 100%;
+    }
+}
+
+/* Table Responsiveness */
+.container3, .container8, .dtr {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+table {
+    min-width: 600px; /* Force scroll on very small screens */
+}
+
 .menu-filter label{
     font-family: var(--font-heading);
-    font-size: 20px;
+    font-size: 1.2rem;
     color: var(--secondary-brown);
     margin-right: 20px;
     margin-left: 10px;
