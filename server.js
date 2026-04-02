@@ -105,7 +105,7 @@ const sessionStore = new MySQLStore({}, db.pool);
 
 app.use(session({
     store: sessionStore,
-    secret: process.env.SESSION_SECRET || 'itaewon-kopi-fallback-secret-12345', 
+    secret: String(process.env.SESSION_SECRET || 'itaewon-kopi-fallback-secret-12345'), 
     resave: false,
     saveUninitialized: false, // Iniiwasan ang paggawa ng empty sessions
     cookie: { 
