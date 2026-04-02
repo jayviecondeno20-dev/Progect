@@ -928,6 +928,15 @@ app.post('/update-profile', checkAuthenticated, async (req, res) => {
         // Siguraduhing may table. Kung wala, gagawin.
         await db(`CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (id INT AUTO_INCREMENT PRIMARY KEY)`);
 
+        // 1.5. DROP UNIQUE INDEX FIX
+        // Tinatanggal ang UNIQUE constraint sa full_name dahil nagdudulot ito ng error kapag may empty strings
+        try {
+            await db(`ALTER TABLE ${TABLE_NAME} DROP INDEX FULL_NAME_UNIQUE`);
+            console.log("[DB FIX] Successfully removed UNIQUE constraint from full_name");
+        } catch (err) {
+            // Ignore error kung wala naman talagang index na ganito
+        }
+
         // 2. COLUMN CHECK: Pipiliting i-add ang columns isa-isa.
         const columnsToAdd = [
             "ADD COLUMN USERNAME VARCHAR(255)",
