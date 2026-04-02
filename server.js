@@ -1007,7 +1007,7 @@ app.post('/time-in', checkAuthenticated, (req, res, next) => {
     // PHILIPPINE TIME (UTC+8)
     const now = new Date();
     const phDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(now);
-    const phTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(now);
+    const phTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, hourCycle: 'h23' }).format(now);
 
     const dateStr = req.body.DATE || phDate;
     const timeStr = req.body.TIME || phTime;
@@ -1063,7 +1063,7 @@ app.post('/time-out', checkAuthenticated, (req, res, next) => {
     // PHILIPPINE TIME (UTC+8)
     const now = new Date();
     const phDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(now);
-    const phTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(now);
+    const phTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, hourCycle: 'h23' }).format(now);
 
     const dateStr = req.body.DATE || phDate;
     const timeStr = req.body.TIME || phTime;
@@ -1120,7 +1120,7 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
     const phDateTime = new Intl.DateTimeFormat('en-CA', { 
         timeZone: 'Asia/Manila', 
         year: 'numeric', month: '2-digit', day: '2-digit', 
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, hourCycle: 'h23'
     }).format(now).replace(/, /g, ' ');
 
     try {

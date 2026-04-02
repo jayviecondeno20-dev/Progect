@@ -294,7 +294,7 @@ async function placeOrder() {
     // 2. GENERATE RECEIPT & PRINT
     let total = 0;
     // Display Philippine Time on the receipt
-    const dateStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
+    const dateStr = new Date().toLocaleString("en-GB", { timeZone: "Asia/Manila", hour12: false, hourCycle: 'h23' });
     
     // Buuin ang HTML content ng Resibo
     let receiptHtml = `

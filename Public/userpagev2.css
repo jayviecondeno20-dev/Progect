@@ -44,14 +44,15 @@ body{
     height: 45px;
     width: 45px;
     background: var(--accent-gold);
-    border-radius: 4px; /* Square */
+    border-radius: 8px; /* Box look */
     color: var(--text-dark);
     align-items: center;
     justify-content: center;
     font-size: 24px;
     cursor: pointer;
     z-index: 1001;
-    transition: var(--tran-03);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 @media (max-width: 1024px) {
