@@ -377,7 +377,6 @@ nav div h1{
     border-radius: 20px;
     text-align: center;
     padding-top: 0%;
-    flex: 0 0 400px; /* Fixed width for consistency */
 }
 
 
@@ -1050,6 +1049,8 @@ nav div h1{
     .container-menu > div, 
     .inventory-actions, 
     .edit, 
+    .container-menu .container10,
+    .container-menu .container7,
     .container6,
     .container5 {
         width: 100%;
@@ -1066,9 +1067,24 @@ nav div h1{
         flex-direction: column;
         gap: 15px;
     }
+
+    #dynamic-menu-container {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .menu-card {
+        width: calc(50% - 10px); /* Dalawang columns sa tablet */
+    }
     
     .filter .dropdown {
         width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-card {
+        width: 100%; /* Isang column na lang sa maliit na phone */
     }
 }
 

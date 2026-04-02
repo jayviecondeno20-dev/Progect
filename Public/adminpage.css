@@ -1132,7 +1132,7 @@ button:hover {
 .charts-container {
     padding: 20px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Responsive Grid */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Mas maliit na min-width para sa mobile */
     gap: 20px;
 }
 
@@ -1145,17 +1145,25 @@ button:hover {
     }
     .container-menu > div,
     .inventory-actions,
+    .container-menu .container9,
+    .container-menu .container11,
     .edit,
     .add-menu,
     .container5 {
         width: 100%;
         max-width: 100%;
         flex: none;
+        position: static; /* Alisin ang sticky positioning sa mobile */
         height: auto;
     }
     .filter-section form {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .charts-container {
+        grid-template-columns: 1fr; /* Isang column na lang ang charts sa mobile */
+        padding: 10px;
     }
 }
 
