@@ -6,7 +6,7 @@ const dbConfig = {
   password: process.env.DB_PASSWORD || '58QdXykEx4EnQGXHWOm9',
   database: process.env.DB_NAME || 'bnivdbauhfdml9iyewd2',
   port: process.env.DB_PORT || 3306,
-  connectionLimit: 10, // Up to 4 is safe for Clever Cloud (max 5)
+  connectionLimit: 3, // Safe limit for Clever Cloud free tier (max 5)
   waitForConnections: true,
   queueLimit: 0
 };
