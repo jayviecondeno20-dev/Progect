@@ -1112,7 +1112,13 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
         return res.status(400).json({ success: false, message: 'Cart is empty' });
     }
 
-    const timestamp = new Date(); // Current server time
+    // PHILIPPINE TIME (UTC+8) para sa Order Timestamp
+    const now = new Date();
+    const phDateTime = new Intl.DateTimeFormat('en-CA', { 
+        timeZone: 'Asia/Manila', 
+        year: 'numeric', month: '2-digit', day: '2-digit', 
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+    }).format(now).replace(/, /g, ' ');
 
     try {
         // Siguraduhing may table na 'sellout' na may tamang columns
@@ -1139,7 +1145,7 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
         for (const item of cart) {
             const totalSellout = parseFloat(item.price) * parseInt(item.qty);
             await db('INSERT INTO sellout (USERNAME, TIMESTAMP, MENU, CATEGORY, `CATEGORY 2`, Price, Qty, `Total Sellout`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
-                [user.USERNAME, timestamp, item.name, item.category, item.category2, item.price, item.qty, totalSellout]);
+                [user.USERNAME, phDateTime, item.name, item.category, item.category2, item.price, item.qty, totalSellout]);
         }
 
         res.json({ success: true, message: 'Order placed and saved successfully!' });

@@ -210,7 +210,7 @@ header .image-text .header-text{
 }
 
 .sidebar.close header .toggle {
-    right: -50px; /* 100% floating look kapag sarado */
+    right: -20px; /* Panatilihing half lang ang kita (overlap) kahit sarado */
 }
 
 .sidebar li{

@@ -212,7 +212,7 @@ header .image-text .header-text{
 }
 
 .sidebar.close header .toggle {
-    right: -50px; /* 100% na nakalabas (Floating look) kapag sarado ang sidebar */
+    right: -20px; /* Panatilihing half lang ang kita gaya ng open state */
 }
 
 .sidebar li{
@@ -1086,6 +1086,7 @@ nav div h1{
     .edit, 
     .container-menu .container10,
     .container-menu .container7,
+    .container-menu .container2,
     .container6,
     .container5 {
         width: 100%;
