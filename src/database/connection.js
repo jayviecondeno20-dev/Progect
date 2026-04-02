@@ -1,11 +1,13 @@
 const mysql = require('mysql2');
 
 const dbConfig = {
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'myDB_Project'
+  host: process.env.DB_HOST || 'bnivdbauhfdml9iyewd2-mysql.services.clever-cloud.com',
+  user: process.env.DB_USER || 'uaupgzxcgsrwjfo4',
+  password: process.env.DB_PASSWORD || '58QdXykEx4EnQGXHWOm9',
+  database: process.env.DB_NAME || 'bnivdbauhfdml9iyewd2',
+  port: process.env.DB_PORT || 3306
 };
+
 
 const pool = mysql.createPool(dbConfig);
 
