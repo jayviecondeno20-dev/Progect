@@ -543,11 +543,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // --- USER PAGE DATA & TABS LOGIC ---
-    // Check for an element unique to userpage to run this block
+    // --- FACE DATA LOADING (User Page Only) ---
     const userPageContent = document.getElementById('userFaceDescriptorData');
     if (userPageContent) { 
-        // 1. Initialize Face Descriptor Data from Hidden Input
         if (userPageContent.value) {
             try {
                 const parsedData = JSON.parse(userPageContent.value);
@@ -561,17 +559,28 @@ document.addEventListener("DOMContentLoaded", function() {
             window.userFaceDescriptor = null;
             console.log("No Face Data found for this user.");
         }
+    }
 
-        // 2. Handle URL Parameters for Tab/Section Navigation
-        const urlParams = new URLSearchParams(window.location.search);
-        const tab = urlParams.get('tab');
-        const sub = urlParams.get('sub');
-        
-        if (tab) {
-            openSection(tab);
+    // --- GLOBAL TAB INITIALIZATION (Admin & User Page) ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    const sub = urlParams.get('sub');
+    const currentPath = window.location.pathname;
+
+    if (tab) {
+        // Kung may 'tab' sa URL (e.g. ?tab=inventory), buksan iyon
+        openSection(tab);
+    } else {
+        // Default behavior base sa kasalukuyang page
+        if (currentPath.includes('/adminpage')) {
+            openSection('analytics'); // Admin page defaults to analytics
+        } else if (currentPath.includes('/userpage')) {
+            openSection('menu');      // User page defaults to menu
         }
-        if (sub === 'Attendance') {
-            toggleForm('Attendance');
-        }
+    }
+
+    // Handle Attendance sub-section redirection
+    if (sub === 'Attendance') {
+        toggleForm('Attendance');
     }
 });

@@ -227,7 +227,7 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
         dtrData = [];
     } 
     res.render('userpage', {
-        USERNAME: user.USERNAME,
+        USERNAME: user.USERNAME, // Ensure username is passed
         CATEGORY: user.CATEGORY,
         items: items, // Ipasa ang 'items' sa EJS file
         dtrData: dtrData, // Pass DTR data to EJS
