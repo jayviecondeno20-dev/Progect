@@ -1000,10 +1000,14 @@ app.post('/time-in', checkAuthenticated, (req, res, next) => {
     });
 }, async (req, res) => {
     const user = normalizeUser(req.user);
-    // AUTOMATIC TIME: Gamitin ang current server time
+    
+    // PHILIPPINE TIME (UTC+8)
     const now = new Date();
-    const dateStr = req.body.DATE || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const timeStr = req.body.TIME || now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const phDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(now);
+    const phTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(now);
+
+    const dateStr = req.body.DATE || phDate;
+    const timeStr = req.body.TIME || phTime;
     const imageFilename = req.file ? req.file.filename : null;
     const redirectUrl = user.CATEGORY === 'ADMIN' ? '/adminpage?tab=account&sub=Attendance' : '/userpage?tab=account&sub=Attendance';
 
@@ -1052,10 +1056,14 @@ app.post('/time-out', checkAuthenticated, (req, res, next) => {
     });
 }, async (req, res) => {
     const user = normalizeUser(req.user);
-    // AUTOMATIC TIME: Gamitin ang current server time
+    
+    // PHILIPPINE TIME (UTC+8)
     const now = new Date();
-    const dateStr = req.body.DATE || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const timeStr = req.body.TIME || now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const phDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(now);
+    const phTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(now);
+
+    const dateStr = req.body.DATE || phDate;
+    const timeStr = req.body.TIME || phTime;
     const imageFilename = req.file ? req.file.filename : null;
     const redirectUrl = user.CATEGORY === 'ADMIN' ? '/adminpage?tab=account&sub=Attendance' : '/userpage?tab=account&sub=Attendance';
 
