@@ -18,6 +18,10 @@ const transporter = nodemailer.createTransport({
  * @returns {Promise<{success: boolean, error?: Error}>}
  */
 async function sendEmail(to, subject, html) {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        return { success: false, error: new Error("Email credentials are missing in Environment Variables") };
+    }
+
     const mailOptions = {
         from: `"ITAEWON KOPI SHOP" <${process.env.EMAIL_USER}>`,
         to,
