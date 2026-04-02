@@ -1,4 +1,11 @@
 function updateGrid() {
+    // Huwag pakialaman ang grid kung mobile/tablet (1024px pababa)
+    // Hayaan ang CSS media queries ang mag-handle nito
+    if (window.innerWidth <= 1024) {
+        body.style.gridTemplateColumns = ""; 
+        return;
+    }
+
     if (sidebar.classList.contains("close")) {
         body.style.gridTemplateColumns = "75px 1fr";
     } else {
