@@ -114,8 +114,8 @@ body{
     width: 280px;
     top: 0;
     left: 0;
-    height: 100%; /* Siguradong hanggang baba sa fixed position */
-    min-height: 100vh; 
+    height: auto;
+    min-height: 100vh;
     background: var(--primary-brown);
     padding: 85px 14px 10px 14px; /* Added top padding to clear the navbar */
     transition: var(--tran-05);
@@ -195,8 +195,8 @@ header .image-text .header-text{
 .sidebar header .toggle{
     position: absolute;
     top: 100%; /* Tapat sa bottom border ng header */
-    transform: translateY(-50%);
-    right: -20px; /* Original position kapag bukas */
+    transform: translateY(-50%); 
+    right: -20px; /* Kapag bukas ang sidebar, kalahati lang ang labas */
     height: 40px;
     width: 40px;
     background: var(--accent-gold);
@@ -212,7 +212,7 @@ header .image-text .header-text{
 }
 
 .sidebar.close header .toggle {
-    right: -45px; /* 100% na nakalabas sa collapsed sidebar (75px) */
+    right: -50px; /* 100% na nakalabas (Floating look) kapag sarado ang sidebar */
 }
 
 .sidebar li{

@@ -112,8 +112,8 @@ body{
     width: 280px;
     top: 0;
     left: 0;
-    height: 100%; /* Siguradong hanggang baba */
-    min-height: 100vh;
+    height: auto;
+    min-height: 100%;
     background: var(--primary-brown);
     padding: 85px 14px 10px 14px; /* Clear navbar area */
     transition: var(--tran-05);
@@ -193,7 +193,7 @@ header .image-text .header-text{
 .sidebar header .toggle{
     position: absolute;
     top: 100%; /* Tapat sa bottom border ng header */
-    transform: translateY(-50%);
+    transform: translateY(-50%); 
     right: -20px; 
     height: 40px;
     width: 40px;
@@ -210,7 +210,7 @@ header .image-text .header-text{
 }
 
 .sidebar.close header .toggle {
-    right: -45px; /* 100% out position */
+    right: -50px; /* 100% floating look kapag sarado */
 }
 
 .sidebar li{
