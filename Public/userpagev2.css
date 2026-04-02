@@ -38,7 +38,7 @@ body{
 
 /* Hamburger Button Style */
 .hamburger-toggle {
-    display: flex; /* Show on all screens */
+    display: none; /* Hidden on desktop */
     position: absolute;
     left: 20px;
     height: 45px;
@@ -64,6 +64,10 @@ body{
             "footer";
     }
 
+    .hamburger-toggle {
+        display: flex; /* Show only on mobile/tablet */
+    }
+
     .sidebar {
         position: fixed;
         top: 0;
@@ -79,6 +83,10 @@ body{
     /* Show sidebar when it DOES NOT have the .close class */
     .sidebar:not(.close) {
         transform: translateX(0);
+    }
+
+    .sidebar header .toggle {
+        display: none; /* Hide desktop toggle on mobile */
     }
 
     .main-content {
@@ -149,8 +157,10 @@ body{
 }
 
 .sidebar .image-text img{
-    width: 60px;
-    height: auto;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* Perfect Circle */
+    object-fit: cover;
 }
 
 .sidebar header .image-text{
@@ -193,7 +203,23 @@ header .image-text .header-text{
 }
 
 .sidebar header .toggle{
-    display: none; /* Hide sidebar edge toggle as it's moved to nav bar */
+    display: flex; /* Show on desktop */
+    position: absolute;
+    top: 100%;
+    transform: translateY(-50%);
+    right: -20px;
+    height: 40px;
+    width: 40px;
+    background: var(--accent-gold);
+    border-radius: 50%;
+    color: var(--text-light);
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: var(--tran-05);
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 1002;
 }
 
 .sidebar li{
@@ -822,7 +848,8 @@ nav div h1{
 
 .profile-pic{
     height: 150px;
-    width: 150px; 
+    width: 150px;
+    aspect-ratio: 1 / 1; /* Force square aspect */
     border-radius: 50%;
     border: 3px solid var(--accent-gold);
     object-fit: cover;
