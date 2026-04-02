@@ -820,7 +820,7 @@ app.post('/login', (req, res, next) => {
                     req.flash('error', `User role is not defined. (DB Value: ${normalizedUser.CATEGORY})`);
                     res.redirect('/login');
                 });
-            }
+            });
         });
     })(req, res, next);
 });
