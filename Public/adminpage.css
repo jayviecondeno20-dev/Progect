@@ -39,7 +39,7 @@ body{
 .hamburger-toggle {
     display: none; /* Hidden on desktop */
     position: absolute;
-    left: 20px;
+    left: 15px; /* Centered relative to the 75px sidebar width */
     height: 45px;
     width: 45px;
     background: var(--accent-gold);
