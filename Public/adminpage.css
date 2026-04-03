@@ -1195,7 +1195,7 @@ button:hover {
 .charts-container {
     padding: 20px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Mas maliit na min-width para sa mobile */
+    grid-template-columns: repeat(4, 1fr); /* Saktong 4 na graph per row sa desktop */
     gap: 20px;
 }
 
@@ -1225,8 +1225,14 @@ button:hover {
     }
 
     .charts-container {
-        grid-template-columns: 1fr; /* Isang column na lang ang charts sa mobile */
+        grid-template-columns: repeat(2, 1fr); /* 2 columns muna para sa tablet view */
         padding: 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    .charts-container {
+        grid-template-columns: 1fr; /* Isang column na lang para sa maliliit na phone */
     }
 }
 
