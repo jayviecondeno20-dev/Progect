@@ -316,6 +316,7 @@
                     <table id="menuTable">
                         <thead>
                             <tr>
+                                <th>Image</th>
                                 <th>Menu Name</th>
                                 <th>Category</th>
                                 <th>Category 2</th>
@@ -328,6 +329,13 @@
                             <% if (typeof menuItems !== 'undefined' && menuItems.length > 0) { %>
                                 <% menuItems.forEach(function(menu) { %>
                                     <tr>
+                                        <td>
+                                            <% if (menu.menu_image) { %>
+                                                <img src="<%= menu.menu_image %>" onclick="downloadMenuImage('<%= menu.menu_image %>')" alt="menu" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; cursor: pointer;" title="Click to download">
+                                            <% } else { %>
+                                                <i class='bx bx-image-alt' style="font-size: 24px; color: #ccc;"></i>
+                                            <% } %>
+                                        </td>
                                         <td><%= menu['Menu Name'] %></td>
                                         <td><%= menu['Category'] %></td>
                                         <td><%= menu['Category 2'] %></td>
@@ -366,8 +374,8 @@
                 <!-- ADD MENU FORM (Existing) -->
                 <div class="container9" id="add-menu">
                     <div>
-                        <!-- ACTION: /add-menu, METHOD: POST -->
-                        <form action="/add-menu" method="POST" class="add-menu">
+                        <!-- Added enctype for image upload -->
+                        <form action="/add-menu" method="POST" class="add-menu" enctype="multipart/form-data">
                             <h1>ADD MENU</h1>
                             <div>
                                 <label for="">Menu Name :</label>
@@ -408,6 +416,11 @@
                                 <input type="number" id="price" name="Price" step="0.01" min="0" placeholder="0.00" required>
                             </div>
 
+                            <div>
+                                <label for="menu_image">Menu Image :</label>
+                                <input type="file" name="menu_image" id="menu_image" accept="image/*">
+                            </div>
+
                             <button>Add Menu</button>
                         </form>
                     </div>
@@ -417,7 +430,7 @@
                 <div class="container9" id="edit-menu">
                     <div>
                         <!-- ACTION: /update-menu, METHOD: PUT -->
-                        <form action="/update-menu?_method=PUT" method="POST" class="add-menu" id="edit-menu-form">
+                        <form action="/update-menu?_method=PUT" method="POST" class="add-menu" id="edit-menu-form" enctype="multipart/form-data">
                             <h1>EDIT MENU</h1>
                             <!-- Hidden Input for ID -->
                             <input type="hidden" name="id">
@@ -458,6 +471,11 @@
                             <div>
                                 <label for="edit-price">Price :</label>
                                 <input type="number" id="edit-price" name="Price" step="0.01" min="0" placeholder="0.00" required>
+                            </div>
+
+                            <div>
+                                <label for="edit_menu_image">Update Menu Image :</label>
+                                <input type="file" name="menu_image" id="edit_menu_image" accept="image/*">
                             </div>
 
                             <button type="submit" class="btn-blue">Update Menu</button>

@@ -74,6 +74,24 @@ function viewDtrImage(imageUrl) {
     window.location.href = window.location.origin + cleanUrl;
 }
 
+// Function para ma-download ang Menu Image
+function downloadMenuImage(imageUrl) {
+    if (!imageUrl || imageUrl === '' || imageUrl.includes('null') || imageUrl.includes('undefined')) {
+        alert("No image available for this item.");
+        return;
+    }
+    // Direct trigger ng download mula sa route
+    let cleanUrl = imageUrl;
+    if (imageUrl.includes('/menu-image/')) {
+        const index = imageUrl.indexOf('/menu-image/');
+        cleanUrl = imageUrl.substring(index);
+    }
+    
+    // Append ?download=true para mag-trigger ng attachment response mula sa server
+    const separator = cleanUrl.includes('?') ? '&' : '?';
+    window.location.href = window.location.origin + cleanUrl + separator + 'download=true';
+}
+
 // Function para buksan ang Edit Menu form at ilagay ang existing data
 function openEditMenu(id, name, category, category2, price) {
     const form = document.getElementById('edit-menu-form');

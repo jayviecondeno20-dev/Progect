@@ -63,6 +63,12 @@ const uploadDTR = multer({
     limits: { fileSize: 10 * 1024 * 1024 } // Limitahan sa 10MB ang picture
 }).single('dtr_image');
 
+// --- SETUP MENU IMAGE UPLOADER ---
+const uploadMenu = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } // Limitahan sa 5MB ang menu image
+}).single('menu_image');
+
 const initializePassport = require('./passport-config'); 
 
 // Helper function: Ayusin ang user data para hindi magkaproblema sa Case Sensitivity
@@ -245,11 +251,13 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
         // KUNIN ANG MENU ITEMS
         try {
             menuItems = await db('SELECT * FROM menu');
-            // Normalize keys just in case
+            // Safe mapping para sa User Page
             menuItems = menuItems.map(m => ({
                 ...m,
+                id: m.id !== undefined ? m.id : (m.ID !== undefined ? m.ID : null),
                 'Menu Name': m['Menu Name'] || m['Menu name'],
-                'Category 2': m['Category 2'] || ''
+                'Category 2': m['Category 2'] || '',
+                menu_image: (m.menu_image || m.MENU_IMAGE) ? `/menu-image/${m.id !== undefined ? m.id : m.ID}` : null
             }));
         } catch(e) { console.error("Menu fetch error:", e); }
 
@@ -464,12 +472,13 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
     // FETCH MENU ITEMS
     try {
         menuItems = await db('SELECT * FROM menu ORDER BY id DESC', []);
-        // Fix: Normalize keys to handle case sensitivity (ID vs id)
+        // Safe mapping para sa Admin Page
         menuItems = menuItems.map(m => ({
             ...m,
-            id: m.id || m.ID,
+            id: m.id !== undefined ? m.id : (m.ID !== undefined ? m.ID : null),
             'Menu Name': m['Menu Name'] || m['Menu name'],
-            'Category 2': m['Category 2'] || '' // Normalize Category 2
+            'Category 2': m['Category 2'] || '', // Normalize Category 2
+            menu_image: (m.menu_image || m.MENU_IMAGE) ? `/menu-image/${m.id !== undefined ? m.id : m.ID}` : null
         }));
     } catch (e) {
         console.log("Menu table might not exist yet, ignoring.");
@@ -597,25 +606,32 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
 // MENU ROUTES
 // =================================================================
 
-app.post('/add-menu', checkAuthenticated, async (req, res) => {
+app.post('/add-menu', checkAuthenticated, (req, res, next) => {
+    uploadMenu(req, res, (err) => {
+        if (err) {
+            req.flash('error', 'Upload Error: ' + err.message);
+            return res.redirect('/adminpage?tab=menu');
+        }
+        next();
+    });
+}, async (req, res) => {
     const user = normalizeUser(req.user);
     if (user.CATEGORY !== 'ADMIN') return res.redirect('/login');
 
-    // Kunin ang data mula sa form
     const menuName = req.body.menu;
     const category = req.body.category;
-    const category2 = req.body.category2; // Kunin ang Category 2
+    const category2 = req.body.category2;
     const price = req.body.Price;
+    // Convert image to Base64
+    const menuImage = req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : null;
 
     try {
-        // Subukang i-insert sa database table 'menu'
-        // Gamit ang headers: `Menu Name`, `Category`, `Category 2`, `Price`
-        await db("INSERT INTO menu (`Menu Name`, `Category`, `Category 2`, `Price`) VALUES (?, ?, ?, ?)", [menuName, category, category2, price]);
+        await db("INSERT INTO menu (`Menu Name`, `Category`, `Category 2`, `Price`, `menu_image`) VALUES (?, ?, ?, ?, ?)", 
+            [menuName, category, category2, price, menuImage]);
         req.flash('success', 'Menu item added successfully!');
     } catch (e) {
         console.error("Error adding menu:", e);
         
-        // AUTO-FIX: Gumawa ng table kung wala pa
         if (e.message && e.message.includes("doesn't exist")) {
             try {
                 await db(`CREATE TABLE IF NOT EXISTS menu (
@@ -623,26 +639,20 @@ app.post('/add-menu', checkAuthenticated, async (req, res) => {
                     \`Menu Name\` VARCHAR(255),
                     \`Category\` VARCHAR(100),
                     \`Category 2\` VARCHAR(100),
-                    \`Price\` DECIMAL(10,2)
+                    \`Price\` DECIMAL(10,2),
+                    \`menu_image\` LONGTEXT
                 )`);
-                // Re-insert after creating table
-                await db("INSERT INTO menu (`Menu Name`, `Category`, `Category 2`, `Price`) VALUES (?, ?, ?, ?)", [menuName, category, category2, price]);
+                await db("INSERT INTO menu (`Menu Name`, `Category`, `Category 2`, `Price`, `menu_image`) VALUES (?, ?, ?, ?, ?)", [menuName, category, category2, price, menuImage]);
                 req.flash('success', 'Menu Table created and Item added!');
-            } catch (err2) {
-                req.flash('error', 'Database Error: ' + err2.message);
-            }
-        } else if (e.message && e.message.includes("Unknown column")) {
-            // Auto-fix: Add 'Category 2' column if missing
+            } catch (err2) { req.flash('error', 'Database Error: ' + err2.message); }
+        } else if (e.message && (e.message.includes("Unknown column") || e.message.includes("menu_image"))) {
             try {
-                await db("ALTER TABLE menu ADD COLUMN `Category 2` VARCHAR(100)");
-                await db("INSERT INTO menu (`Menu Name`, `Category`, `Category 2`, `Price`) VALUES (?, ?, ?, ?)", [menuName, category, category2, price]);
-                req.flash('success', 'Database updated (Column Added) and Item added!');
-            } catch (err3) {
-                req.flash('error', 'Failed to update database schema: ' + err3.message);
-            }
-        } else {
-            req.flash('error', 'Failed to add menu: ' + e.message);
-        }
+                // Auto-fix: Add menu_image column
+                await db("ALTER TABLE menu ADD COLUMN `menu_image` LONGTEXT");
+                await db("INSERT INTO menu (`Menu Name`, `Category`, `Category 2`, `Price`, `menu_image`) VALUES (?, ?, ?, ?, ?)", [menuName, category, category2, price, menuImage]);
+                req.flash('success', 'Database updated and Item added!');
+            } catch (err3) { req.flash('error', 'Failed to update database: ' + err3.message); }
+        } else { req.flash('error', 'Failed to add menu: ' + e.message); }
     }
     res.redirect('/adminpage?tab=menu');
 });
@@ -663,13 +673,35 @@ app.delete('/delete-menu/:id', checkAuthenticated, async (req, res) => {
 });
 
 // UPDATE MENU ROUTE
-app.put('/update-menu', checkAuthenticated, async (req, res) => {
+app.put('/update-menu', checkAuthenticated, (req, res, next) => {
+    uploadMenu(req, res, (err) => {
+        if (err) {
+            req.flash('error', 'Upload Error: ' + err.message);
+            return res.redirect('/adminpage?tab=menu');
+        }
+        next();
+    });
+}, async (req, res) => {
     const user = normalizeUser(req.user);
     if (user.CATEGORY !== 'ADMIN') return res.redirect('/login');
 
     const { id, menu, category, category2, Price } = req.body;
+    // Convert new image to Base64 if uploaded
+    const menuImage = req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : null;
+
     try {
-        await db("UPDATE menu SET `Menu Name` = ?, `Category` = ?, `Category 2` = ?, `Price` = ? WHERE id = ?", [menu, category, category2, Price, id]);
+        let updateQuery = "UPDATE menu SET `Menu Name` = ?, `Category` = ?, `Category 2` = ?, `Price` = ?";
+        let updateParams = [menu, category, category2, Price];
+
+        if (menuImage) {
+            updateQuery += ", `menu_image` = ?";
+            updateParams.push(menuImage);
+        }
+
+        updateQuery += " WHERE id = ?";
+        updateParams.push(id);
+
+        await db(updateQuery, updateParams);
         req.flash('success', 'Menu item updated successfully!');
     } catch (e) {
         req.flash('error', 'Error updating item: ' + e.message);
@@ -1238,6 +1270,33 @@ app.get('/attendance-image/:id/:type', checkAuthenticated, async (req, res) => {
         }
     } catch (e) {
         console.error("Image Fetch Error:", e);
+        res.status(500).send("Server Error");
+    }
+});
+
+// NEW ROUTE: I-serve ang Menu Image galing DB para ma-download
+app.get('/menu-image/:id', checkAuthenticated, async (req, res) => {
+    const { id } = req.params;
+    const isDownload = req.query.download === 'true'; // Check if download is requested
+    try {
+        const rows = await db(`SELECT menu_image FROM menu WHERE id = ? OR ID = ?`, [id, id]);
+        if (rows.length > 0 && rows[0].menu_image) {
+            const data = rows[0].menu_image.toString().trim();
+            if (data.startsWith('data:image')) {
+                const matches = data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+                if (!matches || matches.length !== 3) return res.status(400).send("Invalid image format.");
+                const mimeType = matches[1];
+                const buffer = Buffer.from(matches[2], 'base64');
+                const extension = mimeType.split('/')[1] || 'png';
+
+                res.setHeader('Content-Type', mimeType);
+                // Switch between inline (for display) and attachment (for download)
+                res.setHeader('Content-Disposition', `${isDownload ? 'attachment' : 'inline'}; filename="menu_item_${id}.${extension}"`);
+                return res.send(buffer);
+            }
+        }
+        res.status(404).send("Image not found.");
+    } catch (e) {
         res.status(500).send("Server Error");
     }
 });
