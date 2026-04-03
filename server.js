@@ -19,6 +19,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const ExcelJS = require('exceljs'); // IMPORT EXCELJS LIBRARY
+const cloudinary = require('cloudinary').v2; // Import Cloudinary
+const DatauriParser = require('datauri/parser'); // Para i-convert ang buffer sa data URI
 
 // --- SETUP NG UPLOADER (MULTER) ---
 // Pinaka-safe sa Render/Linux na ilagay ang uploads sa loob ng Public folder.
@@ -29,18 +31,30 @@ if (!fs.existsSync(uploadDir)){
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configuration kung saan ise-save ang picture
-const storage = multer.diskStorage({
-    destination: uploadDir,
-    filename: function(req, file, cb) {
-        // Format: profile_pic-TIMESTAMP.jpg
-        cb(null, 'profile_pic-' + Date.now() + path.extname(file.originalname));
-    }
+// Cloudinary Configuration
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Gamitin ang memoryStorage para sa profile pictures para ma-upload sa Cloudinary
+// Hindi na ito magse-save sa local disk
 const upload = multer({
-    storage: storage
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } // Limitahan sa 5MB ang profile picture
 }).single('profile_pic'); // 'profile_pic' dapat ang name sa HTML input
+
+// Initialize DatauriParser
+const parser = new DatauriParser();
+
+// Helper function para i-convert ang buffer sa data URI
+const formatBufferToDataUri = (file) => {
+    // Siguraduhing may file at buffer
+    if (!file || !file.buffer) return null;
+    // Gumamit ng originalname para makuha ang extension
+    return parser.format(path.extname(file.originalname).toString(), file.buffer).content;
+};
 
 // --- SETUP DTR IMAGE UPLOADER ---
 // Gamitin ang memoryStorage para makuha ang buffer ng image para sa Base64 database storage
@@ -914,20 +928,35 @@ app.post('/add-item', checkAuthenticated, async (req, res) => {
 // =================================================================
 
 app.post('/update-profile', checkAuthenticated, async (req, res) => {
-    // Wrap upload in a promise to handle errors correctly in the async route
-    const processUpload = () => new Promise((resolve, reject) => {
-        upload(req, res, (err) => err ? reject(err) : resolve());
-    });
-
-    try {
-        await processUpload();
-    } catch (err) {
-        req.flash('error', 'Upload Error: ' + err.message);
-        return res.redirect('/userpage');
-    }
-
     const user = normalizeUser(req.user);
     const TABLE_NAME = "`employee deatails`"; // Gumagamit ng backticks para sa table name na may space/typo
+    let profilePicUrl = null; // Default to null
+
+    // Process upload using multer memory storage
+    await new Promise((resolve, reject) => {
+        upload(req, res, async (err) => {
+            if (err) {
+                req.flash('error', 'Upload Error: ' + err.message);
+                return res.redirect(user.CATEGORY === 'ADMIN' ? '/adminpage?tab=account' : '/userpage?tab=account');
+            }
+
+            if (req.file) {
+                try {
+                    // Convert buffer to data URI and upload to Cloudinary
+                    const dataUri = formatBufferToDataUri(req.file);
+                    if (dataUri) {
+                        const cloudinaryResult = await cloudinary.uploader.upload(dataUri, { folder: 'profile_pics' });
+                        profilePicUrl = cloudinaryResult.secure_url; // Kunin ang secure URL
+                    }
+                } catch (cloudinaryErr) {
+                    console.error("Cloudinary Upload Error:", cloudinaryErr);
+                    req.flash('error', 'Failed to upload profile picture to cloud storage.');
+                    return res.redirect(user.CATEGORY === 'ADMIN' ? '/adminpage?tab=account' : '/userpage?tab=account');
+                }
+            }
+            resolve(); // Resolve the promise after processing file or if no file
+        });
+    });
     
     // 1. VARIABLE MAPPING (Prioritize specific input names)
     const fName = req.body.first_name || req.body.firstName || '';
@@ -962,7 +991,7 @@ app.post('/update-profile', checkAuthenticated, async (req, res) => {
             "ADD COLUMN position VARCHAR(100)",
             "ADD COLUMN contact_no VARCHAR(50)",
             "ADD COLUMN home_address TEXT",
-            "ADD COLUMN profile_pic VARCHAR(255)"
+            "ADD COLUMN profile_pic VARCHAR(255)" // Palakihin kung kailangan, pero URLs usually kasya dito
         ];
 
         for (const colSql of columnsToAdd) {
@@ -988,9 +1017,9 @@ app.post('/update-profile', checkAuthenticated, async (req, res) => {
             let updateParams = [fullName, position, contactNo, homeAddress];
 
             // I-update lang ang picture kung may inupload na bago
-            if (req.file) {
+            if (profilePicUrl) { // Gamitin ang Cloudinary URL
                 updateQuery += `, profile_pic = ?`;
-                updateParams.push(req.file.filename);
+                updateParams.push(profilePicUrl);
             }
 
             updateQuery += ` WHERE USERNAME = ?`;
@@ -1000,10 +1029,9 @@ app.post('/update-profile', checkAuthenticated, async (req, res) => {
             req.flash('success', 'Profile Updated Successfully!');
         } else {
             console.log("[PROFILE UPDATE] No record found. Inserting new...");
-            // Sa insert, isama ang picture kung meron
-            const picFilename = req.file ? req.file.filename : null;
+            // Sa insert, isama ang Cloudinary URL kung meron
             await db(`INSERT INTO ${TABLE_NAME} (USERNAME, full_name, position, contact_no, home_address, profile_pic) VALUES (?, ?, ?, ?, ?, ?)`, 
-                [user.USERNAME, fullName, position, contactNo, homeAddress, picFilename]);
+                [user.USERNAME, fullName, position, contactNo, homeAddress, profilePicUrl]);
             req.flash('success', 'Profile Created Successfully!');
         }
     } catch (e) {
