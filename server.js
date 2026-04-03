@@ -164,15 +164,47 @@ app.get('/', (req, res) => {
 //HOMEPAGE 
 app.get('/homepage', checkNotAuthenticated, async (req, res)=> {
     try {
-        // Fetch Top 6 Best Sellers from sellout table
-        const bestSellers = await db(`
-            SELECT MENU, CATEGORY, SUM(Qty) as totalQty 
-            FROM sellout 
-            GROUP BY MENU, CATEGORY 
+        // Kumuha ng mas malaking listahan para siguradong may 6 items tayo pagkatapos pagsamahin ang sizes
+        const rawSales = await db(`
+            SELECT s.MENU, s.CATEGORY, SUM(s.Qty) as totalQty, m.id, m.menu_image
+            FROM sellout s
+            LEFT JOIN menu m ON s.MENU = m.\`Menu Name\`
+            GROUP BY s.MENU, s.CATEGORY, m.id, m.menu_image
             ORDER BY totalQty DESC 
-            LIMIT 6
+            LIMIT 20
         `);
-        res.render('homepage', { bestSellers });
+
+        const cleanedMap = new Map();
+
+        rawSales.forEach(item => {
+            // 1. Alisin ang "Grande", "Regular", at mga Parenthesis (), pagkatapos ay ayusin ang spaces
+            const cleanName = item.MENU.replace(/\b(grande|regular)\b/gi, '').replace(/[()]/g, '').replace(/\s+/g, ' ').trim();
+            
+            // 2. Pagsamahin ang quantities kung pareho na ang Clean Name
+            if (cleanedMap.has(cleanName)) {
+                cleanedMap.get(cleanName).totalQty += Number(item.totalQty);
+            } else {
+                cleanedMap.set(cleanName, { 
+                    ...item, 
+                    MENU: cleanName,
+                    totalQty: Number(item.totalQty)
+                });
+            }
+        });
+
+        // 3. I-convert pabalik sa array, i-sort by highest sales, at kumuha lang ng Top 6
+        const processedSellers = Array.from(cleanedMap.values())
+            .sort((a, b) => b.totalQty - a.totalQty)
+            .slice(0, 6)
+            .map(item => {
+                const itemId = item.id || item.ID;
+                return {
+                    ...item,
+                    menu_image: (item.menu_image || item.MENU_IMAGE) ? `/menu-image/${itemId}` : null
+                };
+            });
+
+        res.render('homepage', { bestSellers: processedSellers });
     } catch (e) {
         console.error("Error fetching best sellers for homepage:", e);
         res.render('homepage', { bestSellers: [] });

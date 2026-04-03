@@ -49,48 +49,31 @@
                 <% /* Duplicate the list to create a seamless loop */ %>
                 <% const loopList = [...bestSellers, ...bestSellers]; %>
                 <% loopList.forEach(item => { 
-                    // Mapping ng mga litrato base sa pangalan ng Menu
+                    // Kunin ang image route mula sa database (kung meron)
                     const menuName = item.MENU ? item.MENU.toLowerCase() : '';
-                    let imgUrl = 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=500&auto=format&fit=crop'; // Default: General Coffee Vibe
+                    let imgUrl = item.menu_image;
 
-                    if (menuName.includes('matcha')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1582722810491-b955d4bb1d91?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('choco')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1544787210-2211d6e9dc6b?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('smoothie')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('caramel')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1572286258217-40142c1c6a70?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('strawberry')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1464454709131-ffd692591ee5?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('vanilla')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('white mocha')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('cookies') || menuName.includes('cream')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('americano') || menuName.includes('black')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('seasalt')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('spanish')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('latte')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1594266302421-4958ba890e48?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('nori') || menuName.includes('sandwich')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1604467731651-398112104635?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('nachos') || menuName.includes('bulgogi')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?q=80&w=500&auto=format&fit=crop';
-                    } else if (menuName.includes('chicken')) {
-                        if (menuName.includes('yangnyeom')) {
+                    // SMART DEFAULT LOGIC: Kung wala pang image sa database, magbigay ng saktong default base sa pangalan
+                    if (!imgUrl) {
+                        imgUrl = 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=500&auto=format&fit=crop'; // General Default
+
+                        if (menuName.includes('matcha')) {
+                            imgUrl = 'https://images.unsplash.com/photo-1582722810491-b955d4bb1d91?q=80&w=500&auto=format&fit=crop';
+                        } else if (menuName.includes('choco')) {
+                            imgUrl = 'https://images.unsplash.com/photo-1544787210-2211d6e9dc6b?q=80&w=500&auto=format&fit=crop';
+                        } else if (menuName.includes('seasalt')) {
+                            imgUrl = 'https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=500&auto=format&fit=crop';
+                        } else if (menuName.includes('nori') || menuName.includes('sandwich')) {
+                            imgUrl = 'https://images.unsplash.com/photo-1604467731651-398112104635?q=80&w=500&auto=format&fit=crop';
+                        } else if (menuName.includes('nachos') || menuName.includes('bulgogi')) {
+                            imgUrl = 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?q=80&w=500&auto=format&fit=crop';
+                        } else if (menuName.includes('chicken')) {
                             imgUrl = 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=80&w=500&auto=format&fit=crop';
-                        } else {
-                            imgUrl = 'https://images.unsplash.com/photo-1562967914-608f82629710?q=80&w=500&auto=format&fit=crop';
+                        } else if (menuName.includes('pasta') || menuName.includes('ramen')) {
+                            imgUrl = 'https://images.unsplash.com/photo-1546549032-9571cd6b27df?q=80&w=500&auto=format&fit=crop';
+                        } else if (menuName.includes('latte') || menuName.includes('coffee')) {
+                            imgUrl = 'https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500&auto=format&fit=crop';
                         }
-                    } else if (menuName.includes('pasta') || menuName.includes('ramen')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1546549032-9571cd6b27df?q=80&w=500&auto=format&fit=crop';
-                    } else if (item.CATEGORY && item.CATEGORY.toLowerCase().includes('food')) {
-                        imgUrl = 'https://images.unsplash.com/photo-1509722747041-616f39b57569?q=80&w=500&auto=format&fit=crop';
                     }
                 %>
                     <div class="menu-card">
