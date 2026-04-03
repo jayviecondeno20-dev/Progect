@@ -52,8 +52,8 @@ const parser = new DatauriParser();
 const formatBufferToDataUri = (file) => {
     // Siguraduhing may file at buffer
     if (!file || !file.buffer) return null;
-    // Gumamit ng originalname para makuha ang extension
-    return parser.format(path.extname(file.originalname).toString(), file.buffer).content;
+    // Mas safe gamitin ang mimetype kaysa extname para sa Cloudinary
+    return parser.format(path.extname(file.originalname), file.buffer).content;
 };
 
 // --- SETUP DTR IMAGE UPLOADER ---
@@ -119,7 +119,7 @@ const sessionStore = new MySQLStore({}, db.pool);
 
 app.use(session({
     store: sessionStore,
-    secret: String(process.env.SESSION_SECRET || 'itaewon-kopi-fallback-secret-12345'), 
+    secret: process.env.SESSION_SECRET || 'itaewon-kopi-fallback-secret-12345', 
     resave: false,
     saveUninitialized: false, // Iniiwasan ang paggawa ng empty sessions
     cookie: { 
@@ -931,32 +931,30 @@ app.post('/update-profile', checkAuthenticated, async (req, res) => {
     const user = normalizeUser(req.user);
     const TABLE_NAME = "`employee deatails`"; // Gumagamit ng backticks para sa table name na may space/typo
     let profilePicUrl = null; // Default to null
+    const redirectPath = user.CATEGORY === 'ADMIN' ? '/adminpage?tab=account' : '/userpage?tab=account';
 
-    // Process upload using multer memory storage
-    await new Promise((resolve, reject) => {
-        upload(req, res, async (err) => {
-            if (err) {
-                req.flash('error', 'Upload Error: ' + err.message);
-                return res.redirect(user.CATEGORY === 'ADMIN' ? '/adminpage?tab=account' : '/userpage?tab=account');
-            }
-
-            if (req.file) {
-                try {
-                    // Convert buffer to data URI and upload to Cloudinary
-                    const dataUri = formatBufferToDataUri(req.file);
-                    if (dataUri) {
-                        const cloudinaryResult = await cloudinary.uploader.upload(dataUri, { folder: 'profile_pics' });
-                        profilePicUrl = cloudinaryResult.secure_url; // Kunin ang secure URL
-                    }
-                } catch (cloudinaryErr) {
-                    console.error("Cloudinary Upload Error:", cloudinaryErr);
-                    req.flash('error', 'Failed to upload profile picture to cloud storage.');
-                    return res.redirect(user.CATEGORY === 'ADMIN' ? '/adminpage?tab=account' : '/userpage?tab=account');
-                }
-            }
-            resolve(); // Resolve the promise after processing file or if no file
+    try {
+        // 1. I-handle ang Multer upload bilang Promise
+        await new Promise((resolve, reject) => {
+            upload(req, res, (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
         });
-    });
+
+        // 2. Kung may file, i-upload sa Cloudinary
+        if (req.file) {
+            const dataUri = formatBufferToDataUri(req.file);
+            if (dataUri) {
+                const cloudinaryResult = await cloudinary.uploader.upload(dataUri, { folder: 'profile_pics' });
+                profilePicUrl = cloudinaryResult.secure_url;
+            }
+        }
+    } catch (err) {
+        console.error("Profile Upload Error:", err);
+        req.flash('error', 'Upload Failed: ' + (err.message || 'Cloudinary Error'));
+        return res.redirect(redirectPath);
+    }
     
     // 1. VARIABLE MAPPING (Prioritize specific input names)
     const fName = req.body.first_name || req.body.firstName || '';

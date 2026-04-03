@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 const dbConfig = {
   host: process.env.DB_HOST || 'bnivdbauhfdml9iyewd2-mysql.services.clever-cloud.com',
   user: process.env.DB_USER || 'uaupgzxcgsrwjfo4',
-  password: process.env.DB_PASSWORD || '58QdXykEx4EnQGXHWOm9',
+  password: process.env.DB_PASS || '58QdXykEx4EnQGXHWOm9',
   database: process.env.DB_NAME || 'bnivdbauhfdml9iyewd2',
   port: process.env.DB_PORT || 3306,
   connectionLimit: 2, // Mababa dapat para hindi ma-reach ang 5 limit ng Clever Cloud
