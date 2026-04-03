@@ -1024,7 +1024,7 @@ app.post('/time-in', checkAuthenticated, (req, res, next) => {
 
     const dateStr = req.body.DATE || phDate;
     const timeStr = req.body.TIME || phTime;
-    const imageFilename = req.file ? req.file.filename : null;
+    const imageBase64 = req.file ? `data:image/png;base64,${req.file.buffer.toString('base64')}` : null;
     const redirectUrl = user.CATEGORY === 'ADMIN' ? '/adminpage?tab=account&sub=Attendance' : '/userpage?tab=account&sub=Attendance';
 
     try {
@@ -1036,7 +1036,7 @@ app.post('/time-in', checkAuthenticated, (req, res, next) => {
         if (exists.length === 0) {
             try {
                 console.log(`[TIME-IN] No existing record found. Inserting new record with image.`);
-                await db('INSERT INTO dtr (`USERNAME`, `DATE`, `TIME IN`, `time_in_image`) VALUES (?, ?, ?, ?)', [user.USERNAME, dateStr, timeStr, imageFilename]);
+                await db('INSERT INTO dtr (`USERNAME`, `DATE`, `TIME IN`, `time_in_image`) VALUES (?, ?, ?, ?)', [user.USERNAME, dateStr, timeStr, imageBase64]);
                 req.flash('success', `Time In recorded at ${timeStr}`);
                 // Send JSON response instead of redirecting immediately
                 return res.json({ success: true, message: `Time In successful at ${timeStr}!`, redirectUrl: redirectUrl });
@@ -1080,7 +1080,7 @@ app.post('/time-out', checkAuthenticated, (req, res, next) => {
 
     const dateStr = req.body.DATE || phDate;
     const timeStr = req.body.TIME || phTime;
-    const imageFilename = req.file ? req.file.filename : null;
+    const imageBase64 = req.file ? `data:image/png;base64,${req.file.buffer.toString('base64')}` : null;
     const redirectUrl = user.CATEGORY === 'ADMIN' ? '/adminpage?tab=account&sub=Attendance' : '/userpage?tab=account&sub=Attendance';
 
     try {
@@ -1100,7 +1100,7 @@ app.post('/time-out', checkAuthenticated, (req, res, next) => {
         }
 
         // 2. UPDATE RECORD: Kung valid pa, i-record ang Time Out
-        await db('UPDATE dtr SET `TIME OUT` = ?, `time_out_image` = ? WHERE `USERNAME` = ? AND DATE(`DATE`) = ?', [timeStr, imageFilename, user.USERNAME, dateStr]);
+        await db('UPDATE dtr SET `TIME OUT` = ?, `time_out_image` = ? WHERE `USERNAME` = ? AND DATE(`DATE`) = ?', [timeStr, imageBase64, user.USERNAME, dateStr]);
 
         console.log(`[TIME-OUT] Record updated successfully.`);
         req.flash('success', `Time Out recorded at ${timeStr}`);
@@ -1401,8 +1401,8 @@ async function initializeDtrTable() {
             "ALTER TABLE dtr ADD COLUMN `DATE` DATE",
             "ALTER TABLE dtr ADD COLUMN `TIME IN` VARCHAR(50)",
             "ALTER TABLE dtr ADD COLUMN `TIME OUT` VARCHAR(50)",
-            "ALTER TABLE dtr ADD COLUMN `time_in_image` VARCHAR(255)", // Column para sa Time In Pic
-            "ALTER TABLE dtr ADD COLUMN `time_out_image` VARCHAR(255)"  // Column para sa Time Out Pic
+            "ALTER TABLE dtr ADD COLUMN `time_in_image` LONGTEXT", // LONGTEXT para kasya ang Base64
+            "ALTER TABLE dtr ADD COLUMN `time_out_image` LONGTEXT"  // LONGTEXT para kasya ang Base64
         ];
 
         // 3. I-execute ang pag-add ng columns (Ignored kapag meron na)
@@ -1422,6 +1422,14 @@ async function initializeDtrTable() {
         try {
             await db("ALTER TABLE dtr MODIFY COLUMN `DATE` DATE");
             console.log("[DB CHECK] Enforced DATE type on dtr table.");
+            
+            // Siguraduhin na LONGTEXT ang columns kahit existing na sila
+            try {
+                await db("ALTER TABLE dtr MODIFY COLUMN `time_in_image` LONGTEXT");
+                await db("ALTER TABLE dtr MODIFY COLUMN `time_out_image` LONGTEXT");
+                console.log("[DB CHECK] Image columns modified to LONGTEXT.");
+            } catch (err) { console.log(err.message); }
+
         } catch (err) {
             // Ignore errors (e.g., kung empty table o strict sql mode issues)
             console.log(`[DB NOTE] Date column modification: ${err.message}`);
