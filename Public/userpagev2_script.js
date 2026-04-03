@@ -56,6 +56,24 @@ function toggleForm(formId) {
     }
 }
 
+// Function para ma-view ang DTR Image nang hindi nagkaka-error 431
+function viewDtrImage(imageUrl) {
+    if (!imageUrl || imageUrl === '' || imageUrl.includes('null') || imageUrl.includes('undefined')) {
+        alert("No photo recorded for this attendance.");
+        return;
+    }
+
+    // ULTRA-CLEAN: Hanapin ang '/attendance-image/' at burahin lahat ng nasa unahan nito
+    let cleanUrl = imageUrl;
+    if (imageUrl.includes('/attendance-image/')) {
+        const index = imageUrl.indexOf('/attendance-image/');
+        cleanUrl = imageUrl.substring(index);
+    }
+
+    // Siguraduhing absolute path ang itatawag para hindi maligaw ang browser
+    window.location.href = window.location.origin + cleanUrl;
+}
+
 // Function para buksan ang Edit Menu form at ilagay ang existing data
 function openEditMenu(id, name, category, category2, price) {
     const form = document.getElementById('edit-menu-form');
@@ -499,7 +517,14 @@ async function captureAndSubmit() {
         const endpoint = attendanceType === 'in' ? '/time-in' : '/time-out';
 
         fetch(endpoint, { method: 'POST', body: formData })
-            .then(response => response.json())
+            .then(async response => {
+                const data = await response.json();
+                // Kung may error sa server (hal. duplicate), i-throw para mahuli sa catch
+                if (!response.ok || data.success === false) {
+                    throw new Error(data.message || 'Server Error');
+                }
+                return data;
+            })
             .then(data => {
                 // Ipakita ang message (Success or Error)
                 alert(data.message);
@@ -513,7 +538,7 @@ async function captureAndSubmit() {
             })
             .catch(err => {
                 console.error("Submission error:", err);
-                alert("Failed to submit attendance.");
+                alert("Attendance Error: " + err.message);
             });
     }, 'image/png');
 }

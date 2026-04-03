@@ -43,13 +43,11 @@ const upload = multer({
 }).single('profile_pic'); // 'profile_pic' dapat ang name sa HTML input
 
 // --- SETUP DTR IMAGE UPLOADER ---
-const dtrStorage = multer.diskStorage({
-    destination: uploadDir,
-    filename: function(req, file, cb) {
-        cb(null, 'dtr-' + Date.now() + '.png');
-    }
-});
-const uploadDTR = multer({ storage: dtrStorage }).single('dtr_image');
+// Gamitin ang memoryStorage para makuha ang buffer ng image para sa Base64 database storage
+const uploadDTR = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // Limitahan sa 10MB ang picture
+}).single('dtr_image');
 
 const initializePassport = require('./passport-config'); 
 
@@ -96,8 +94,8 @@ initializePassport(
 
 app.set('view engine', 'ejs');
 // Middleware: Pagsasaayos ng order at paglilinis
-app.use(express.json()); // Para sa pag-parse ng JSON bodies (galing sa fetch/AJAX)
-app.use(express.urlencoded({ extended: true })); // Para sa pag-parse ng form data
+app.use(express.json({ limit: '50mb' })); // Tinaasan ang limit para sa malalaking Base64 images
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Render uses a reverse proxy (load balancer). Trusting it is required for secure cookies/sessions.
 app.set('trust proxy', 1);
@@ -226,10 +224,17 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
             const year = dateObj.getFullYear();
             const month = (dateObj.getMonth() + 1).toString().padStart(2, '0'); // e.g., '01' for January
             const day = dateObj.getDate().toString().padStart(2, '0');
+
+            // Super Safe ID detection: Hahanapin ang ID key kahit ano pa ang pagkakasulat (id, ID, Id)
+            const recordId = record.id || record.ID || record.Id || record.iD || null;
+            
             return {
                 ...record,
                 formattedDate: `${year}-${month}-${day}`, // Para sa display
-                month: month // Para sa data-month attribute
+                month: month, // Para sa data-month attribute
+                // Huwag i-embed ang buong Base64. Magbigay lang ng URL para i-fetch ito.
+                time_in_image: (record.time_in_image && recordId) ? `/attendance-image/${recordId}/in` : null,
+                time_out_image: (record.time_out_image && recordId) ? `/attendance-image/${recordId}/out` : null
             };
         });
 
@@ -505,7 +510,16 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
                 status = 'ON DUTY';
             }
 
-            return { ...record, formattedDate: dateStr, computedStatus: status, computedOvertime: overtime };
+            // Safe ID detection para sa Admin mapping
+            const recordId = record.id !== undefined ? record.id : (record.ID !== undefined ? record.ID : (record.Id || null));
+            
+            return { 
+                ...record, 
+                formattedDate: dateStr, computedStatus: status, computedOvertime: overtime,
+                // Admin mapping
+                time_in_image: (record.time_in_image && recordId) ? `/attendance-image/${recordId}/in` : null,
+                time_out_image: (record.time_out_image && recordId) ? `/attendance-image/${recordId}/out` : null
+            };
         });
     } catch (e) {
         console.log("DTR table might not exist yet, ignoring.");
@@ -1011,7 +1025,9 @@ app.post('/update-profile', checkAuthenticated, async (req, res) => {
 
 app.post('/time-in', checkAuthenticated, (req, res, next) => {
     uploadDTR(req, res, (err) => {
-        if (err) { return next(err); }
+        if (err) { 
+            return res.status(400).json({ success: false, message: 'Upload Error: ' + err.message });
+        }
         next();
     });
 }, async (req, res) => {
@@ -1056,19 +1072,18 @@ app.post('/time-in', checkAuthenticated, (req, res, next) => {
         }
     } catch (e) {
         console.error("Error recording Time In:", e);
-        // Ipakita ang exact error message para madaling ma-debug
-        if (e.message && e.message.includes('Unknown column')) {
-            req.flash('error', 'Column Mismatch! <a href="/fix-dtr" style="font-weight:bold; text-decoration:underline;">CLICK HERE TO FIX DATABASE</a>');
-        } else {
-            req.flash('error', 'Database Error: ' + e.message);
-        }
-        return res.json({ success: false, message: 'Database Error: ' + e.message, redirectUrl: redirectUrl });
+        // Iwasan ang paglalagay ng e.message sa flash kung malaki ang data
+        const errMsg = e.message.includes('Unknown column') ? 'Database structure error. Please fix DB.' : 'Attendance failed. Try again.';
+        req.flash('error', errMsg);
+        return res.json({ success: false, message: errMsg, redirectUrl: redirectUrl });
     }
 });
 
 app.post('/time-out', checkAuthenticated, (req, res, next) => {
     uploadDTR(req, res, (err) => {
-        if (err) { return next(err); }
+        if (err) { 
+            return res.status(400).json({ success: false, message: 'Upload Error: ' + err.message });
+        }
         next();
     });
 }, async (req, res) => {
@@ -1109,13 +1124,58 @@ app.post('/time-out', checkAuthenticated, (req, res, next) => {
         return res.json({ success: true, message: `Time Out successful at ${timeStr}!`, redirectUrl: redirectUrl });
     } catch (e) {
         console.error("Error recording Time Out:", e);
-        if (e.message && e.message.includes('Unknown column')) {
-            req.flash('error', 'Column Mismatch! <a href="/fix-dtr" style="font-weight:bold; text-decoration:underline;">CLICK HERE TO FIX DATABASE</a>');
-        } else {
-            req.flash('error', 'Database Error: ' + e.message);
-        }
-        return res.json({ success: false, message: 'Database Error: ' + e.message, redirectUrl: redirectUrl });
+        const errMsg = e.message.includes('Unknown column') ? 'Database structure error. Please fix DB.' : 'Attendance failed. Try again.';
+        req.flash('error', errMsg);
+        return res.json({ success: false, message: errMsg, redirectUrl: redirectUrl });
     }
+});
+
+// NEW ROUTE: I-serve ang image galing DB para iwas Error 431
+app.get('/attendance-image/:id/:type', checkAuthenticated, async (req, res) => {
+    const { id, type } = req.params;
+    const col = type === 'in' ? 'time_in_image' : 'time_out_image';
+    try {
+        // Check both lowercase and uppercase ID columns just in case
+        const rows = await db(`SELECT ?? as img FROM dtr WHERE id = ? OR ID = ?`, [col, id, id]);
+        if (rows.length > 0 && rows[0].img) {
+            const data = rows[0].img.toString().trim();
+            if (data.startsWith('data:image')) {
+                // I-convert ang Base64 string pabalik sa binary Buffer para ma-download
+                const matches = data.toString().trim().match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+                if (!matches || matches.length !== 3) return res.status(400).send("Invalid image format.");
+
+                const mimeType = matches[1];
+                const base64Content = matches[2];
+                const buffer = Buffer.from(base64Content, 'base64');
+                const extension = mimeType.split('/')[1] || 'png';
+
+                // Force download headers
+                res.setHeader('Content-Type', mimeType);
+                res.setHeader('Content-Disposition', `attachment; filename="attendance_${type}_${id}.${extension}"`);
+                return res.send(buffer);
+            } else {
+                // Fallback para sa mga lumang record na filename lang ang nasa DB
+                if (!data || data === 'null') return res.status(404).send("No image data found.");
+                
+                const filePath = path.join(__dirname, 'Public', 'uploads', data);
+                if (fs.existsSync(filePath)) {
+                    return res.download(filePath, `attendance_${type}_${id}.png`);
+                }
+                res.status(404).send("Image data not found on server.");
+            }
+        } else {
+            res.status(404).send("Photo not found.");
+        }
+    } catch (e) {
+        console.error("Image Fetch Error:", e);
+        res.status(500).send("Server Error");
+    }
+});
+
+// FAIL-SAFE: Redirect kung sakaling may /uploads/ pa rin na prefix galing sa EJS link
+app.get(['/uploads/attendance-image/:id/:type', '/uploads//attendance-image/:id/:type'], checkAuthenticated, (req, res) => {
+    const { id, type } = req.params;
+    res.redirect(`/attendance-image/${id}/${type}`);
 });
 
 // =================================================================
