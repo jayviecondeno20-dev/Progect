@@ -164,21 +164,24 @@ app.get('/', (req, res) => {
 //HOMEPAGE 
 app.get('/homepage', checkNotAuthenticated, async (req, res)=> {
     try {
-        // Kumuha ng mas malaking listahan para siguradong may 6 items tayo pagkatapos pagsamahin ang sizes
-        const rawSales = await db(`
-            SELECT s.MENU, s.CATEGORY, SUM(s.Qty) as totalQty, m.id, m.menu_image
-            FROM sellout s
-            LEFT JOIN menu m ON s.MENU = m.\`Menu Name\`
-            GROUP BY s.MENU, s.CATEGORY, m.id, m.menu_image
-            ORDER BY totalQty DESC 
-            LIMIT 20
-        `);
+        // 1. Kunin ang lahat ng benta
+        const rawSales = await db(`SELECT MENU, CATEGORY, SUM(Qty) as totalQty FROM sellout GROUP BY MENU, CATEGORY`);
+        
+        // 2. Kunin ang lahat ng menu items para sa matching ng images
+        const rawMenuItems = await db(`SELECT * FROM menu`);
+        // I-normalize ang menu items para siguradong makuha ang 'MENU_NAME', 'ID', at 'MENU_IMAGE'
+        const normalizedMenu = rawMenuItems.map(m => normalizeUser(m));
 
         const cleanedMap = new Map();
 
+        // Helper function para linisin ang pangalan para sa matching
+        const getBaseName = (name) => {
+            if (!name) return '';
+            return name.replace(/\b(grande|regular)\b/gi, '').replace(/[()]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+        };
+
         rawSales.forEach(item => {
-            // 1. Alisin ang "Grande", "Regular", at mga Parenthesis (), pagkatapos ay ayusin ang spaces
-            const cleanName = item.MENU.replace(/\b(grande|regular)\b/gi, '').replace(/[()]/g, '').replace(/\s+/g, ' ').trim();
+            const cleanName = getBaseName(item.MENU);
             
             // 2. Pagsamahin ang quantities kung pareho na ang Clean Name
             if (cleanedMap.has(cleanName)) {
@@ -197,10 +200,12 @@ app.get('/homepage', checkNotAuthenticated, async (req, res)=> {
             .sort((a, b) => b.totalQty - a.totalQty)
             .slice(0, 6)
             .map(item => {
-                const itemId = item.id || item.ID;
+                // Siguraduhing makuha ang ID at Image data kahit ano ang casing sa DB
+                const itemId = item.id || item.ID || item.ID_ALT;
+                const hasImage = item.menu_image || item.MENU_IMAGE || item.MENU_IMAGE_ALT;
                 return {
                     ...item,
-                    menu_image: (item.menu_image || item.MENU_IMAGE) ? `/menu-image/${itemId}` : null
+                    menu_image: (hasImage && itemId) ? `/menu-image/${itemId}` : null
                 };
             });
 
@@ -256,7 +261,8 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
 
         // KUNIN ANG EMPLOYEE DETAILS (Kung meron na sa database)
         try {
-            const profileResult = await db('SELECT * FROM `employee deatails` WHERE USERNAME = ?', [user.USERNAME]);
+            // FIX: Gumamit ng UPPER(TRIM()) para mag-match sa logic ng POST route
+            const profileResult = await db('SELECT * FROM `employee deatails` WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?))', [user.USERNAME]);
             if (profileResult.length > 0) {
                 let normalizedProfile = normalizeUser(profileResult[0]);
                 
