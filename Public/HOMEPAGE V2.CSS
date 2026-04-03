@@ -102,11 +102,11 @@ body {
 
 /* Hero Section */
 .home {
-    height: 90vh;
+    height: 100vh;
     /* Fallback color if image fails */
     background-color: #3e2723; 
     /* Add a background image here if you have one, e.g.: url('coffee-shop-bg.jpg') */
-    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),url(cover_photo.jpg);
     background-size: cover;
     background-position: center;
     display: flex;
@@ -152,37 +152,94 @@ body {
 
 /* Offer Section */
 .section1 {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
     padding: 5rem 10%;
+    overflow: hidden; /* Iwas scrollbar sa main page */
     background-color: var(--bg-cream);
+    text-align: center;
 }
 
-.card {
+.best-seller-title {
+    font-family: var(--font-heading);
+    color: var(--primary-brown);
+    margin-bottom: 3rem;
+    font-size: 3rem;
+    position: relative;
+}
+
+.menu-slider {
+    width: 100%;
+    overflow: hidden;
+    padding: 20px 0;
+}
+
+.menu-grid {
+    display: flex;
+    gap: 2.5rem;
+    width: max-content; /* Importante para sa flex scrolling */
+    animation: scroll 40s linear infinite; /* Bagalan o bilisan dito */
+}
+
+.menu-grid:hover {
+    animation-play-state: paused; /* Hihinto ang loop pag tinapatan ng mouse */
+}
+
+.menu-card {
+    flex: 0 0 300px; /* Saktong lapad ng bawat card */
     background: white;
-    padding: 2.5rem;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
     transition: transform 0.3s;
 }
 
-.card:hover {
+.menu-card:hover {
     transform: translateY(-10px);
 }
 
-.card .img {
-    height: 80px;
-    margin-bottom: 1.5rem;
-    object-fit: contain;
+.menu-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
 }
 
-.card h3 {
+.menu-info {
+    padding: 1.5rem;
+}
+
+.menu-info h3 {
     font-family: var(--font-heading);
     color: var(--primary-brown);
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+}
+
+.tag {
+    background: var(--accent-gold);
+    color: var(--primary-brown);
+    display: inline-block;
+    padding: 4px 15px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.sold-count {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #8d6e63;
+    font-style: italic;
+}
+
+/* Infinite Loop Animation */
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%); /* Lilipat hanggang sa dulo ng unang set */
+    }
 }
 
 /* Story Section */
@@ -219,22 +276,121 @@ body {
     font-size: 1.1rem;
 }
 
+/* Story Modal Styles */
+.story-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease;
+}
+
+.story-modal-content {
+    background-color: var(--bg-cream);
+    margin: 5% auto;
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    border-left: 5px solid var(--accent-gold);
+}
+
+.close-story {
+    position: absolute;
+    right: 25px;
+    top: 15px;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--primary-brown);
+    transition: 0.3s;
+}
+
+.close-story:hover { color: var(--accent-gold); }
+
+.modal-title {
+    font-family: var(--font-heading);
+    color: var(--secondary-brown);
+    margin-bottom: 25px;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.story-modal-content h3 {
+    color: var(--accent-gold);
+    margin: 25px 0 10px;
+    font-family: var(--font-heading);
+}
+
+.modal-footer { margin-top: 30px; text-align: center; border-top: 1px solid #ddd; padding-top: 20px; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 /* Footer */
 .footer {
     background-color: var(--primary-brown);
-    color: #BCAAA4;
-    text-align: center;
-    padding: 4rem 1rem;
+    color: #FAF9F6;
+    padding: 4rem 5%;
+}
+
+.footer-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-column {
+    text-align: left;
 }
 
 .footer h3 {
     color: var(--accent-gold);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
     font-family: var(--font-heading);
-    font-size: 1.5rem;
+    font-size: 1.3rem;
 }
 
 .footer p {
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer a:hover {
+    color: var(--accent-gold);
+}
+
+.map-wrapper {
+    border-radius: 10px;
+    overflow: hidden;
+    height: 150px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+@media (max-width: 768px) {
+    .footer-column {
+        text-align: center;
+    }
+    .footer-column p {
+        justify-content: center;
+    }
 }

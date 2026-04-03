@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 <link rel="stylesheet" href="HOMEPAGE V2.CSS">
 </head>
 <body>
@@ -41,36 +42,142 @@
 <div>
     
 <section id="OFFER" class="section1">
-    <div class="card">
-        <img src="slow-download-removebg-preview.png" alt="" class="img">
-        <h3>Manual Inefficiency</h3>
-        <p>Traditional systems lead to long waiting times and inaccurate order processing.</p>
-    </div>
-    <div class="card">
-        <img src="334-3344963_inventory-icon-stacked-boxes-icon-removebg-preview.png" alt="" class="img">
-        <h3>Inventory Gaps</h3>
-        <p>Manual tracking causes stock discrepancies and significant business waste.</p>
-    </div>
-    <div class="card">
-        <img src="insight.png" alt="" class="img">
-        <h3>No Insights</h3>
-        <p>Cafés struggle to grow without data on customer preferences and sales trends.</p>
+    <h1 class="best-seller-title">Our Best Sellers</h1>
+    <div class="menu-slider">
+        <div class="menu-grid">
+            <% if (bestSellers && bestSellers.length > 0) { %>
+                <% /* Duplicate the list to create a seamless loop */ %>
+                <% const loopList = [...bestSellers, ...bestSellers]; %>
+                <% loopList.forEach(item => { 
+                    // Mapping ng mga litrato base sa pangalan ng Menu
+                    const menuName = item.MENU ? item.MENU.toLowerCase() : '';
+                    let imgUrl = 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=500&auto=format&fit=crop'; // Default: General Coffee Vibe
+
+                    if (menuName.includes('matcha')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1582722810491-b955d4bb1d91?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('choco')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1544787210-2211d6e9dc6b?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('smoothie')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('caramel')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1572286258217-40142c1c6a70?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('strawberry')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1464454709131-ffd692591ee5?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('vanilla')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('white mocha')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('cookies') || menuName.includes('cream')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('americano') || menuName.includes('black')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('seasalt')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('spanish')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('latte')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1594266302421-4958ba890e48?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('nori') || menuName.includes('sandwich')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1604467731651-398112104635?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('nachos') || menuName.includes('bulgogi')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?q=80&w=500&auto=format&fit=crop';
+                    } else if (menuName.includes('chicken')) {
+                        if (menuName.includes('yangnyeom')) {
+                            imgUrl = 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=80&w=500&auto=format&fit=crop';
+                        } else {
+                            imgUrl = 'https://images.unsplash.com/photo-1562967914-608f82629710?q=80&w=500&auto=format&fit=crop';
+                        }
+                    } else if (menuName.includes('pasta') || menuName.includes('ramen')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1546549032-9571cd6b27df?q=80&w=500&auto=format&fit=crop';
+                    } else if (item.CATEGORY && item.CATEGORY.toLowerCase().includes('food')) {
+                        imgUrl = 'https://images.unsplash.com/photo-1509722747041-616f39b57569?q=80&w=500&auto=format&fit=crop';
+                    }
+                %>
+                    <div class="menu-card">
+                        <img src="<%= imgUrl %>" alt="<%= item.MENU %>" class="menu-img">
+                        <div class="menu-info">
+                            <h3><%= item.MENU %></h3>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>Visit us to see our daily specials!</p>
+            <% } %>
+        </div>
     </div>
 </section>
 
 <section id="our-story" class="section2">
     <div class="story-content">
         <h1>OUR STORY</h1>
-        <p>"Dedicated to the Dreamers. Built for the Doers." Behind every great business is a spark of inspiration and a lot of late-night coffee. Our work is a tribute to the Filipino café community and the families who supported our passion for entrepreneurship. We’ve designed this platform to be a catalyst for growth, proving that with the right tech, every challenge is just an opportunity in disguise.</p>
-        <p>This project is a testament to the power of seeing opportunities where others see obstacles. We’ve integrated smart business solutions tailored specifically for the unique rhythm of the Philippine market. From streamlining workflows to enhancing customer experiences, we are committed to pushing the boundaries of what a local business can achieve. This isn't just a digital upgrade; it’s a commitment to the long-term resilience and evolution of our coffee culture.</p>
+        <p>Ang Itaewon Kopi Shop ay hindi lamang isang lugar kung saan ka pwedeng uminom ng masarap na kape at tumikim ng authentic K-style snacks. Ito ay isang proyekto na ipinanganak mula sa pagmamahal sa pagbibigay ng saya sa mga customers at sa determinasyong gawing mas madali ang buhay ng mga kapwa natin entrepreneurs.</p>
+        <button class="cta-button" onclick="openStoryModal()">Basahin ang Buong Kwento</button>
     </div>
 </section>
 
+<!-- Modal para sa Full Story -->
+<div id="storyModal" class="story-modal">
+    <div class="story-modal-content">
+        <span class="close-story" onclick="closeStoryModal()">&times;</span>
+        <h2 class="modal-title">Ang Kwento ng Itaewon Kopi Shop</h2>
+        
+        <h3>Ang Aming Simula</h3>
+        <p>Nagsimula ang lahat sa isang simpleng pangarap: ang magdala ng Itaewon-vibes sa ating komunidad. Nais naming maging sanctuary ito para sa mga magkakaibigan, mag-aaral, at pamilya na naghahanap ng tambayan na may masarap na Iced Seasalt Latte at K-sandwiches.</p>
+        <p>Habang lumalaki ang aming shop, naranasan din namin ang mga hamon ng pagpapatakbo ng negosyo—ang pag-monitor ng stocks, ang pag-track ng benta, at ang pagtiyak na laging mabilis ang serbisyo.</p>
+
+        <h3>Ang Aming "Secret Ingredient"</h3>
+        <p>Dito pumasok ang teknolohiya. Bilang mga mahilig sa development at paglutas ng problema, naisip namin: "Bakit hindi namin gawan ng solusyon ang mga sakit ng ulo sa negosyo?"</p>
+        <p>Ito ang dahilan kung bakit ang Itaewon Kopi Shop ay pinapatakbo ng aming sariling Intelligent Point-of-Sale and Inventory Management System. Ang aming website ay hindi lang isang display; ito ay isang testament na ang pagmamahal sa kape at ang galing sa code ay pwedeng magsama para makabuo ng mas matalinong paraan ng pagnenegosyo.</p>
+
+        <h3>Ang Aming Pangako</h3>
+        <p>Patuloy kaming magseserbisyo ng kalidad na kape at pagkain, habang patuloy ding nag-i-innovate sa aming system. Layunin naming hindi lang magbenta ng kape, kundi magbahagi ng teknolohiyang makakatulong sa ibang maliliit na negosyante na maging kasing-husay at kasing-bilis ng aming operasyon.</p>
+        
+        <div class="modal-footer">
+            <p><strong>Itaewon Kopi Shop. Quality Coffee, Powered by Smart Innovation.</strong></p>
+        </div>
+    </div>
+</div>
+
 <footer id="MY TEAM" class="footer">
-    <h3>The Research Team</h3>
-    <p>Condeno, Jayvie | Dolinog, John Rodel | Lanuza, Joy Ann</p>
-    <p><em>Bachelor of Science in Information Technology</em></p>
-    <p>St. Vincent de Ferrer College of Camarin Inc.</p>
+    <div class="footer-container">
+        <div class="footer-column">
+            <h3>Itaewon Kopi Shop</h3>
+            <p><i class='bx bx-time-five'></i> Mon - Sun: 10:00 AM - 9:00 PM</p>
+            <p><i class='bx bxl-facebook-circle'></i> <a href="https://www.facebook.com/profile.php?id=61572977362897" target="_blank">Visit our Facebook Page</a></p>
+            <p><i class='bx bxl-messenger'></i> <a href="https://m.me/61572977362897" target="_blank">Contact us via Messenger</a></p>
+        </div>
+
+        <div class="footer-column">
+            <h3>Our Location</h3>
+            <p><i class='bx bxs-map-pin'></i> 4543 Area D, Kiko Camarin, Caloocan, 1422 Metro Manila</p>
+        </div>
+
+        <div class="footer-column">
+            <h3>Find Us</h3>
+            <div class="map-wrapper">
+                <iframe src="https://maps.google.com/maps?q=Itaewon%20Kopi%20Shop%20Caloocan&t=&z=15&ie=UTF8&iwloc=&output=embed" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </div>
+
+        <div class="footer-column">
+            <h3>The Research Team</h3>
+            <p>Condeno, Jayvie | Dolinog, J. R. | Lanuza, J. A.</p>
+            <p><em>BSIT - SVFC Camarin Inc.</em></p>
+        </div>
+    </div>
 </footer>
+
+<script>
+    function openStoryModal() {
+        document.getElementById('storyModal').style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Pigilan ang scrolling ng background
+    }
+
+    function closeStoryModal() {
+        document.getElementById('storyModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+</script>
+
 </body>
 </html>

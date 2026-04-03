@@ -152,12 +152,25 @@ app.use('/accounts', accountsRoute)
 
 // Root Route: Redirect sa homepage kapag binisita ang main URL
 app.get('/', (req, res) => {
-    res.redirect('/homepage');
+    res.redirect('/login');
 });
 
 //HOMEPAGE 
-app.get('/homepage',checkNotAuthenticated, (req, res)=> {
-    res.render('homepage')
+app.get('/homepage', checkNotAuthenticated, async (req, res)=> {
+    try {
+        // Fetch Top 6 Best Sellers from sellout table
+        const bestSellers = await db(`
+            SELECT MENU, CATEGORY, SUM(Qty) as totalQty 
+            FROM sellout 
+            GROUP BY MENU, CATEGORY 
+            ORDER BY totalQty DESC 
+            LIMIT 6
+        `);
+        res.render('homepage', { bestSellers });
+    } catch (e) {
+        console.error("Error fetching best sellers for homepage:", e);
+        res.render('homepage', { bestSellers: [] });
+    }
 })
 
 //user page
