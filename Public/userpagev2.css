@@ -40,7 +40,7 @@ body{
 .hamburger-toggle {
     display: none; /* Hidden on desktop */
     position: absolute;
-    left: 10px; /* Centered relative to the 75px sidebar width */
+    left: 12px; /* Centered relative to the 75px sidebar width */
     top: 12.5px; /* Centered vertically in 75px nav (75-50)/2 */
     height: 50px;
     width: 50px;
@@ -58,7 +58,6 @@ body{
     text-align: center;
     padding: 2px;
 }
-
 
 .hamburger-toggle:hover {
     background: #e5bc4a; /* Mas maliwanag na gold */
