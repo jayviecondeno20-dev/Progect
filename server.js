@@ -22,7 +22,7 @@ const ExcelJS = require('exceljs'); // IMPORT EXCELJS LIBRARY
 
 // --- SETUP NG UPLOADER (MULTER) ---
 // Siguraduhing may folder na 'Public/uploads'
-const uploadDir = './Public/uploads/';
+const uploadDir = path.join(__dirname, 'Public', 'uploads');
 if (!fs.existsSync(uploadDir)){
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -123,7 +123,7 @@ app.use(flash()) // Dapat laging pagkatapos ng session
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
-app.use(express.static('Public'));
+app.use(express.static(path.join(__dirname, 'Public')));
 
 // Prevent Browser Caching (Para hindi ma-access ang back button pagka-logout o redirect)
 app.use((req, res, next) => {
