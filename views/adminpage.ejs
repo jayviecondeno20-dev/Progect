@@ -13,7 +13,7 @@
         <header>
             <div class="image-text">
                 <span class="image">
-                    <img src="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.profile_pic) ? '/uploads/' + employeeProfile.profile_pic : 'https://img.icons8.com/fluent/1200/test-account.jpg' %>" alt="Profile Picture" class="profile-pic">
+                    <img src="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.PROFILE_PIC) ? employeeProfile.PROFILE_PIC : '/default-avatar.png' %>" alt="Profile Picture" class="profile-pic">
                 </span>
                 <div class="text header-text">
                     <span class="name"><%= USERNAME %></span>
@@ -607,16 +607,16 @@
                 <div class="container5">
                     <div class="Profile">
                         <!-- Logic: Kung may uploaded picture, gamitin yun. Kung wala, gamitin ang default. -->
-                        <img src="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.profile_pic) ? '/uploads/' + employeeProfile.profile_pic : 'https://img.icons8.com/fluent/1200/test-account.jpg' %>" alt="Profile Picture" class="profile-pic">
+                        <img src="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.PROFILE_PIC) ? employeeProfile.PROFILE_PIC : '/default-avatar.png' %>" alt="Profile Picture" class="profile-pic">
                         <span class="name1"><%= USERNAME %></span>
                         <span class="role1"><%= CATEGORY %></span>
                     </div>
 
                     <div class="details">
-                        <p>Full Name : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.full_name) ? employeeProfile.full_name : 'Not Set' %></p>
-                        <p>Position : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.position) ? employeeProfile.position : 'Not Set' %></p>
-                        <p>Contact Number : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.contact_no) ? employeeProfile.contact_no : 'Not Set' %></p>
-                        <p>Home Address : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.home_address) ? employeeProfile.home_address : 'Not Set' %></p>
+                        <p>Full Name : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.FULL_NAME) ? employeeProfile.FULL_NAME : 'Not Set' %></p>
+                        <p>Position : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.POSITION) ? employeeProfile.POSITION : 'Not Set' %></p>
+                        <p>Contact Number : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.CONTACT_NO) ? employeeProfile.CONTACT_NO : 'Not Set' %></p>
+                        <p>Home Address : <%= (typeof employeeProfile !== 'undefined' && employeeProfile.HOME_ADDRESS) ? employeeProfile.HOME_ADDRESS : 'Not Set' %></p>
                     </div>
                 </div>
 
@@ -627,22 +627,22 @@
 
                             <div>
                                 <label for="">Full Name</label>
-                                <input type="text" name="full_name" id="name" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.full_name) ? employeeProfile.full_name : '' %>" placeholder="Full Name">
+                                <input type="text" name="full_name" id="name" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.FULL_NAME) ? employeeProfile.FULL_NAME : '' %>" placeholder="Full Name">
                             </div>
 
                             <div>
                                 <label for="">Position</label>
-                                <input type="text" name="position" id="position" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.position) ? employeeProfile.position : '' %>" placeholder="Position">
+                                <input type="text" name="position" id="position" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.POSITION) ? employeeProfile.POSITION : '' %>" placeholder="Position">
                             </div>
 
                             <div>
                                 <label for="">Contact Number</label>
-                                <input type="text" name="contact_no" id="contact" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.contact_no) ? employeeProfile.contact_no : '' %>" placeholder="Contact Number">
+                                <input type="text" name="contact_no" id="contact" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.CONTACT_NO) ? employeeProfile.CONTACT_NO : '' %>" placeholder="Contact Number">
                             </div>
 
                             <div>
                                 <label for="">Home Address</label>
-                                <input type="text" name="home_address" id="address" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.home_address) ? employeeProfile.home_address : '' %>" placeholder="Home Address">
+                                <input type="text" name="home_address" id="address" value="<%= (typeof employeeProfile !== 'undefined' && employeeProfile.HOME_ADDRESS) ? employeeProfile.HOME_ADDRESS : '' %>" placeholder="Home Address">
                             </div>
 
                             <div>

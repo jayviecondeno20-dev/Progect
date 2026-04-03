@@ -1195,7 +1195,7 @@ button:hover {
 .charts-container {
     padding: 20px;
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Saktong 4 na graph per row sa desktop */
+    grid-template-columns: repeat(4, 1fr); /* Saktong 4 na graph per row sa desktop */
     gap: 20px;
 }
 

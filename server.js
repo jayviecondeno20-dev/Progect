@@ -67,16 +67,16 @@ const initializePassport = require('./passport-config');
 
 // Helper function: Ayusin ang user data para hindi magkaproblema sa Case Sensitivity
 function normalizeUser(user) {
-    if (!user) return null;
-    const plainUser = JSON.parse(JSON.stringify(user)); // Convert to plain object
+    if (!user || typeof user !== 'object') return null;
     const normalized = {};
     
-    // Gawing uppercase lahat ng keys (e.g., username -> USERNAME)
-    Object.keys(plainUser).forEach(key => {
-        normalized[key.toUpperCase()] = plainUser[key];
-    });
+    // Optimized loop para sa malalaking Base64 strings (iwas JSON.stringify bottleneck)
+    for (let key in user) {
+        if (Object.prototype.hasOwnProperty.call(user, key)) {
+            normalized[key.toUpperCase()] = user[key];
+        }
+    }
 
-    // Siguraduhing uppercase at walang spaces ang CATEGORY
     if (normalized.CATEGORY) {
         normalized.CATEGORY = normalized.CATEGORY.toString().trim().toUpperCase();
     }
@@ -207,7 +207,23 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
         try {
             const profileResult = await db('SELECT * FROM `employee deatails` WHERE USERNAME = ?', [user.USERNAME]);
             if (profileResult.length > 0) {
-                employeeProfile = profileResult[0];
+                let normalizedProfile = normalizeUser(profileResult[0]);
+                
+                // Agresibong check para sa Base64 data mula sa database
+                let rawPic = normalizedProfile.PROFILE_PIC ? normalizedProfile.PROFILE_PIC.toString().trim() : '';
+                
+                if (rawPic.startsWith('data:')) {
+                    normalizedProfile.PROFILE_PIC = rawPic;
+                    console.log(`[DEBUG /userpage] Loaded Base64 profile pic for ${user.USERNAME}`);
+                } else if (rawPic && rawPic !== 'null' && rawPic !== '') {
+                    normalizedProfile.PROFILE_PIC = rawPic.startsWith('http') ? rawPic : `/uploads/${rawPic}`;
+                } else {
+                    normalizedProfile.PROFILE_PIC = '/default-avatar.png';
+                }
+                employeeProfile = normalizedProfile;
+            } else {
+                employeeProfile = { PROFILE_PIC: '/default-avatar.png' }; // Fallback kung walang record
+                console.log("[DEBUG /userpage] Using default profile pic (no record or empty).");
             }
         } catch (err) {
             // Ignore error kung wala pang table, gagawin ito sa POST route
@@ -416,7 +432,17 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
     try {
         const profileResult = await db('SELECT * FROM `employee deatails` WHERE USERNAME = ?', [user.USERNAME]);
         if (profileResult.length > 0) {
-            employeeProfile = profileResult[0];
+            let normalizedProfile = normalizeUser(profileResult[0]);
+            
+            if (normalizedProfile.PROFILE_PIC && normalizedProfile.PROFILE_PIC.toString().trim() !== "") {
+                const picValue = normalizedProfile.PROFILE_PIC.toString().trim();
+                normalizedProfile.PROFILE_PIC = (picValue.startsWith('http') || picValue.startsWith('data:')) ? picValue : `/uploads/${picValue}`;
+            } else {
+                normalizedProfile.PROFILE_PIC = '/default-avatar.png'; // Fallback
+            }
+            employeeProfile = normalizedProfile;
+        } else {
+            employeeProfile = { PROFILE_PIC: '/default-avatar.png' }; // Fallback
         }
     } catch (e) {
         console.log("Employee details table might not exist yet, ignoring.");
@@ -942,31 +968,29 @@ app.post('/update-profile', checkAuthenticated, async (req, res) => {
             });
         });
 
-        // 2. Kung may file, i-upload sa Cloudinary
+        // 2. Kung may file, i-convert sa Base64 string para i-save sa Database
         if (req.file) {
-            const dataUri = formatBufferToDataUri(req.file);
-            if (dataUri) {
-                const cloudinaryResult = await cloudinary.uploader.upload(dataUri, { folder: 'profile_pics' });
-                profilePicUrl = cloudinaryResult.secure_url;
-            }
+            // FIX: Added missing backticks for template literal interpolation
+            profilePicUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+            console.log(`[PROFILE UPDATE] File detected: ${req.file.originalname}, Size: ${req.file.size} bytes`);
         }
     } catch (err) {
         console.error("Profile Upload Error:", err);
-        req.flash('error', 'Upload Failed: ' + (err.message || 'Cloudinary Error'));
+        req.flash('error', 'Upload Failed: ' + err.message);
         return res.redirect(redirectPath);
     }
     
-    // 1. VARIABLE MAPPING (Prioritize specific input names)
-    const fName = req.body.first_name || req.body.firstName || '';
-    const lName = req.body.last_name || req.body.lastName || '';
+    // 1. VARIABLE MAPPING - Mas malawak na fallbacks para siguradong makuha ang data mula sa form
+    const fName = req.body.first_name || req.body.firstName || req.body.firstname || req.body.fName || '';
+    const lName = req.body.last_name || req.body.lastName || req.body.lastname || '';
 
-    // Handle full_name, position, contact_no, home_address
-    const fullName = req.body.full_name || (`${fName} ${lName}`).trim() || '';
-    const position = req.body.position || 'Employee'; // Default value kung walang input
-    const contactNo = req.body.contact_no || req.body.contact_number || req.body.contact || '';
-    const homeAddress = req.body.home_address || req.body.address || '';
+    // Flexible mapping para sa full_name, position, contact_no, home_address
+    const fullName = req.body.full_name || req.body.fullName || req.body.fullname || req.body.name || (`${fName} ${lName}`).trim() || 'No Name';
+    const position = req.body.position || req.body.job_title || req.body.jobTitle || req.body.role || 'Employee';
+    const contactNo = req.body.contact_no || req.body.contactNo || req.body.contact_number || req.body.contact || req.body.phone || '';
+    const homeAddress = req.body.home_address || req.body.homeAddress || req.body.address || req.body.location || '';
 
-    console.log("[PROFILE UPDATE] Saving data for:", user.USERNAME);
+    console.log(`[PROFILE UPDATE] Processing for: ${user.USERNAME} | Full Name: ${fullName}`);
 
     try {
         // 1. FORCE DATABASE FIX (Brute Force)
@@ -982,6 +1006,12 @@ app.post('/update-profile', checkAuthenticated, async (req, res) => {
             // Ignore error kung wala naman talagang index na ganito
         }
 
+        // 2. MAINTENANCE: Siguraduhin na LONGTEXT ang profile_pic bago ang UPDATE/INSERT
+        try {
+            await db(`ALTER TABLE ${TABLE_NAME} MODIFY COLUMN profile_pic LONGTEXT`);
+            console.log("[DB FIX] Enforced LONGTEXT on profile_pic column.");
+        } catch (err) { console.log(`[DB NOTE] ${err.message}`); }
+
         // 2. COLUMN CHECK: Pipiliting i-add ang columns isa-isa.
         const columnsToAdd = [
             "ADD COLUMN USERNAME VARCHAR(255)",
@@ -989,7 +1019,7 @@ app.post('/update-profile', checkAuthenticated, async (req, res) => {
             "ADD COLUMN position VARCHAR(100)",
             "ADD COLUMN contact_no VARCHAR(50)",
             "ADD COLUMN home_address TEXT",
-            "ADD COLUMN profile_pic VARCHAR(255)" // Palakihin kung kailangan, pero URLs usually kasya dito
+            "ADD COLUMN profile_pic LONGTEXT"
         ];
 
         for (const colSql of columnsToAdd) {
@@ -1006,7 +1036,8 @@ app.post('/update-profile', checkAuthenticated, async (req, res) => {
 
         // 3. SAVE PROCESS (Ngayon sigurado na tayong may columns)
         // Check kung may record na gamit ang dynamic TABLE_NAME
-        const check = await db(`SELECT * FROM ${TABLE_NAME} WHERE USERNAME = ?`, [user.USERNAME]);
+        // Gumamit ng UPPER at TRIM para sigurado sa matching ng USERNAME
+        const check = await db(`SELECT * FROM ${TABLE_NAME} WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?))`, [user.USERNAME]);
 
         if (check.length > 0) {
             console.log("[PROFILE UPDATE] Existing record found. Updating...");
@@ -1014,20 +1045,20 @@ app.post('/update-profile', checkAuthenticated, async (req, res) => {
             let updateQuery = `UPDATE ${TABLE_NAME} SET full_name = ?, position = ?, contact_no = ?, home_address = ?`;
             let updateParams = [fullName, position, contactNo, homeAddress];
 
-            // I-update lang ang picture kung may inupload na bago
-            if (profilePicUrl) { // Gamitin ang Cloudinary URL
+            // I-update lang ang picture kung may inupload na bago (Base64)
+            if (profilePicUrl) {
                 updateQuery += `, profile_pic = ?`;
                 updateParams.push(profilePicUrl);
             }
 
-            updateQuery += ` WHERE USERNAME = ?`;
+            updateQuery += ` WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?))`;
             updateParams.push(user.USERNAME);
 
             await db(updateQuery, updateParams);
             req.flash('success', 'Profile Updated Successfully!');
         } else {
             console.log("[PROFILE UPDATE] No record found. Inserting new...");
-            // Sa insert, isama ang Cloudinary URL kung meron
+            // Sa insert, isama ang Base64 data URI kung meron
             await db(`INSERT INTO ${TABLE_NAME} (USERNAME, full_name, position, contact_no, home_address, profile_pic) VALUES (?, ?, ?, ?, ?, ?)`, 
                 [user.USERNAME, fullName, position, contactNo, homeAddress, profilePicUrl]);
             req.flash('success', 'Profile Created Successfully!');
