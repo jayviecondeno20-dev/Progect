@@ -1024,6 +1024,7 @@ app.post('/time-in', checkAuthenticated, (req, res, next) => {
 
     const dateStr = req.body.DATE || phDate;
     const timeStr = req.body.TIME || phTime;
+    // Convert buffer to Base64 string para i-save sa database
     const imageBase64 = req.file ? `data:image/png;base64,${req.file.buffer.toString('base64')}` : null;
     const redirectUrl = user.CATEGORY === 'ADMIN' ? '/adminpage?tab=account&sub=Attendance' : '/userpage?tab=account&sub=Attendance';
 
@@ -1080,6 +1081,7 @@ app.post('/time-out', checkAuthenticated, (req, res, next) => {
 
     const dateStr = req.body.DATE || phDate;
     const timeStr = req.body.TIME || phTime;
+    // Convert buffer to Base64 string
     const imageBase64 = req.file ? `data:image/png;base64,${req.file.buffer.toString('base64')}` : null;
     const redirectUrl = user.CATEGORY === 'ADMIN' ? '/adminpage?tab=account&sub=Attendance' : '/userpage?tab=account&sub=Attendance';
 
@@ -1354,8 +1356,8 @@ app.get('/fix-dtr', checkAuthenticated, async (req, res) => {
             "ALTER TABLE dtr ADD COLUMN `DATE` DATE",
             "ALTER TABLE dtr ADD COLUMN `TIME IN` VARCHAR(50)",
             "ALTER TABLE dtr ADD COLUMN `TIME OUT` VARCHAR(50)",
-            "ALTER TABLE dtr ADD COLUMN `time_in_image` VARCHAR(255)",
-            "ALTER TABLE dtr ADD COLUMN `time_out_image` VARCHAR(255)"
+            "ALTER TABLE dtr ADD COLUMN `time_in_image` LONGTEXT",
+            "ALTER TABLE dtr ADD COLUMN `time_out_image` LONGTEXT"
         ];
 
         for (const query of schemaUpdates) {
