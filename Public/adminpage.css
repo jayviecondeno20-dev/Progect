@@ -39,7 +39,7 @@ body{
 .hamburger-toggle {
     display: none; /* Hidden on desktop */
     position: absolute;
-    left: 15px; /* Centered relative to the 75px sidebar width */
+    left: 10px; /* Centered relative to the 75px sidebar width */
     top: 12.5px; /* Centered vertically in 75px nav (75-50)/2 */
     height: 50px;
     width: 50px;
@@ -48,12 +48,14 @@ body{
     color: var(--text-dark);
     align-items: center;
     justify-content: center;
-    font-size: 32px; /* Increased icon size */
+    font-size: 40px; /* Increased icon size */
     cursor: pointer;
     z-index: 1001;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    padding: 2px;
 }
 
 .hamburger-toggle:hover {
