@@ -394,6 +394,7 @@ body {
 
     .nav-links {
         gap: 15px;
+        font-size: auto;
     }
 
     .hero-content h1 {
