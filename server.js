@@ -123,7 +123,11 @@ app.use(flash()) // Dapat laging pagkatapos ng session
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
+
+// Static Files - Siguraduhing Case Sensitive ang 'Public' folder
 app.use(express.static(path.join(__dirname, 'Public')));
+// Explicitly serve the uploads folder para sa mga DTR pictures
+app.use('/uploads', express.static(path.join(__dirname, 'Public', 'uploads')));
 
 // Prevent Browser Caching (Para hindi ma-access ang back button pagka-logout o redirect)
 app.use((req, res, next) => {
