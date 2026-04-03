@@ -21,8 +21,8 @@ const fs = require('fs');
 const ExcelJS = require('exceljs'); // IMPORT EXCELJS LIBRARY
 
 // --- SETUP NG UPLOADER (MULTER) ---
-// Siguraduhing may folder na 'Public/uploads'
-const uploadDir = path.join(__dirname, 'Public', 'uploads');
+// Move uploads to root directory for better reliability on Render
+const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)){
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -126,8 +126,8 @@ app.use(methodOverride('_method'))
 
 // Static Files - Siguraduhing Case Sensitive ang 'Public' folder
 app.use(express.static(path.join(__dirname, 'Public')));
-// Explicitly serve the uploads folder para sa mga DTR pictures
-app.use('/uploads', express.static(path.join(__dirname, 'Public', 'uploads')));
+// Serve the uploads folder from the root directory
+app.use('/uploads', express.static(uploadDir));
 
 // Prevent Browser Caching (Para hindi ma-access ang back button pagka-logout o redirect)
 app.use((req, res, next) => {
