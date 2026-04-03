@@ -21,8 +21,10 @@ const fs = require('fs');
 const ExcelJS = require('exceljs'); // IMPORT EXCELJS LIBRARY
 
 // --- SETUP NG UPLOADER (MULTER) ---
-// Move uploads to root directory for better reliability on Render
-const uploadDir = path.join(__dirname, 'uploads');
+// Pinaka-safe sa Render/Linux na ilagay ang uploads sa loob ng Public folder.
+// PAALALA: Siguraduhin na ang folder name sa GitHub ay saktong 'Public' (Capital P).
+// Kung lowercase 'public' ito sa GitHub, palitan ang code sa ibaba para mag-match.
+const uploadDir = path.join(__dirname, 'Public', 'uploads');
 if (!fs.existsSync(uploadDir)){
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -126,8 +128,6 @@ app.use(methodOverride('_method'))
 
 // Static Files - Siguraduhing Case Sensitive ang 'Public' folder
 app.use(express.static(path.join(__dirname, 'Public')));
-// Serve the uploads folder from the root directory
-app.use('/uploads', express.static(uploadDir));
 
 // Prevent Browser Caching (Para hindi ma-access ang back button pagka-logout o redirect)
 app.use((req, res, next) => {
