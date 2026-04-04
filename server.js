@@ -578,10 +578,12 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
                 }
 
                 // Constants based on 8AM - 6PM schedule
-                const START_SHIFT = 8 * 60; // 8:00 AM in minutes
-                const END_SHIFT = 18 * 60;  // 6:00 PM in minutes
-                const OT_THRESHOLD = 8 * 60; // 8 Hours in minutes
-                
+                const START_SHIFT_MINS = 8 * 60; // 8:00 AM in minutes
+                const END_SHIFT_MINS = 18 * 60;  // 6:00 PM in minutes (for undertime check)
+                const STANDARD_SHIFT_LENGTH_MINS = 8 * 60; // 8 hours
+                const OT_GRACE_PERIOD_MINS = 15; // Overtime only counts if >= 15 minutes
+
+
                 let statusList = [];
 
                 // Logic for Half Day (e.g., less than 5 hours work)
@@ -589,7 +591,7 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
                     statusList.push('HALF DAY');
                     analyticsData.attendanceStats.HalfDay++;
                 } else {
-                    if (inMins > START_SHIFT) {
+                    if (inMins > START_SHIFT_MINS) {
                         statusList.push('LATE');
                         analyticsData.attendanceStats.Late++;
                         
@@ -597,7 +599,7 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
                         const uName = record.USERNAME || 'Unknown';
                         analyticsData.latesPerUser[uName] = (analyticsData.latesPerUser[uName] || 0) + 1;
                     }
-                    if (outMins < END_SHIFT) {
+                    if (outMins < END_SHIFT_MINS) {
                          statusList.push('UNDERTIME');
                          analyticsData.attendanceStats.Undertime++;
                     }
@@ -609,10 +611,19 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
                     analyticsData.attendanceStats.Present++;
                 }
 
-                // Overtime Logic (Starts after 6PM / 18:00)
-                if (outMins > END_SHIFT) {
-                    const otMinsTotal = outMins - END_SHIFT;
-                    overtime = `${Math.floor(otMinsTotal / 60)} hrs ${otMinsTotal % 60} mins`;
+                // REVISED OVERTIME LOGIC: Based on Total Hours Worked - Shift Threshold
+                let rawOtMins = durationMins - STANDARD_SHIFT_LENGTH_MINS;
+                let actualOtMins = Math.max(0, rawOtMins); // Ensure OT is not negative
+
+                // Apply Grace Period
+                if (actualOtMins > 0 && actualOtMins < OT_GRACE_PERIOD_MINS) {
+                    actualOtMins = 0; // No overtime if less than grace period
+                }
+
+                if (actualOtMins > 0) {
+                    overtime = `${Math.floor(actualOtMins / 60)} hrs ${actualOtMins % 60} mins`;
+                } else {
+                    overtime = '--'; // No overtime
                 }
             } else if (timeInStr && !timeOutStr) {
                 status = 'ON DUTY';
@@ -1530,21 +1541,32 @@ app.get('/download-attendance', checkAuthenticated, async (req, res) => {
                 // BREAK DEDUCTION
                 if (durationMins > 60) durationMins -= 60;
 
-                const START_SHIFT = 8 * 60; 
-                const END_SHIFT = 18 * 60; 
+                const START_SHIFT_MINS = 8 * 60; 
+                const END_SHIFT_MINS = 18 * 60; 
+                const STANDARD_SHIFT_LENGTH_MINS = 8 * 60; // 8 hours
+                const OT_GRACE_PERIOD_MINS = 15; // Overtime only counts if >= 15 minutes
                 let statusList = [];
 
                 if (durationMins < (5 * 60) && durationMins > 0) statusList.push('HALF DAY');
                 else {
-                    if (inMins > START_SHIFT) statusList.push('LATE');
-                    if (outMins < END_SHIFT) statusList.push('UNDERTIME');
+                    if (inMins > START_SHIFT_MINS) statusList.push('LATE');
+                    if (outMins < END_SHIFT_MINS) statusList.push('UNDERTIME');
                 }
                 if (statusList.length > 0) status = statusList.join(' / ');
 
-                // OVERTIME (After 6PM)
-                if (outMins > END_SHIFT) {
-                    const otMinsTotal = outMins - END_SHIFT;
-                    overtime = `${Math.floor(otMinsTotal / 60)} hrs ${otMinsTotal % 60} mins`;
+                // REVISED OVERTIME LOGIC: Based on Total Hours Worked - Shift Threshold
+                let rawOtMins = durationMins - STANDARD_SHIFT_LENGTH_MINS;
+                let actualOtMins = Math.max(0, rawOtMins); // Ensure OT is not negative
+
+                // Apply Grace Period
+                if (actualOtMins > 0 && actualOtMins < OT_GRACE_PERIOD_MINS) {
+                    actualOtMins = 0; // No overtime if less than grace period
+                }
+
+                if (actualOtMins > 0) {
+                    overtime = `${Math.floor(actualOtMins / 60)} hrs ${actualOtMins % 60} mins`;
+                } else {
+                    overtime = '--'; // No overtime
                 }
             } else if (timeInStr && !timeOutStr) {
                 status = 'ON DUTY';
