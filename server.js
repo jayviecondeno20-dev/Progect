@@ -1422,7 +1422,8 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
 });
 
 // DOWNLOAD SELLOUT REPORT ROUTE (CSV/Excel)
-app.get('/download-sellout', checkAuthenticated, async (req, res) => {
+// INALIS ang checkAuthenticated middleware. Manual na lang ang check ng user role sa loob ng route.
+app.get('/download-attendance', async (req, res) => {
     const user = normalizeUser(req.user);
     
     // Security Check: Admin lang ang pwede mag-download
