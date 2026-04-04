@@ -167,11 +167,12 @@ app.get('/homepage', checkNotAuthenticated, async (req, res)=> {
         // 1. Kunin ang lahat ng benta
         const rawSales = await db(`SELECT MENU, CATEGORY, SUM(Qty) as totalQty FROM sellout GROUP BY MENU, CATEGORY`);
         
+        console.log("[DEBUG HOMEPAGE] Raw Sales from DB:", rawSales);
         // 2. Kunin ang lahat ng menu items para sa matching ng images
         const rawMenuItems = await db(`SELECT * FROM menu`);
         // I-normalize ang menu items para siguradong makuha ang 'MENU_NAME', 'ID', at 'MENU_IMAGE'
         const normalizedMenu = rawMenuItems.map(m => normalizeUser(m));
-
+        console.log("[DEBUG HOMEPAGE] Normalized Menu Items from DB (ID, Name, Image status):", normalizedMenu.map(m => ({ ID: m.ID, MENUNAME: m['MENU NAME'], IMAGE_EXISTS: !!m.MENU_IMAGE })));
         const cleanedMap = new Map();
 
         // Helper function para linisin ang pangalan para sa matching
@@ -200,9 +201,16 @@ app.get('/homepage', checkNotAuthenticated, async (req, res)=> {
             .sort((a, b) => b.totalQty - a.totalQty)
             .slice(0, 6)
             .map(item => {
-                // Siguraduhing makuha ang ID at Image data kahit ano ang casing sa DB
-                const itemId = item.id || item.ID || item.ID_ALT;
-                const hasImage = item.menu_image || item.MENU_IMAGE || item.MENU_IMAGE_ALT;
+                // Hanapin ang saktong Menu Item gamit ang normalized keys para makuha ang Image
+                const cleanSearchName = getBaseName(item.MENU);
+                const matchedMenu = normalizedMenu.find(m => {
+                    const dbName = m['MENU NAME'] || m['MENU_NAME'] || m['MENU'] || '';
+                    return getBaseName(dbName) === cleanSearchName;
+                });
+
+                const itemId = matchedMenu ? matchedMenu.ID : null;
+                const hasImage = matchedMenu ? matchedMenu.MENU_IMAGE : null;
+
                 return {
                     ...item,
                     menu_image: (hasImage && itemId) ? `/menu-image/${itemId}` : null
@@ -1313,7 +1321,8 @@ app.get('/attendance-image/:id/:type', checkAuthenticated, async (req, res) => {
 });
 
 // NEW ROUTE: I-serve ang Menu Image galing DB para ma-download
-app.get('/menu-image/:id', checkAuthenticated, async (req, res) => {
+// INALIS ang checkAuthenticated para ma-view ng public/guests ang images sa homepage
+app.get('/menu-image/:id', async (req, res) => {
     const { id } = req.params;
     const isDownload = req.query.download === 'true'; // Check if download is requested
     try {
