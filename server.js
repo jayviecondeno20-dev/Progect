@@ -1423,10 +1423,12 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
 
 // DOWNLOAD SELLOUT REPORT ROUTE (CSV/Excel)
 // INALIS ang checkAuthenticated middleware para iwas sa redirect loop
-app.get('/download-attendance', async (req, res) => {
-    // Manual Authentication Check
-    if (!req.isAuthenticated()) {
-        return res.redirect('/login');
+app.get('/download-sellout', async (req, res) => {
+    // Manual Authentication Check: Check if user is logged in AND is an Admin
+    if (!req.isAuthenticated() || !req.user || normalizeUser(req.user).CATEGORY !== 'ADMIN') {
+        req.flash('error', 'Unauthorized access. Please log in as Admin.');
+        // Redirect to login if not authenticated, or to adminpage if authenticated but not admin
+        return req.isAuthenticated() ? res.redirect('/adminpage') : res.redirect('/login');
     }
 
     const user = normalizeUser(req.user);
