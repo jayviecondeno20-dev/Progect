@@ -5,6 +5,7 @@ const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
     secure: false, // false para sa port 587 (STARTTLS)
+    family: 4, // Pinipilit ang IPv4 para iwasan ang ENETUNREACH error sa IPv6
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
