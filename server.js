@@ -852,9 +852,10 @@ app.post('/send-otp', async (req, res) => {
                 res.json({ message: 'OTP has been sent to your email.' });
             });
         } else {
-            console.error("[OTP ROUTE ERROR] Email error for", EMAIL, ":", emailResult.error);
+            // I-log ang buong error object para makita ang exact reason (e.g. Invalid Login)
+            console.error("[OTP ROUTE ERROR] Full Error:", emailResult.error);
             res.status(500).json({ 
-                message: 'Mail Server Error: ' + emailResult.error,
+                message: 'Mail Server Error. Please check your App Password or Network.',
                 details: emailResult.error
             });
         }

@@ -2,17 +2,17 @@ const nodemailer = require('nodemailer');
 require('dotenv').config(); // Siguraduhing loaded ang environment variables
 
 const transporter = nodemailer.createTransport({
+    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // false para sa port 587 (STARTTLS)
-    family: 4, // Pinipilit ang IPv4 para iwasan ang ENETUNREACH error sa IPv6
+    port: 465,
+    secure: true, // Mas stable ang port 465 para sa Gmail sa maraming cloud hosts
+    family: 4,    // Force IPv4 para iwasan ang ENETUNREACH
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
     tls: {
         rejectUnauthorized: false,
-        requireTLS: true
     },
 });
 
