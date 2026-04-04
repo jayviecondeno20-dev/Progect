@@ -9,15 +9,24 @@ if (dns.setDefaultResultOrder) {
 
 require('dotenv').config(); // Siguraduhing loaded ang environment variables
 
+// Linisin ang password para tanggalin ang spaces (common issue sa copy-paste sa Render Dashboard)
+const cleanPass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g, '') : '';
+
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // Mas stable ang 'service' setup sa cloud
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // false para sa port 587
+    family: 4,     // Pilitin ang IPv4 para iwasan ang ENETUNREACH sa Render
     auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        pass: cleanPass,
     },
     tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        minVersion: 'TLSv1.2'
     },
+    connectionTimeout: 20000, // Dagdagan ang timeout para sa cloud network
+    greetingTimeout: 20000,
 });
 
 // I-verify ang connection sa startup para makita agad sa console kung may error sa credentials
