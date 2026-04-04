@@ -852,10 +852,10 @@ app.post('/send-otp', async (req, res) => {
                 res.json({ message: 'OTP has been sent to your email.' });
             });
         } else {
-            console.error("[MAIL ERROR] Details:", emailResult.error);
+            console.error("[OTP ROUTE ERROR] sendEmail failed:", emailResult.error);
             res.status(500).json({ 
-                message: 'Failed to send OTP to ' + EMAIL, 
-                error: emailResult.error ? emailResult.error.message : 'Unknown Mail Error' 
+                message: 'Mail server error. Please check server logs.', 
+                details: emailResult.error 
             });
         }
     } catch (e) {

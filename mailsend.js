@@ -2,22 +2,27 @@ const nodemailer = require('nodemailer');
 require('dotenv').config(); // Siguraduhing loaded ang environment variables
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // Mas robust na setup para sa Gmail
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // true para sa port 465
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
     tls: {
-        rejectUnauthorized: false 
+        rejectUnauthorized: false,
+        // Nakakatulong ito sa ilang hosting environment (tulad ng Render)
+        minVersion: 'TLSv1.2'
     },
 });
 
 // I-verify ang connection sa startup para makita agad sa console kung may error sa credentials
 transporter.verify(function (error, success) {
     if (error) {
-        console.error("[MAILER ERROR] Connection failed:", error.message);
+        console.error("[MAILER ERROR] Verification failed! Check your EMAIL_USER and EMAIL_PASS.");
+        console.error("Error Detail:", error);
     } else {
-        console.log("[MAILER] Server is ready to send emails");
+        console.log("[MAILER] Success! Nodemailer is ready to send emails.");
     }
 });
 
@@ -32,7 +37,7 @@ async function sendEmail(to, subject, html) {
     // Siguraduhing may credentials bago mag-send
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         console.error("[MAIL ERROR] Missing EMAIL_USER or EMAIL_PASS in environment variables.");
-        return { success: false, error: new Error("Email credentials are missing in Environment Variables") };
+        return { success: false, error: "Environment variables missing" };
     }
 
     console.log(`[MAILER] Attempting to send email to: ${to}`);
@@ -46,13 +51,11 @@ async function sendEmail(to, subject, html) {
 
     try {
         await transporter.sendMail(mailOptions);
-        // Ibalik ang success object
         console.log(`[MAILER] Email successfully sent to ${to}`);
         return { success: true };
     } catch (error) {
-        console.error('Nodemailer error:', error);
-        // Ibalik ang error object para ma-log ito sa server.js
-        return { success: false, error: error };
+        console.error('[MAILER ERROR] Failed to send email:', error.message);
+        return { success: false, error: error.message };
     }
 }
 
