@@ -843,11 +843,20 @@ app.post('/send-otp', async (req, res) => {
         const emailResult = await sendEmail(EMAIL, subject, message);
 
         if (emailResult.success) {
-            res.json({ message: 'OTP has been sent to your email.' });
+            // Siguraduhing naka-save ang session bago mag-respond
+            req.session.save((err) => {
+                if (err) {
+                    console.error("[OTP ERROR] Session save failed:", err);
+                    return res.status(500).json({ message: 'Session storage error. Please try again.' });
+                }
+                res.json({ message: 'OTP has been sent to your email.' });
+            });
         } else {
-            // Mag-log ng specific error galing sa mailsend.js para mas madali i-debug
-            console.error("Error from sendEmail:", emailResult.error);
-            res.status(500).json({ message: 'Failed to send OTP. Please check server logs for details.' });
+            console.error("[MAIL ERROR] Details:", emailResult.error);
+            res.status(500).json({ 
+                message: 'Failed to send OTP.', 
+                error: emailResult.error ? emailResult.error.message : 'Unknown Mail Error' 
+            });
         }
     } catch (e) {
         console.error("Error in /send-otp:", e);

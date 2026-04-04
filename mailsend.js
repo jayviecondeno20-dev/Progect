@@ -1,16 +1,17 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
-    // Dagdag na settings para sa cloud deployment (Render/Heroku)
     tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false // Iniiwasan ang SSL verification issues sa cloud
     },
-    pool: true // Mas mabilis sa maraming requests
+    pool: false // Mas safe sa Gmail para hindi ma-block ang connection
 });
 
 /**
