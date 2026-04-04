@@ -1537,7 +1537,8 @@ app.get('/download-attendance', checkAuthenticated, async (req, res) => {
         dtrData.forEach(row => {
             let dateStr = row.DATE;
             if (row.DATE && typeof row.DATE.getMonth === 'function') {
-                 dateStr = row.DATE.toISOString().split('T')[0];
+                 // Ensure date is formatted using Philippine Time Zone for the Excel report
+                 dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(row.DATE);
             }
 
             // --- REUSE STATUS & OVERTIME LOGIC ---
