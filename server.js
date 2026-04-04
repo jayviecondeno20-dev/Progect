@@ -1279,7 +1279,8 @@ app.post('/time-out', checkAuthenticated, (req, res, next) => {
 });
 
 // NEW ROUTE: I-serve ang image galing DB para iwas Error 431
-app.get('/attendance-image/:id/:type', checkAuthenticated, async (req, res) => {
+// INALIS ang checkAuthenticated para ma-view ang images mula sa Excel report nang hindi na kailangang mag-login
+app.get('/attendance-image/:id/:type', async (req, res) => {
     const { id, type } = req.params;
     const col = type === 'in' ? 'time_in_image' : 'time_out_image';
     try {
