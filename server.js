@@ -1,3 +1,11 @@
+const dns = require('dns');
+
+// FIX PARA SA RENDER: Pilitin ang Node.js na unahin ang IPv4 kaysa IPv6.
+// Ito ang lunas sa 'ENETUNREACH' at 'Connection Timeout' sa cloud hostings.
+if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+}
+
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
 }

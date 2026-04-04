@@ -13,20 +13,18 @@ require('dotenv').config(); // Siguraduhing loaded ang environment variables
 const cleanPass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g, '') : '';
 
 const transporter = nodemailer.createTransport({
+    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // false para sa port 587
-    family: 4,     // Pilitin ang IPv4 para iwasan ang ENETUNREACH sa Render
+    port: 465,
+    secure: true,  // Gamitin ang Port 465 para sa implicit SSL
+    family: 4,     // Force IPv4
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
     tls: {
-        rejectUnauthorized: false,
-        minVersion: 'TLSv1.2'
+        rejectUnauthorized: false
     },
-    connectionTimeout: 20000, // Dagdagan ang timeout para sa cloud network
-    greetingTimeout: 20000,
 });
 
 // I-verify ang connection sa startup para makita agad sa console kung may error sa credentials
