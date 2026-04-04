@@ -1423,12 +1423,19 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
 
 // DOWNLOAD SELLOUT REPORT ROUTE (CSV/Excel)
 // INALIS ang checkAuthenticated middleware. Manual na lang ang check ng user role sa loob ng route.
+// DOWNLOAD SELLOUT REPORT ROUTE (CSV/Excel)
 app.get('/download-sellout', async (req, res) => {
-    const user = req.user ? normalizeUser(req.user) : null;
+    // Manual Auth Check instead of middleware to prevent logout loops
+    if (!req.isAuthenticated()) {
+        return res.redirect('/login');
+    }
+
+    const user = normalizeUser(req.user);
 
     // Security Check: Admin lang ang pwede mag-download
-    if (!user || user.CATEGORY !== 'ADMIN') {
-        return res.redirect('/login');
+    if (user.CATEGORY !== 'ADMIN') {
+        req.flash('error', 'Unauthorized access.');
+        return res.redirect('/adminpage');
     }
 
     try {
