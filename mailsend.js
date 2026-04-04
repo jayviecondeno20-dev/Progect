@@ -2,10 +2,9 @@ const nodemailer = require('nodemailer');
 require('dotenv').config(); // Siguraduhing loaded ang environment variables
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // Mas stable ang port 465 para sa Gmail sa maraming cloud hosts
+    port: 587,
+    secure: false, // Gamitin ang false para sa port 587 (STARTTLS)
     family: 4,    // Force IPv4 para iwasan ang ENETUNREACH
     auth: {
         user: process.env.EMAIL_USER,
@@ -13,7 +12,9 @@ const transporter = nodemailer.createTransport({
     },
     tls: {
         rejectUnauthorized: false,
+        requireTLS: true
     },
+    connectionTimeout: 10000, // 10 seconds timeout
 });
 
 // I-verify ang connection sa startup para makita agad sa console kung may error sa credentials
