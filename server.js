@@ -821,7 +821,7 @@ app.get('/register',checkNotAuthenticated,(req,res) =>{
 // 3. Gumawa ng bagong route para sa pag-send ng OTP
 app.post('/send-otp', async (req, res) => {
     // Tanggapin ang email kahit 'EMAIL' o 'email' ang gamit sa frontend
-    const EMAIL = req.body.EMAIL || req.body.email;
+    const EMAIL = req.body.EMAIL || req.body.email || req.body.Email;
     if (!EMAIL) {
         return res.status(400).json({ message: 'Email is required.' });
     }
@@ -854,7 +854,7 @@ app.post('/send-otp', async (req, res) => {
         } else {
             console.error("[MAIL ERROR] Details:", emailResult.error);
             res.status(500).json({ 
-                message: 'Failed to send OTP.', 
+                message: 'Failed to send OTP to ' + EMAIL, 
                 error: emailResult.error ? emailResult.error.message : 'Unknown Mail Error' 
             });
         }

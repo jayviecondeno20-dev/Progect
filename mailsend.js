@@ -1,17 +1,24 @@
 const nodemailer = require('nodemailer');
+require('dotenv').config(); // Siguraduhing loaded ang environment variables
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // true for 465, false for other ports
+    service: 'gmail', // Mas robust na setup para sa Gmail
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
     tls: {
-        rejectUnauthorized: false // Iniiwasan ang SSL verification issues sa cloud
+        rejectUnauthorized: false 
     },
-    pool: false // Mas safe sa Gmail para hindi ma-block ang connection
+});
+
+// I-verify ang connection sa startup para makita agad sa console kung may error sa credentials
+transporter.verify(function (error, success) {
+    if (error) {
+        console.error("[MAILER ERROR] Connection failed:", error.message);
+    } else {
+        console.log("[MAILER] Server is ready to send emails");
+    }
 });
 
 /**
