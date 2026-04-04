@@ -1494,10 +1494,16 @@ app.get('/download-attendance', checkAuthenticated, async (req, res) => {
             { header: 'TIME IN', key: 'TIME IN', width: 15 },
             { header: 'TIME OUT', key: 'TIME OUT', width: 15 },
             { header: 'STATUS', key: 'STATUS', width: 25 },
-            { header: 'OVERTIME (>6PM)', key: 'OVERTIME', width: 20 }
+            { header: 'OVERTIME (>6PM)', key: 'OVERTIME', width: 20 },
+            { header: 'TIME IN PHOTO', key: 'TIME_IN_LINK', width: 20 },
+            { header: 'TIME OUT PHOTO', key: 'TIME_OUT_LINK', width: 20 }
         ];
 
         // 3. I-add ang mga Rows kasama ang Computation
+        const protocol = req.protocol;
+        const host = req.get('host');
+        const baseUrl = `${protocol}://${host}`;
+
         dtrData.forEach(row => {
             let dateStr = row.DATE;
             if (row.DATE && typeof row.DATE.getMonth === 'function') {
@@ -1543,13 +1549,33 @@ app.get('/download-attendance', checkAuthenticated, async (req, res) => {
                 status = 'ON DUTY';
             }
 
+            // Construct clickable hyperlinks for images
+            const recordId = row.id || row.ID || row.Id;
+            let timeInLink = "";
+            let timeOutLink = "";
+
+            if (row.time_in_image && recordId) {
+                timeInLink = { 
+                    text: 'VIEW PHOTO', 
+                    hyperlink: `${baseUrl}/attendance-image/${recordId}/in` 
+                };
+            }
+            if (row.time_out_image && recordId) {
+                timeOutLink = { 
+                    text: 'VIEW PHOTO', 
+                    hyperlink: `${baseUrl}/attendance-image/${recordId}/out` 
+                };
+            }
+
             worksheet.addRow({
                 formattedDate: dateStr,
                 USERNAME: row.USERNAME,
                 'TIME IN': row['TIME IN'],
                 'TIME OUT': row['TIME OUT'],
                 STATUS: status,
-                OVERTIME: overtime
+                OVERTIME: overtime,
+                TIME_IN_LINK: timeInLink,
+                TIME_OUT_LINK: timeOutLink
             });
         });
 
