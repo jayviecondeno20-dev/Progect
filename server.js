@@ -1422,10 +1422,9 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
 });
 
 // DOWNLOAD SELLOUT REPORT ROUTE (CSV/Excel)
-// INALIS ang checkAuthenticated middleware. Manual na lang ang check ng user role sa loob ng route.
-// DOWNLOAD SELLOUT REPORT ROUTE (CSV/Excel)
-app.get('/download-sellout', async (req, res) => {
-    // Manual Auth Check instead of middleware to prevent logout loops
+// INALIS ang checkAuthenticated middleware para iwas sa redirect loop
+app.get('/download-attendance', async (req, res) => {
+    // Manual Authentication Check
     if (!req.isAuthenticated()) {
         return res.redirect('/login');
     }
@@ -1527,8 +1526,7 @@ app.get('/download-attendance', checkAuthenticated, async (req, res) => {
         dtrData.forEach(row => {
             let dateStr = row.DATE;
             if (row.DATE && typeof row.DATE.getMonth === 'function') {
-                 // Ensure date is formatted using Philippine Time Zone for the Excel report
-                 dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(row.DATE);
+                 dateStr = row.DATE.toISOString().split('T')[0];
             }
 
             // --- REUSE STATUS & OVERTIME LOGIC ---
