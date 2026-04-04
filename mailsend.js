@@ -1,20 +1,23 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+
+// IMPORTANT: Force Node.js to prefer IPv4 over IPv6. 
+// Ito ang solusyon sa "ENETUNREACH" error sa Render environment.
+if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+}
+
 require('dotenv').config(); // Siguraduhing loaded ang environment variables
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // Gamitin ang false para sa port 587 (STARTTLS)
-    family: 4,    // Force IPv4 para iwasan ang ENETUNREACH
+    service: 'gmail', // Mas stable ang 'service' setup sa cloud
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
     tls: {
-        rejectUnauthorized: false,
-        requireTLS: true
+        rejectUnauthorized: false
     },
-    connectionTimeout: 10000, // 10 seconds timeout
 });
 
 // I-verify ang connection sa startup para makita agad sa console kung may error sa credentials
