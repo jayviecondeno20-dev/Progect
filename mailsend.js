@@ -2,17 +2,13 @@ const nodemailer = require('nodemailer');
 require('dotenv').config(); // Siguraduhing loaded ang environment variables
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // true para sa port 465
+    service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
     tls: {
-        rejectUnauthorized: false,
-        // Nakakatulong ito sa ilang hosting environment (tulad ng Render)
-        minVersion: 'TLSv1.2'
+        rejectUnauthorized: false
     },
 });
 
