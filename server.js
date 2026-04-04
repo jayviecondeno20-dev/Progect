@@ -1426,7 +1426,7 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
 app.get('/download-attendance', async (req, res) => {
     // Manual Authentication Check
     if (!req.isAuthenticated()) {
-        return res.redirect('/login');
+        return res.redirect('/adminpage');
     }
 
     const user = normalizeUser(req.user);
