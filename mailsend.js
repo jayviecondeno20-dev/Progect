@@ -16,21 +16,23 @@ const rawPass = process.env.EMAIL_PASS || '';
 const cleanPass = rawPass.replace(/\s+/g, '');
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // Mas stable ang built-in gmail config sa cloud environments
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // Port 465 uses SSL/TLS
+    family: 4,    // Force IPv4
+    pool: false,  // Fresh connection para sa bawat OTP
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
-    family: 4, // Force IPv4 para iwas ENETUNREACH
-    pool: false, // I-disable ang pool para sa OTP para laging fresh connection
-    connectionTimeout: 20000, // Taasan ang timeout para sa cloud latency
+    connectionTimeout: 15000,
     greetingTimeout: 10000,
-    socketTimeout: 20000,
-    logger: true, // PAKITINGNAN ITO SA RENDER LOGS: Dito lalabas ang error
-    debug: true,  // Ipakita ang SMTP traffic logs
+    socketTimeout: 15000,
+    logger: true, 
+    debug: true,  
     tls: {
-        rejectUnauthorized: false,
-        minVersion: 'TLSv1.2'
+        rejectUnauthorized: false, // Common fix sa cloud environments
+        servername: 'smtp.gmail.com'
     }
 });
 
