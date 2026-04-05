@@ -17,15 +17,16 @@ console.log("[MAILER CHECK] User:", process.env.EMAIL_USER);
 console.log("[MAILER CHECK] Password status:", cleanPass ? "PRESENT" : "MISSING/EMPTY");
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
     host: 'smtp.gmail.com',
     port: 465,
-    secure: true, // SMTPS (mas stable sa Render)
-    family: 4,    // Force IPv4
+    secure: true,
+    family: 4,    // Force IPv4 para sa Render
+    pool: true,   // Gamitin ang connection pool para sa mas mabilis na retry
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
+    connectionTimeout: 15000, // 15 seconds timeout para sa cloud latency
     tls: {
         rejectUnauthorized: false
     }
