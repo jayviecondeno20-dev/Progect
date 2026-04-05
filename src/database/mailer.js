@@ -7,21 +7,15 @@ if (dns.setDefaultResultOrder) {
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    pool: false,
+    service: 'gmail',
+    family: 4,
     logger: true,
     debug: true,
-    family: 4,
     connectionTimeout: 30000,
     greetingTimeout: 30000,
     auth: {
         user: process.env.EMAIL_USER?.trim(),
         pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim().replace(/\s+/g, '') : ''
-    },
-    tls: {
-        rejectUnauthorized: false
     },
 });
 
