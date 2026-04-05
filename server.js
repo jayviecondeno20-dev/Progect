@@ -834,14 +834,14 @@ app.post('/send-otp', async (req, res) => {
     // Tanggapin ang email kahit 'EMAIL' o 'email' ang gamit sa frontend
     const EMAIL = req.body.EMAIL || req.body.email || req.body.Email;
     if (!EMAIL) {
-        console.log("[OTP] Error: No email in request body");
+        console.error("[OTP ERROR] No email found in request body. Content-Type check failed?");
         return res.status(400).json({ message: 'Email is required.' });
     }
 
     try {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
-        console.log(`[OTP] Preparing to send ${otp} to ${EMAIL}`);
+        console.log(`[OTP DEBUG] Email: ${EMAIL} | Generated OTP: ${otp}`);
 
         // I-save ang OTP at expiry sa session
         req.session.otp = otp;
