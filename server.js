@@ -869,11 +869,11 @@ app.post('/send-otp', async (req, res) => {
                 return res.json({ message: 'OTP has been sent to your email.' });
             });
         } else {
-            console.error(`[OTP ERROR] Full Details:`, emailResult.error);
+            console.error(`[OTP ERROR] Full SMTP Error Details:`, emailResult.error);
             return res.status(500).json({ 
                 message: 'Mail Server Error',
-                error_details: emailResult.error,
-                hint: 'If error is EAUTH, check DisplayUnlockCaptcha on Google.'
+                error_code: emailResult.error,
+                hint: 'Check Render logs for specific SMTP codes like 534 or 535.'
             });
         }
     } catch (e) {
