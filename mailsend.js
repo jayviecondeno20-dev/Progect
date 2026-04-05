@@ -19,11 +19,12 @@ const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465, // Gamitin ang 465 para sa mas stable na connection sa cloud
     secure: true, // Dapat true kung port 465
-    pool: true, // Enhanced: Gumamit ng connection pool para iwas sa socket hang up
+    pool: false, // I-disable muna ang pool para sa mas malinis na debug logs
     logger: true, // ENHANCED: I-log ang SMTP traffic para makita ang error
     debug: true,  // ENHANCED: Ipakita ang detailed debug info
     family: 4, // PWERSAHIN ANG IPv4 (Ito ang pinaka-importante para sa Render)
     auth: {
+        type: 'login', // Pilitin ang login type authentication
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
@@ -78,7 +79,7 @@ async function sendEmail(to, subject, html) {
         console.log(`[MAILER SUCCESS] ID: ${info.messageId} | Response: ${info.response}`);
         return { success: true };
     } catch (error) {
-        console.error('[MAILER ERROR] Connection/Auth failed:', error.message);
+        console.error('[MAILER ERROR] Full Error Details:', error); // I-log ang buong error object
         if (error.code === 'EAUTH') {
             console.error('[MAILER ERROR] Hint: Double check your GMAIL APP PASSWORD.');
         }
