@@ -7,32 +7,33 @@ if (dns.setDefaultResultOrder) {
     dns.setDefaultResultOrder('ipv4first');
 }
 
-require('dotenv').config(); // Siguraduhing loaded ang environment variables
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
 
 // Linisin ang password para tanggalin ang spaces (common issue sa copy-paste sa Render Dashboard)
 const rawPass = process.env.EMAIL_PASS || '';
 const cleanPass = rawPass.replace(/\s+/g, '');
 
-console.log("[MAILER CHECK] User:", process.env.EMAIL_USER);
-console.log("[MAILER CHECK] Password status:", cleanPass ? "PRESENT" : "MISSING/EMPTY");
-
 const transporter = nodemailer.createTransport({
+    service: 'gmail',
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
     family: 4,    // Force IPv4 para sa Render
-    pool: true,   // Gamitin ang connection pool para sa mas mabilis na retry
+    pool: false,  // I-disable ang pool para sa OTP para laging fresh connection
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
-    connectionTimeout: 15000, // 15 seconds timeout para sa cloud latency
+    connectionTimeout: 20000, // Dagdagan ang timeout para sa cloud latency
+    greetingTimeout: 10000,
+    socketTimeout: 20000,
     tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        minVersion: 'TLSv1.2'
     }
 });
-
-// Inalis ang blocking verify() para hindi mag-timeout ang Render deployment
 
 /**
  * Nagpapadala ng email gamit ang Nodemailer.
@@ -42,13 +43,14 @@ const transporter = nodemailer.createTransport({
  * @returns {Promise<{success: boolean, error?: Error}>}
  */
 async function sendEmail(to, subject, html) {
+    console.log("[MAILER CHECK] User:", process.env.EMAIL_USER ? "SET" : "MISSING");
+    console.log("[MAILER CHECK] Pass:", cleanPass ? "SET" : "MISSING");
+
     // Siguraduhing may credentials bago mag-send
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        console.error("[MAIL ERROR] Missing EMAIL_USER or EMAIL_PASS in environment variables.");
+        console.error("[MAILER ERROR] Environment variables are missing in Render Dashboard!");
         return { success: false, error: "Environment variables missing" };
     }
-
-    console.log(`[MAILER] Attempting to send email to: ${to}`);
 
     const mailOptions = {
         from: `"ITAEWON KOPI SHOP" <${process.env.EMAIL_USER}>`,
@@ -58,11 +60,15 @@ async function sendEmail(to, subject, html) {
     };
 
     try {
+        // Subukan muna ang connection bago mag-send
+        await transporter.verify();
+        console.log(`[MAILER] SMTP Connection verified. Sending to ${to}...`);
+        
         await transporter.sendMail(mailOptions);
         console.log(`[MAILER] Email successfully sent to ${to}`);
         return { success: true };
     } catch (error) {
-        console.error('[MAILER ERROR] Failed to send email:', error.message);
+        console.error('[MAILER ERROR] Full Error:', error);
         return { success: false, error: error.message };
     }
 }
