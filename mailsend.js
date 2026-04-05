@@ -16,22 +16,22 @@ const rawPass = process.env.EMAIL_PASS || '';
 const cleanPass = rawPass.replace(/\s+/g, '');
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
-    family: 4,    // Force IPv4 para sa Render
-    pool: false,  // I-disable ang pool para sa OTP para laging fresh connection
+    family: 4, // Napaka-importante nito sa Render para iwas "Network Unreachable"
+    pool: true, 
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
-    connectionTimeout: 20000, // Dagdagan ang timeout para sa cloud latency
-    greetingTimeout: 10000,
-    socketTimeout: 20000,
+    connectionTimeout: 10000,
+    greetingTimeout: 5000,
+    socketTimeout: 15000,
     tls: {
+        // Huwag payagan ang insecure connections pero huwag mag-fail sa self-signed certs ng cloud
         rejectUnauthorized: false,
-        minVersion: 'TLSv1.2'
+        servername: 'smtp.gmail.com'
     }
 });
 
@@ -60,11 +60,10 @@ async function sendEmail(to, subject, html) {
     };
 
     try {
-        // Subukan muna ang connection bago mag-send
-        await transporter.verify();
-        console.log(`[MAILER] SMTP Connection verified. Sending to ${to}...`);
-        
-        await transporter.sendMail(mailOptions);
+        // Direkta na nating i-send para iwas extra latency sa .verify()
+        console.log(`[MAILER] Attempting to send email to ${to}...`);
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`[MAILER] Response: ${info.response}`);
         console.log(`[MAILER] Email successfully sent to ${to}`);
         return { success: true };
     } catch (error) {
