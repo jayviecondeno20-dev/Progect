@@ -16,9 +16,7 @@ const rawPass = process.env.EMAIL_PASS || '';
 const cleanPass = rawPass.trim().replace(/\s+/g, '');
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587, 
-    secure: false, // false para sa port 587 (STARTTLS)
+    service: 'gmail', // Mas stable ang 'service' shorthand para sa Gmail sa cloud
     pool: false, // I-disable muna ang pool para sa mas malinis na debug logs
     logger: true, // ENHANCED: I-log ang SMTP traffic para makita ang error
     debug: true,  // ENHANCED: Ipakita ang detailed debug info
@@ -58,8 +56,8 @@ transporter.verify(function (error, success) {
 async function sendEmail(to, subject, html) {
     // Diagnostic Log para sa Render Dashboard
     console.log(`[MAILER DIAGNOSTIC] Attempting send to: ${to}`);
-    console.log(`[MAILER DIAGNOSTIC] EMAIL_USER: ${process.env.EMAIL_USER ? 'Present' : 'EMPTY'}`);
-    console.log(`[MAILER DIAGNOSTIC] EMAIL_PASS: ${cleanPass ? 'Present' : 'EMPTY'}`);
+    console.log(`[MAILER DIAGNOSTIC] EMAIL_USER: ${process.env.EMAIL_USER ? 'Set' : 'MISSING'}`);
+    console.log(`[MAILER DIAGNOSTIC] PASS_LENGTH: ${cleanPass.length} characters`); // Dapat ay 16 characters
 
     // Siguraduhing may credentials bago mag-send
     if (!process.env.EMAIL_USER || !cleanPass) {
