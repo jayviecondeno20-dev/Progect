@@ -14,16 +14,15 @@ const cleanPass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // false para sa port 587 (STARTTLS)
+    port: 465,
+    secure: true, // true para sa port 465
     family: 4,     // Force IPv4
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
     tls: {
-        rejectUnauthorized: false,
-        requireTLS: true
+        rejectUnauthorized: false
     },
     connectionTimeout: 15000, // 15 seconds
     greetingTimeout: 15000,
