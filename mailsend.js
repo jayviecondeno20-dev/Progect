@@ -17,29 +17,21 @@ console.log("[MAILER CHECK] User:", process.env.EMAIL_USER);
 console.log("[MAILER CHECK] Password status:", cleanPass ? "PRESENT" : "MISSING/EMPTY");
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    family: 4, // Force IPv4 for Render
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false, // false para sa port 587
+    family: 4, // Force IPv4 for Render
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
     tls: {
-        rejectUnauthorized: false // Iwas self-signed certificate issues sa cloud
+        rejectUnauthorized: false,
+        minVersion: 'TLSv1.2'
     }
 });
 
-// I-verify ang connection sa startup para makita agad sa console kung may error sa credentials
-transporter.verify(function (error, success) {
-    if (error) {
-        console.error("[MAILER ERROR] Verification failed! Check your EMAIL_USER and EMAIL_PASS.");
-        console.error("Error Detail:", error);
-    } else {
-        console.log("[MAILER] Success! Nodemailer is ready to send emails.");
-    }
-});
+// Inalis ang blocking verify() para hindi mag-timeout ang Render deployment
 
 /**
  * Nagpapadala ng email gamit ang Nodemailer.

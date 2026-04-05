@@ -1791,3 +1791,9 @@ async function initializeDtrTable() {
 }
 
 // Patakbuhin ang database check bago mag-start ang server
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+    console.log(`[SERVER] Running on port ${PORT}`);
+    // Patakbuhin ang DB init pagkatapos mag-bind sa port
+    initializeDtrTable();
+});
