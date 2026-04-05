@@ -17,8 +17,9 @@ const cleanPass = rawPass.replace(/\s+/g, '');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: true, // true para sa port 465
+    port: 465, // Gamitin ang 465 para sa mas stable na connection sa cloud
+    secure: true, // Dapat true kung port 465
+    pool: true, // Enhanced: Gumamit ng connection pool para iwas sa socket hang up
     family: 4, // PWERSAHIN ANG IPv4 (Ito ang pinaka-importante para sa Render)
     auth: {
         user: process.env.EMAIL_USER,
@@ -28,8 +29,9 @@ const transporter = nodemailer.createTransport({
         rejectUnauthorized: false,
         servername: 'smtp.gmail.com' 
     },
-    connectionTimeout: 15000, // Dagdagan ang timeout para sa cloud latency
-    greetingTimeout: 15000
+    connectionTimeout: 20000, // Tinaasan pa ang timeout
+    greetingTimeout: 20000,
+    socketTimeout: 20000
 });
 
 /**
