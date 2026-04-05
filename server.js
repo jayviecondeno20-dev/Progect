@@ -861,19 +861,19 @@ app.post('/send-otp', async (req, res) => {
             req.session.save((err) => {
                 if (err) {
                     console.error("[OTP ERROR] Database connection failed during session save:", err.message);
-                    // Kahit may DB error, sabihin nating sent na kasi natanggap na ng email server
-                    return res.status(200).json({ 
+                    return res.status(500).json({ 
                         message: 'OTP sent, but database connection is weak. You might encounter issues in the next step.',
-                        warning: 'Database Error'
+                        error: err.message
                     });
                 }
                 return res.json({ message: 'OTP has been sent to your email.' });
             });
         } else {
-            console.error(`[OTP ERROR] Failed to send to ${EMAIL}. Reason:`, emailResult.error);
-            res.status(500).json({ 
-                message: 'Mail Server Error. Please check your App Password or Network.',
-                details: emailResult.error
+            console.error(`[OTP ERROR] Full Details:`, emailResult.error);
+            return res.status(500).json({ 
+                message: 'Mail Server Error',
+                error_details: emailResult.error,
+                hint: 'If error is EAUTH, check DisplayUnlockCaptcha on Google.'
             });
         }
     } catch (e) {
