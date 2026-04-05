@@ -16,16 +16,20 @@ const rawPass = process.env.EMAIL_PASS || '';
 const cleanPass = rawPass.replace(/\s+/g, '');
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // Gamitin ang built-in service config ng Nodemailer para sa Gmail
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // true para sa port 465
+    family: 4, // PWERSAHIN ANG IPv4 (Ito ang pinaka-importante para sa Render)
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
     tls: {
         rejectUnauthorized: false,
-        // Force IPv4 resolution para iwas sa Render IPv6 issues
         servername: 'smtp.gmail.com' 
-    }
+    },
+    connectionTimeout: 15000, // Dagdagan ang timeout para sa cloud latency
+    greetingTimeout: 15000
 });
 
 /**
