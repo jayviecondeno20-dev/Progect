@@ -1794,9 +1794,10 @@ async function initializeDtrTable() {
 }
 
 // Patakbuhin ang database check bago mag-start ang server
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`[SERVER] Running on port ${PORT}`);
+    const url = PORT === 3000 ? `http://localhost:${PORT}` : `Port ${PORT}`;
+    console.log(`[SERVER] Running on ${url}`);
     // Patakbuhin ang DB init na may catch para hindi mag-crash ang server kung offline ang DB
     initializeDtrTable().catch(err => {
         console.error("[CRITICAL] Database initialization failed:", err.message);

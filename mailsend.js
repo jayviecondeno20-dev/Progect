@@ -17,10 +17,11 @@ console.log("[MAILER CHECK] User:", process.env.EMAIL_USER);
 console.log("[MAILER CHECK] Password status:", cleanPass ? "PRESENT" : "MISSING/EMPTY");
 
 const transporter = nodemailer.createTransport({
+    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // STARTTLS
-    family: 4, // Force IPv4 para sa cloud environment
+    port: 465,
+    secure: true, // SMTPS (mas stable sa Render)
+    family: 4,    // Force IPv4
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
