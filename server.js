@@ -10,6 +10,9 @@ if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
 }
 
+// I-log sa startup kung may laman ang email variables (Huwag i-log ang password!)
+console.log("[STARTUP] Checking Email Config:", process.env.EMAIL_USER ? "EMAIL_USER is set" : "EMAIL_USER IS MISSING");
+console.log("[STARTUP] Checking Session Secret:", process.env.SESSION_SECRET ? "SESSION_SECRET is set" : "SESSION_SECRET IS MISSING");
 
 const express = require('express')
 const bodyParser = require('body-parser')

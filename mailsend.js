@@ -14,17 +14,16 @@ const cleanPass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,  // Gamitin ang Port 465 para sa implicit SSL
+    port: 587,
+    secure: false, // false para sa port 587 (STARTTLS)
     family: 4,     // Force IPv4
-    debug: true,   // I-print ang SMTP traffic sa logs
-    logger: true,  // I-log ang progress sa console
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
     tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        requireTLS: true
     },
     connectionTimeout: 15000, // 15 seconds
     greetingTimeout: 15000,
