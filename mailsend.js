@@ -16,13 +16,15 @@ const rawPass = process.env.EMAIL_PASS || '';
 const cleanPass = rawPass.trim().replace(/\s+/g, '');
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // Mas stable ang 'service' shorthand para sa Gmail sa cloud
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // true para sa port 465
     pool: false, // I-disable muna ang pool para sa mas malinis na debug logs
     logger: true, // ENHANCED: I-log ang SMTP traffic para makita ang error
     debug: true,  // ENHANCED: Ipakita ang detailed debug info
     family: 4, // PWERSAHIN ANG IPv4 (Ito ang pinaka-importante para sa Render)
     auth: {
-        user: process.env.EMAIL_USER,
+        user: process.env.EMAIL_USER?.trim(),
         pass: cleanPass,
     },
     tls: {
@@ -30,9 +32,9 @@ const transporter = nodemailer.createTransport({
         servername: 'smtp.gmail.com',
         minVersion: 'TLSv1.2'
     },
-    connectionTimeout: 20000, // Tinaasan pa ang timeout
-    greetingTimeout: 20000,
-    socketTimeout: 20000
+    connectionTimeout: 30000, // Dagdagan ang allowance para sa cloud latency
+    greetingTimeout: 30000,
+    socketTimeout: 30000
 });
 
 // ENHANCED: I-verify ang connection sa startup
