@@ -857,8 +857,11 @@ app.post('/send-otp', async (req, res) => {
             // Siguraduhing naka-save ang session bago mag-respond
             req.session.save((err) => {
                 if (err) {
-                    console.error("[OTP ERROR] Session save failed:", err);
-                    return res.status(500).json({ message: 'Session storage error. Please try again.' });
+                    console.error("[OTP ERROR] Session save failed (Check DB Connection):", err.message);
+                    return res.status(500).json({ 
+                        message: 'Database/Session error. OTP could not be saved.',
+                        error: err.message 
+                    });
                 }
                 res.json({ message: 'OTP has been sent to your email.' });
             });
@@ -1788,9 +1791,3 @@ async function initializeDtrTable() {
 }
 
 // Patakbuhin ang database check bago mag-start ang server
-initializeDtrTable().then(() => {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-    });
-});

@@ -19,9 +19,15 @@ console.log("[MAILER CHECK] Password status:", cleanPass ? "PRESENT" : "MISSING/
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     family: 4, // Force IPv4 for Render
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
+    },
+    tls: {
+        rejectUnauthorized: false // Iwas self-signed certificate issues sa cloud
     }
 });
 
