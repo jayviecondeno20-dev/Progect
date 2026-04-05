@@ -8,15 +8,17 @@ require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465, // Consistent fix para sa SMTPS
-    secure: true,
-    pool: true,
+    port: 587,
+    secure: false,
+    pool: false,
+    logger: true,
+    debug: true,
     family: 4,
     connectionTimeout: 20000,
     greetingTimeout: 20000,
     auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g, '') : ''
+        pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim().replace(/\s+/g, '') : ''
     },
     tls: {
         rejectUnauthorized: false

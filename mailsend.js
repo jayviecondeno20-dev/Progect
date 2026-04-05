@@ -13,24 +13,24 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Linisin ang password para tanggalin ang spaces (common issue sa copy-paste sa Render Dashboard)
 const rawPass = process.env.EMAIL_PASS || '';
-const cleanPass = rawPass.replace(/\s+/g, '');
+const cleanPass = rawPass.trim().replace(/\s+/g, '');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465, // Gamitin ang 465 para sa mas stable na connection sa cloud
-    secure: true, // Dapat true kung port 465
+    port: 587, 
+    secure: false, // false para sa port 587 (STARTTLS)
     pool: false, // I-disable muna ang pool para sa mas malinis na debug logs
     logger: true, // ENHANCED: I-log ang SMTP traffic para makita ang error
     debug: true,  // ENHANCED: Ipakita ang detailed debug info
     family: 4, // PWERSAHIN ANG IPv4 (Ito ang pinaka-importante para sa Render)
     auth: {
-        type: 'login', // Pilitin ang login type authentication
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
     tls: {
         rejectUnauthorized: false,
-        servername: 'smtp.gmail.com' 
+        servername: 'smtp.gmail.com',
+        minVersion: 'TLSv1.2'
     },
     connectionTimeout: 20000, // Tinaasan pa ang timeout
     greetingTimeout: 20000,
