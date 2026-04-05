@@ -16,23 +16,15 @@ const rawPass = process.env.EMAIL_PASS || '';
 const cleanPass = rawPass.replace(/\s+/g, '');
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // Port 465 uses SSL/TLS
-    family: 4,    // Force IPv4
-    pool: false,  // Fresh connection para sa bawat OTP
+    service: 'gmail', // Gamitin ang built-in service config ng Nodemailer para sa Gmail
     auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPass,
     },
-    connectionTimeout: 15000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-    logger: true, 
-    debug: true,  
     tls: {
-        rejectUnauthorized: false, // Common fix sa cloud environments
-        servername: 'smtp.gmail.com'
+        rejectUnauthorized: false,
+        // Force IPv4 resolution para iwas sa Render IPv6 issues
+        servername: 'smtp.gmail.com' 
     }
 });
 
@@ -44,11 +36,13 @@ const transporter = nodemailer.createTransport({
  * @returns {Promise<{success: boolean, error?: Error}>}
  */
 async function sendEmail(to, subject, html) {
-    console.log("[MAILER CHECK] User:", process.env.EMAIL_USER ? "SET" : "MISSING");
-    console.log("[MAILER CHECK] Pass:", cleanPass ? "SET" : "MISSING");
+    // Diagnostic Log para sa Render Dashboard
+    console.log(`[MAILER DIAGNOSTIC] Attempting send to: ${to}`);
+    console.log(`[MAILER DIAGNOSTIC] EMAIL_USER: ${process.env.EMAIL_USER ? 'Present' : 'EMPTY'}`);
+    console.log(`[MAILER DIAGNOSTIC] EMAIL_PASS: ${cleanPass ? 'Present' : 'EMPTY'}`);
 
     // Siguraduhing may credentials bago mag-send
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    if (!process.env.EMAIL_USER || !cleanPass) {
         console.error("[MAILER ERROR] Environment variables are missing in Render Dashboard!");
         return { success: false, error: "Environment variables missing" };
     }
@@ -61,14 +55,14 @@ async function sendEmail(to, subject, html) {
     };
 
     try {
-        // Direkta na nating i-send para iwas extra latency sa .verify()
-        console.log(`[MAILER] Attempting to send email to ${to}...`);
         const info = await transporter.sendMail(mailOptions);
-        console.log(`[MAILER] Response: ${info.response}`);
-        console.log(`[MAILER] Email successfully sent to ${to}`);
+        console.log(`[MAILER SUCCESS] ID: ${info.messageId} | Response: ${info.response}`);
         return { success: true };
     } catch (error) {
-        console.error('[MAILER ERROR] Full Error:', error);
+        console.error('[MAILER ERROR] Connection/Auth failed:', error.message);
+        if (error.code === 'EAUTH') {
+            console.error('[MAILER ERROR] Hint: Double check your GMAIL APP PASSWORD.');
+        }
         return { success: false, error: error.message };
     }
 }
