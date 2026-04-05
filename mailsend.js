@@ -17,7 +17,7 @@ const cleanPass = rawPass.replace(/\s+/g, '');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
+    port: 587,
     secure: true, // true para sa port 465
     family: 4, // PWERSAHIN ANG IPv4 (Ito ang pinaka-importante para sa Render)
     auth: {
