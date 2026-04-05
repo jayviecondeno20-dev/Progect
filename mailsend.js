@@ -20,6 +20,8 @@ const transporter = nodemailer.createTransport({
     port: 465, // Gamitin ang 465 para sa mas stable na connection sa cloud
     secure: true, // Dapat true kung port 465
     pool: true, // Enhanced: Gumamit ng connection pool para iwas sa socket hang up
+    logger: true, // ENHANCED: I-log ang SMTP traffic para makita ang error
+    debug: true,  // ENHANCED: Ipakita ang detailed debug info
     family: 4, // PWERSAHIN ANG IPv4 (Ito ang pinaka-importante para sa Render)
     auth: {
         user: process.env.EMAIL_USER,
@@ -33,6 +35,17 @@ const transporter = nodemailer.createTransport({
     greetingTimeout: 20000,
     socketTimeout: 20000
 });
+
+// ENHANCED: I-verify ang connection sa startup
+transporter.verify(function (error, success) {
+    if (error) {
+        console.error("[MAILER STARTUP ERROR] Cannot connect to Gmail:");
+        console.error(error);
+    } else {
+        console.log("[MAILER STARTUP SUCCESS] Server is ready to take our messages");
+    }
+});
+
 
 /**
  * Nagpapadala ng email gamit ang Nodemailer.

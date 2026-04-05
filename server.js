@@ -867,10 +867,10 @@ app.post('/send-otp', async (req, res) => {
                         warning: 'Database Error'
                     });
                 }
-                res.json({ message: 'OTP has been sent to your email.' });
+                return res.json({ message: 'OTP has been sent to your email.' });
             });
         } else {
-            console.error("[OTP ERROR] Mailer failed to connect to Gmail:", emailResult.error);
+            console.error(`[OTP ERROR] Failed to send to ${EMAIL}. Reason:`, emailResult.error);
             res.status(500).json({ 
                 message: 'Mail Server Error. Please check your App Password or Network.',
                 details: emailResult.error
