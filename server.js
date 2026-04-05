@@ -834,13 +834,14 @@ app.post('/send-otp', async (req, res) => {
     // Tanggapin ang email kahit 'EMAIL' o 'email' ang gamit sa frontend
     const EMAIL = req.body.EMAIL || req.body.email || req.body.Email;
     if (!EMAIL) {
+        console.log("[OTP] Error: No email in request body");
         return res.status(400).json({ message: 'Email is required.' });
     }
 
     try {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
-        console.log(`[OTP DEBUG] Starting OTP process for: ${EMAIL}`);
+        console.log(`[OTP] Preparing to send ${otp} to ${EMAIL}`);
 
         // I-save ang OTP at expiry sa session
         req.session.otp = otp;
@@ -852,23 +853,24 @@ app.post('/send-otp', async (req, res) => {
         const subject = 'Your OTP for Registration';
         const message = `<p>Hello,</p><p>Your One-Time Password (OTP) is: <b>${otp}</b>. It is valid for 10 minutes.</p>`;
 
+        // Subukan munang mag-send bago mag-save ng session para makita kung gumagana ang email
         const emailResult = await sendEmail(EMAIL, subject, message);
 
         if (emailResult.success) {
-            // Siguraduhing naka-save ang session bago mag-respond
+            console.log("[OTP] Email sent! Saving session to database...");
             req.session.save((err) => {
                 if (err) {
-                    console.error("[OTP ERROR] Session save failed (Check DB Connection):", err.message);
-                    return res.status(500).json({ 
-                        message: 'Database/Session error. OTP could not be saved.',
-                        error: err.message 
+                    console.error("[OTP ERROR] Database connection failed during session save:", err.message);
+                    // Kahit may DB error, sabihin nating sent na kasi natanggap na ng email server
+                    return res.status(200).json({ 
+                        message: 'OTP sent, but database connection is weak. You might encounter issues in the next step.',
+                        warning: 'Database Error'
                     });
                 }
                 res.json({ message: 'OTP has been sent to your email.' });
             });
         } else {
-            // I-log ang buong error object para makita ang exact reason (e.g. Invalid Login)
-            console.error("[OTP ROUTE ERROR] Full Error:", emailResult.error);
+            console.error("[OTP ERROR] Mailer failed to connect to Gmail:", emailResult.error);
             res.status(500).json({ 
                 message: 'Mail Server Error. Please check your App Password or Network.',
                 details: emailResult.error
