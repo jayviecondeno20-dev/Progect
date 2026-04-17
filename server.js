@@ -399,6 +399,7 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
     let selloutData = []; // Variable para sa sellout reports
     let dtrData = []; // Variable para sa attendance reports
     let pendingUsers = []; // Listahan ng mga accounts na naghihintay ng approval
+    let allUsers = []; // Listahan ng lahat ng regular users
     let analyticsData = {
         totalSales: 0,
         totalItemsSold: 0,
@@ -520,6 +521,13 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
             pendingUsers = await db('SELECT id, username, category, email FROM accounts WHERE is_approved = 0');
         } catch (e) {
             console.log("Error fetching pending accounts:", e.message);
+        }
+
+        // --- FETCH ALL USER ACCOUNTS (MANNING) ---
+        try {
+            allUsers = await db("SELECT id, username, email, category, is_approved FROM accounts WHERE category = 'USER'");
+        } catch (e) {
+            console.log("Error fetching users for Manning section:", e.message);
         }
 
     } catch (e) {
@@ -689,7 +697,8 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
         analyticsData: analyticsData, // Ipasa ang analytics data
         selectedMonth: selectedMonth, // Ipasa ang selected filter
         selectedYear: selectedYear,
-        pendingUsers: pendingUsers // Ipasa ang listahan ng for approval sa EJS
+        pendingUsers: pendingUsers, // Ipasa ang listahan ng for approval sa EJS
+        allUsers: allUsers // Ipasa ang listahan ng lahat ng users para sa Manning section
     });
 });
 

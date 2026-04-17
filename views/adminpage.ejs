@@ -81,6 +81,15 @@
 
                 <ul class="menu-links">
                     <li class="nav-links">
+                        <a href="#" onclick="openSection('manning')">
+                            <i class='bx bx-group icon'></i>
+                            <span class="text nav-text">MANNING</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="menu-links">
+                    <li class="nav-links">
                         <a href="#" onclick="openSection('account')">
                             <i class='bx bxs-user-account icon' ></i>
                             <span class="text nav-text">ACCOUNT</span>
@@ -254,6 +263,47 @@
                     <% } else { %>
                         <p style="text-align: center; padding: 20px;">No late records found.</p>
                     <% } %>
+                </div>
+            </div>
+        </section>
+
+        <section id="manning" class="tab-content">
+            <div class="headermenu">
+                <h2>MANNING (USER LIST)</h2>
+            </div>
+
+            <div class="container-menu">
+                <div class="container11">
+                    <table class="inventory-table" id="manningTable">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                            </tr>
+                            <tr class="filter-row">
+                                <th><select class="filter-input" onchange="filterTable('manningTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('manningTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('manningTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('manningTable')"><option value="">All</option></select></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (typeof allUsers !== 'undefined' && allUsers.length > 0) { %>
+                                <% allUsers.forEach(function(u) { %>
+                                    <tr>
+                                        <td><%= u.username %></td>
+                                        <td><%= u.email %></td>
+                                        <td><%= u.category %></td>
+                                        <td><%= u.is_approved == 1 ? 'Approved' : 'Pending Approval' %></td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr><td colspan="4">No user accounts found.</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -1087,6 +1137,7 @@
             populateDropdowns('selloutTable');
             populateDropdowns('attendanceTable');
             populateDropdowns('usersTable');
+            populateDropdowns('manningTable');
         });
 
         // Function to populate dropdowns automatically based on table data
