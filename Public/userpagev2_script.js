@@ -297,6 +297,12 @@ function renderCart() {
 
 // Function to handle "Place Order" and print receipt
 async function placeOrder() {
+    // 0. ATTENDANCE CHECK
+    if (!window.isOnDuty) {
+        alert("❌ TRANSACTION DENIED!\n\nYou must TIME-IN first before you can place an order. Please go to the Attendance section.");
+        return;
+    }
+
     if (orderCart.length === 0) {
         alert("Cart is empty!");
         return;
@@ -620,6 +626,13 @@ document.addEventListener("DOMContentLoaded", function() {
             window.userFaceDescriptor = null;
             console.log("No Face Data found for this user.");
         }
+    }
+
+    // --- ATTENDANCE STATUS LOADING ---
+    const dutyStatusInput = document.getElementById('isOnDutyStatus');
+    if (dutyStatusInput) {
+        window.isOnDuty = dutyStatusInput.value === 'true';
+        console.log("Duty Status Loaded:", window.isOnDuty);
     }
 
     // --- GLOBAL TAB INITIALIZATION (Admin & User Page) ---

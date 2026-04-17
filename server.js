@@ -263,12 +263,21 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
    let transactionData = []; // Variable para sa transaction history
    let faceDescriptor = null; // Variable para sa face data
    let username; // Declare username here
+   let isOnDuty = false; // Flag para sa attendance status
+
+   // Kunin ang petsa ngayon sa Philippine Time
+   const phDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(new Date());
+
     try {
         username = user.USERNAME; // Assign username inside the try block
         items = await db('SELECT `DATE`, `ITEM_NAME`, `ITEM_CATEGORY`, `UNIT_OF_MEASURE`, `STOCK_ONHAND`, `USERNAME` FROM inventory WHERE USERNAME = ? ORDER BY id DESC', [user.USERNAME]);
 
         // Fetch DTR data for the table
         const rawDtrData = await db('SELECT * FROM dtr WHERE USERNAME = ? ORDER BY DATE DESC', [user.USERNAME]);
+
+        // CHECK KUNG ON DUTY: Dapat may Time In at wala pang Time Out para sa araw na ito
+        const attendanceCheck = await db('SELECT * FROM dtr WHERE USERNAME = ? AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND `TIME OUT` IS NULL', [user.USERNAME, phDate]);
+        isOnDuty = attendanceCheck.length > 0;
 
         // KUNIN ANG FACE DESCRIPTOR NG USER
         try {
@@ -363,7 +372,8 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
         transactionData: transactionData, // Ipasa ang transactionData sa EJS
         errors: req.flash('error'),
         success: req.flash('success'),
-        faceDescriptor: faceDescriptor // IPASA ANG FACE DATA SA USER PAGE
+        faceDescriptor: faceDescriptor, // IPASA ANG FACE DATA SA USER PAGE
+        isOnDuty: isOnDuty // Ipasa ang duty status
     });
 });
 
@@ -1419,6 +1429,17 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
 
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
         return res.status(400).json({ success: false, message: 'Cart is empty' });
+    }
+
+    // SECURITY CHECK: Attendance Verification sa Backend
+    const phDateOnly = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(new Date());
+    try {
+        const attendanceStatus = await db('SELECT * FROM dtr WHERE USERNAME = ? AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND `TIME OUT` IS NULL', [user.USERNAME, phDateOnly]);
+        if (attendanceStatus.length === 0) {
+            return res.status(403).json({ success: false, message: 'Access Denied: You must Time-In first to place an order.' });
+        }
+    } catch (err) {
+        return res.status(500).json({ success: false, message: 'Error verifying attendance.' });
     }
 
     // PHILIPPINE TIME (UTC+8) para sa Order Timestamp
