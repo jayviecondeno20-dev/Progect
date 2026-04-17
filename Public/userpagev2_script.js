@@ -297,8 +297,10 @@ function renderCart() {
 
 // Function to handle "Place Order" and print receipt
 async function placeOrder() {
+    console.log("Checking Duty Status before order:", window.isOnDuty);
+    
     // 0. ATTENDANCE CHECK
-    if (!window.isOnDuty) {
+    if (window.isOnDuty !== true && window.isOnDuty !== "true") {
         alert("❌ TRANSACTION DENIED!\n\nYou must TIME-IN first before you can place an order. Please go to the Attendance section.");
         return;
     }

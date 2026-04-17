@@ -265,8 +265,8 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
    let username; // Declare username here
    let isOnDuty = false; // Flag para sa attendance status
 
-   // Kunin ang petsa ngayon sa Philippine Time
-   const phDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(new Date());
+   // Mas safe na YYYY-MM-DD format para sa MySQL
+   const phDate = new Date().toLocaleString('sv', { timeZone: 'Asia/Manila' }).split(' ')[0];
 
     try {
         username = user.USERNAME; // Assign username inside the try block
@@ -275,8 +275,11 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
         // Fetch DTR data for the table
         const rawDtrData = await db('SELECT * FROM dtr WHERE USERNAME = ? ORDER BY DATE DESC', [user.USERNAME]);
 
-        // CHECK KUNG ON DUTY: Dapat may Time In at wala pang Time Out para sa araw na ito
-        const attendanceCheck = await db('SELECT * FROM dtr WHERE USERNAME = ? AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND `TIME OUT` IS NULL', [user.USERNAME, phDate]);
+        // REVISED ON-DUTY CHECK: Check for NULL or Empty string sa TIME OUT
+        const attendanceCheck = await db(
+            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND (`TIME OUT` IS NULL OR `TIME OUT` = "")', 
+            [user.USERNAME, phDate]
+        );
         isOnDuty = attendanceCheck.length > 0;
 
         // KUNIN ANG FACE DESCRIPTOR NG USER
@@ -1432,9 +1435,12 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
     }
 
     // SECURITY CHECK: Attendance Verification sa Backend
-    const phDateOnly = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(new Date());
+    const phDateOnly = new Date().toLocaleString('sv', { timeZone: 'Asia/Manila' }).split(' ')[0];
     try {
-        const attendanceStatus = await db('SELECT * FROM dtr WHERE USERNAME = ? AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND `TIME OUT` IS NULL', [user.USERNAME, phDateOnly]);
+        const attendanceStatus = await db(
+            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND (`TIME OUT` IS NULL OR `TIME OUT` = "")', 
+            [user.USERNAME, phDateOnly]
+        );
         if (attendanceStatus.length === 0) {
             return res.status(403).json({ success: false, message: 'Access Denied: You must Time-In first to place an order.' });
         }
