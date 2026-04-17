@@ -275,12 +275,13 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
         // Fetch DTR data for the table
         const rawDtrData = await db('SELECT * FROM dtr WHERE USERNAME = ? ORDER BY DATE DESC', [user.USERNAME]);
 
-        // ON-DUTY CHECK: Dapat may Time In at ang Time Out ay (NULL, Empty, o --:--) para sa araw na ito
+        // ON-DUTY CHECK: Mas matibay na logic para sa --:-- placeholder
         const attendanceCheck = await db(
-            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND (`TIME IN` IS NOT NULL AND `TIME IN` != "") AND (`TIME OUT` IS NULL OR `TIME OUT` = "" OR `TIME OUT` = "--:--" OR `TIME OUT` = "--:-- ")', 
+            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND (`TIME IN` IS NOT NULL AND `TIME IN` != "") AND (`TIME OUT` IS NULL OR TRIM(`TIME OUT`) = "" OR `TIME OUT` LIKE "%--:--%")', 
             [user.USERNAME, phDate]
         );
         isOnDuty = attendanceCheck.length > 0;
+        console.log(`[DEBUG] User: ${user.USERNAME} | Date: ${phDate} | On Duty: ${isOnDuty}`);
         console.log(`[ATTENDANCE DEBUG] User: ${user.USERNAME} | Date: ${phDate} | On Duty: ${isOnDuty}`);
 
         // KUNIN ANG FACE DESCRIPTOR NG USER
@@ -1438,9 +1439,9 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
     // SECURITY CHECK: Attendance Verification sa Backend
     const phDateOnly = new Date().toLocaleString('sv', { timeZone: 'Asia/Manila' }).split(' ')[0];
     try {
-        // Backend Security: Check attendance status ulit bago i-save ang order
+        // Backend Security Check: Dapat match ang logic dito sa /userpage
         const attendanceStatus = await db(
-            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND (`TIME IN` IS NOT NULL AND `TIME IN` != "") AND (`TIME OUT` IS NULL OR `TIME OUT` = "" OR `TIME OUT` = "--:--" OR `TIME OUT` = "--:-- ")', 
+            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND (`TIME IN` IS NOT NULL AND `TIME IN` != "") AND (`TIME OUT` IS NULL OR TRIM(`TIME OUT`) = "" OR `TIME OUT` LIKE "%--:--%")', 
             [user.USERNAME, phDateOnly]
         );
         if (attendanceStatus.length === 0) {
