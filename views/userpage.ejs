@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>USERPAGE</title>
-    <link rel="icon" type="image/png" href="coffee-bean-solid-24.png">
-    <link rel="stylesheet" href="userpagev2.css">
+    <link rel="icon" type="image/png" href="/coffee-bean-solid-24.png">
+    <link rel="stylesheet" href="/userpagev2.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
@@ -24,7 +24,6 @@
 
         <div class="menu-bar">
             <div class="menu">
-
                 <ul class="menu-links">
                     <li class="nav-links">
                         <a href="#" onclick="openSection('menu')">
@@ -32,27 +31,18 @@
                             <span class="text nav-text">MENU</span>
                         </a>
                     </li>
-                </ul>
-
-                <ul class="menu-links">
                     <li class="nav-links">
                         <a href="#" onclick="openSection('inventory')">
                             <i class='bx bxs-box icon' ></i>
                             <span class="text nav-text">INVENTORY</span>
                         </a>
                     </li>
-                </ul>
-
-                <ul class="menu-links">
                     <li class="nav-links">
                         <a href="#" onclick="openSection('transaction')">
                             <i class='bx bx-history icon' ></i>
                             <span class="text nav-text">TRANSACTION HISTORY</span>
                         </a>
                     </li>
-                </ul>
-
-                <ul class="menu-links">
                     <li class="nav-links">
                         <a href="#" onclick="openSection('account')">
                             <i class='bx bxs-user-account icon' ></i>
@@ -499,33 +489,33 @@
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
     <!-- HIDDEN INPUT FOR FACE DATA (Bridge between Server EJS and External JS) -->
-    <input type="hidden" id="userFaceDescriptorData" value="<%= (typeof faceDescriptor !== 'undefined' && faceDescriptor) ? faceDescriptor : '' %>">
+    <input type="hidden" id="userFaceDescriptorData" value="<%= (typeof faceDescriptor !== 'undefined' && faceDescriptor) ? (typeof faceDescriptor === 'object' ? JSON.stringify(faceDescriptor) : faceDescriptor) : '' %>">
 
     <!-- HIDDEN INPUT FOR ATTENDANCE STATUS (Bridge between Server EJS and External JS) -->
     <input type="hidden" id="isOnDutyStatus" value="<%= (typeof isOnDuty !== 'undefined') ? isOnDuty : 'false' %>">
 
     <script>
         // Calculate Best Sellers based on Transaction History
-        const transactionHistory = <%- JSON.stringify(Array.isArray(locals.transactionData) ? transactionData : []) %>;
-        const salesMap = {};
-        transactionHistory.forEach(t => {
-            if (t.MENU) {
-                const name = t.MENU.trim().toLowerCase();
-                salesMap[name] = (salesMap[name] || 0) + (parseInt(t.Qty) || 0);
-            }
-        });
+        const transactionHistory = <%- JSON.stringify(locals.transactionData || []) %>;
+        
+        const bestSellers = Object.entries(
+            transactionHistory.reduce((acc, t) => {
+                const name = (t.MENU || "").trim().toLowerCase();
+                if (name) acc[name] = (acc[name] || 0) + (Number(t.Qty) || 0);
+                return acc;
+            }, {})
+        ).sort((a, b) => b[1] - a[1])
+         .slice(0, 10)
+         .map(entry => entry[0]);
 
-        // Get top 10 best selling item names
-        const bestSellers = Object.keys(salesMap)
-            .sort((a, b) => salesMap[b] - salesMap[a])
-            .slice(0, 10);
-
-        // Global variable para matandaan ang piniling category
+        // Global state for filtering
         let activeCategory = 'all';
+        let isInitialLoad = true;
 
         // Function para sa Category Buttons (kasama ang Adds On)
         function filterMenu(category) {
             activeCategory = category;
+            isInitialLoad = false; // User interacted with filters
             applyFilters();
         }
 
@@ -538,7 +528,14 @@
         function applyFilters() {
             const searchTerm = document.getElementById('menuSearch').value.toLowerCase();
             const cards = document.querySelectorAll('.menu-card');
-            const menuHeader = document.querySelector('#menu .headermenu h2');
+            const menuHeaderElement = document.querySelector('#menu .headermenu h2');
+
+            // Update Header Text based on view
+            if (isInitialLoad && activeCategory === 'all' && searchTerm === "") {
+                menuHeaderElement.innerText = "BEST SELLERS";
+            } else {
+                menuHeaderElement.innerText = activeCategory === 'all' ? "MENU" : activeCategory.toUpperCase();
+            }
 
             cards.forEach(card => {
                 const itemName = card.getAttribute('data-name') || "";
@@ -548,19 +545,15 @@
                 let matchesCategory = false;
                 const itemNameLower = itemName.trim().toLowerCase();
 
-                // If no filter/search, show Best Sellers. Otherwise, standard filter.
-                if (activeCategory === 'all' && searchTerm === "" && bestSellers.length > 0) {
+                // Only show Best Sellers on initial load when "All" is selected and no search term is present
+                if (isInitialLoad && activeCategory === 'all' && searchTerm === "" && bestSellers.length > 0) {
                     matchesCategory = bestSellers.includes(itemNameLower);
                 } else {
                     matchesCategory = (activeCategory === 'all' || itemCategory.toLowerCase() === activeCategory.toLowerCase());
                 }
 
-                // Ipapakita lang ang card kung pasok sa category AT pasok sa search term
-                if (matchesCategory && matchesSearch) {
-                    card.style.display = "block";
-                } else {
-                    card.style.display = "none";
-                }
+                // Toggle visibility based on filter match
+                card.style.display = (matchesCategory && matchesSearch) ? "block" : "none";
             });
         }
 
@@ -568,7 +561,7 @@
         window.addEventListener('DOMContentLoaded', applyFilters);
     </script>
 
-    <script src="userpagev2_script.js"></script>
+    <script src="/userpagev2_script.js"></script>
     
 </body>
 </html>
