@@ -200,7 +200,7 @@
                            <% if (typeof items !== 'undefined' && items.length > 0) { %>
                                <% items.forEach(function(item) { %>
                                    <tr>
-                                       <td><%= item.DATE %></td>
+                                       <td><%= new Date(item.DATE).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) %></td>
                                        <td><%= item.ITEM_NAME %></td>
                                        <td><%= item.ITEM_CATEGORY %></td>
                                        <td><%= item.UNIT_OF_MEASURE %></td>
@@ -293,7 +293,7 @@
                             <% if (typeof transactionData !== 'undefined' && transactionData.length > 0) { %>
                                 <% transactionData.forEach(function(trans) { %>
                                     <tr>
-                                        <td><%= new Date(trans.TIMESTAMP).toLocaleString() %></td>
+                                        <td><%= new Date(trans.TIMESTAMP).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) %></td>
                                         <td><%= trans.MENU %></td>
                                         <td><%= trans.CATEGORY %></td>
                                         <td><%= trans['CATEGORY 2'] %></td>
