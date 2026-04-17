@@ -17,6 +17,7 @@ console.log("[STARTUP] Checking Session Secret:", process.env.SESSION_SECRET ? "
 const express = require('express')
 const bodyParser = require('body-parser')
 const mysql = require('mysql2')
+const compression = require('compression'); // Pabilisin ang transfer ng data
 const app = express()
 const bcryptjs = require('bcryptjs')
 const passport = require('passport')
@@ -85,13 +86,12 @@ const initializePassport = require('./passport-config');
 // Helper function: Ayusin ang user data para hindi magkaproblema sa Case Sensitivity
 function normalizeUser(user) {
     if (!user || typeof user !== 'object') return null;
-    const normalized = {};
-    
-    // Optimized loop para sa malalaking Base64 strings (iwas JSON.stringify bottleneck)
-    for (let key in user) {
-        if (Object.prototype.hasOwnProperty.call(user, key)) {
-            normalized[key.toUpperCase()] = user[key];
-        }
+    const normalized = {};    
+
+    // Optimized loop: Huwag i-uppercase ang napakalalaking strings kung hindi kailangan
+    const keys = Object.keys(user);
+    for (let i = 0; i < keys.length; i++) {
+        normalized[keys[i].toUpperCase()] = user[keys[i]];
     }
 
     if (normalized.CATEGORY) {
@@ -124,6 +124,7 @@ initializePassport(
 );
 
 app.set('view engine', 'ejs');
+app.use(compression()); // I-compress ang lahat ng responses (HTML, JSON, CSS)
 // Middleware: Pagsasaayos ng order at paglilinis
 app.use(express.json({ limit: '50mb' })); // Tinaasan ang limit para sa malalaking Base64 images
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -179,11 +180,11 @@ app.get('/homepage', checkNotAuthenticated, async (req, res)=> {
         const rawSales = await db(`SELECT MENU, CATEGORY, SUM(Qty) as totalQty FROM sellout GROUP BY MENU, CATEGORY`);
         
         console.log("[DEBUG HOMEPAGE] Raw Sales from DB:", rawSales);
-        // 2. Kunin ang lahat ng menu items para sa matching ng images
-        const rawMenuItems = await db(`SELECT * FROM menu`);
+        // OPTIMIZATION: Huwag kunin ang buong menu_image, kumuha lang ng 1 character (flag)
+        const rawMenuItems = await db(`SELECT id, \`Menu Name\`, LEFT(menu_image, 1) as has_menu_img FROM menu`);
         // I-normalize ang menu items para siguradong makuha ang 'MENU_NAME', 'ID', at 'MENU_IMAGE'
         const normalizedMenu = rawMenuItems.map(m => normalizeUser(m));
-        console.log("[DEBUG HOMEPAGE] Normalized Menu Items from DB (ID, Name, Image status):", normalizedMenu.map(m => ({ ID: m.ID, MENUNAME: m['MENU NAME'], IMAGE_EXISTS: !!m.MENU_IMAGE })));
+        console.log("[DEBUG HOMEPAGE] Normalized Menu Items from DB (ID, Name, Image status):", normalizedMenu.map(m => ({ ID: m.ID, MENUNAME: m['MENU NAME'], IMAGE_EXISTS: !!m.HAS_MENU_IMG })));
         const cleanedMap = new Map();
 
         // Helper function para linisin ang pangalan para sa matching
@@ -220,7 +221,7 @@ app.get('/homepage', checkNotAuthenticated, async (req, res)=> {
                 });
 
                 const itemId = matchedMenu ? matchedMenu.ID : null;
-                const hasImage = matchedMenu ? matchedMenu.MENU_IMAGE : null;
+                const hasImage = matchedMenu ? matchedMenu.HAS_MENU_IMG : null;
 
                 return {
                     ...item,
@@ -272,8 +273,12 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
         username = user.USERNAME; // Assign username inside the try block
         items = await db('SELECT `DATE`, `ITEM_NAME`, `ITEM_CATEGORY`, `UNIT_OF_MEASURE`, `STOCK_ONHAND`, `USERNAME` FROM inventory WHERE USERNAME = ? ORDER BY id DESC', [user.USERNAME]);
 
-        // Fetch DTR data for the table
-        const rawDtrData = await db('SELECT * FROM dtr WHERE USERNAME = ? ORDER BY DATE DESC', [user.USERNAME]);
+        // OPTIMIZATION: Huwag kunin ang buong Image Base64 sa main list load. 
+        // Kumuha lang ng 1 character (LEFT) para malaman kung may laman (truthy).
+        const rawDtrData = await db(`
+            SELECT id, USERNAME, DATE, \`TIME IN\`, \`TIME OUT\`, 
+            LEFT(time_in_image, 1) as has_in_img, LEFT(time_out_image, 1) as has_out_img 
+            FROM dtr WHERE USERNAME = ? ORDER BY DATE DESC`, [user.USERNAME]);
 
         // ON-DUTY CHECK: Mas matibay na logic para sa --:-- placeholder
         const attendanceCheck = await db(
@@ -320,14 +325,16 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
 
         // KUNIN ANG MENU ITEMS
         try {
-            menuItems = await db('SELECT * FROM menu');
+            // OPTIMIZATION: Huwag i-select ang menu_image column dito.
+            menuItems = await db('SELECT id, `Menu Name`, Category, `Category 2`, Price, LEFT(menu_image, 1) as has_menu_img FROM menu');
+            
             // Safe mapping para sa User Page
             menuItems = menuItems.map(m => ({
                 ...m,
                 id: m.id !== undefined ? m.id : (m.ID !== undefined ? m.ID : null),
                 'Menu Name': m['Menu Name'] || m['Menu name'],
                 'Category 2': m['Category 2'] || '',
-                menu_image: (m.menu_image || m.MENU_IMAGE) ? `/menu-image/${m.id !== undefined ? m.id : m.ID}` : null
+                menu_image: (m.has_menu_img) ? `/menu-image/${m.id !== undefined ? m.id : m.ID}` : null
             }));
         } catch(e) { console.error("Menu fetch error:", e); }
 
@@ -353,9 +360,9 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
                 ...record,
                 formattedDate: `${year}-${month}-${day}`, // Para sa display
                 month: month, // Para sa data-month attribute
-                // Huwag i-embed ang buong Base64. Magbigay lang ng URL para i-fetch ito.
-                time_in_image: (record.time_in_image && recordId) ? `/attendance-image/${recordId}/in` : null,
-                time_out_image: (record.time_out_image && recordId) ? `/attendance-image/${recordId}/out` : null
+                // Gumamit ng 'has_in_img' flag sa halip na ang mismong content
+                time_in_image: (record.has_in_img && recordId) ? `/attendance-image/${recordId}/in` : null,
+                time_out_image: (record.has_out_img && recordId) ? `/attendance-image/${recordId}/out` : null
             };
         });
 
@@ -429,7 +436,8 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
 
     try {
         // Fetch all items from the inventory table
-        items = await db('SELECT * FROM inventory ORDER BY id DESC', []);
+        // OPTIMIZATION: I-exclude ang remarks kung hindi kailangan agad o i-check lang ang kailangan.
+        items = await db('SELECT id, DATE, ITEM_NAME, ITEM_CATEGORY, UNIT_OF_MEASURE, STOCK_ONHAND, USERNAME, remarks FROM inventory ORDER BY id DESC', []);
 
         // REVISED INVENTORY FOR ADMIN: Add Remarks for Low Stock
         items = items.map(item => {
@@ -583,14 +591,16 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
 
     // FETCH MENU ITEMS
     try {
-        menuItems = await db('SELECT * FROM menu ORDER BY id DESC', []);
+        // OPTIMIZATION
+        menuItems = await db('SELECT id, `Menu Name`, Category, `Category 2`, Price, LEFT(menu_image, 1) as has_menu_img FROM menu ORDER BY id DESC', []);
+        
         // Safe mapping para sa Admin Page
         menuItems = menuItems.map(m => ({
             ...m,
             id: m.id !== undefined ? m.id : (m.ID !== undefined ? m.ID : null),
             'Menu Name': m['Menu Name'] || m['Menu name'],
             'Category 2': m['Category 2'] || '', // Normalize Category 2
-            menu_image: (m.menu_image || m.MENU_IMAGE) ? `/menu-image/${m.id !== undefined ? m.id : m.ID}` : null
+            menu_image: (m.has_menu_img) ? `/menu-image/${m.id !== undefined ? m.id : m.ID}` : null
         }));
     } catch (e) {
         console.log("Menu table might not exist yet, ignoring.");
@@ -605,7 +615,11 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
 
     // FETCH ATTENDANCE / DTR REPORTS
     try {
-        const rawDtrData = await db(`SELECT * FROM dtr WHERE 1=1 ${dtrFilterSql} ORDER BY DATE DESC`, [...dtrParams]);
+        // OPTIMIZATION
+        const rawDtrData = await db(`
+            SELECT id, USERNAME, DATE, \`TIME IN\`, \`TIME OUT\`, 
+            LEFT(time_in_image, 1) as has_in_img, LEFT(time_out_image, 1) as has_out_img 
+            FROM dtr WHERE 1=1 ${dtrFilterSql} ORDER BY DATE DESC`, [...dtrParams]);
         
         // Reset counts for analytics
         analyticsData.attendanceStats = { Present: 0, Late: 0, Undertime: 0, HalfDay: 0 };
@@ -701,9 +715,9 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
             return { 
                 ...record, 
                 formattedDate: dateStr, computedStatus: status, computedOvertime: overtime,
-                // Admin mapping
-                time_in_image: (record.time_in_image && recordId) ? `/attendance-image/${recordId}/in` : null,
-                time_out_image: (record.time_out_image && recordId) ? `/attendance-image/${recordId}/out` : null
+                // Admin mapping using flags
+                time_in_image: (record.has_in_img && recordId) ? `/attendance-image/${recordId}/in` : null,
+                time_out_image: (record.has_out_img && recordId) ? `/attendance-image/${recordId}/out` : null
             };
         });
     } catch (e) {
@@ -1668,7 +1682,11 @@ app.get('/download-attendance', checkAuthenticated, async (req, res) => {
     }
 
     try {
-        const dtrData = await db('SELECT * FROM dtr ORDER BY DATE DESC');
+        // OPTIMIZATION: Iwasan ang Data Bloat sa Excel report generation
+        const dtrData = await db(`
+            SELECT id, USERNAME, DATE, \`TIME IN\`, \`TIME OUT\`, 
+            LEFT(time_in_image, 1) as has_in_img, LEFT(time_out_image, 1) as has_out_img 
+            FROM dtr ORDER BY DATE DESC`);
         
         // 1. Gumawa ng bagong Workbook at Worksheet
         const workbook = new ExcelJS.Workbook();
@@ -1753,13 +1771,13 @@ app.get('/download-attendance', checkAuthenticated, async (req, res) => {
             let timeInLink = "";
             let timeOutLink = "";
 
-            if (row.time_in_image && recordId) {
+            if (row.has_in_img && recordId) {
                 timeInLink = { 
                     text: 'VIEW PHOTO', 
                     hyperlink: `${baseUrl}/attendance-image/${recordId}/in` 
                 };
             }
-            if (row.time_out_image && recordId) {
+            if (row.has_out_img && recordId) {
                 timeOutLink = { 
                     text: 'VIEW PHOTO', 
                     hyperlink: `${baseUrl}/attendance-image/${recordId}/out` 

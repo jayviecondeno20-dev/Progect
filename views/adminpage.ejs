@@ -160,7 +160,7 @@
                     <input type="number" name="limit" placeholder="Limit results" class="search-input-styled" min="1" value="<%= typeof limit !== 'undefined' ? limit : '' %>">
                     </select>
                     <button type="submit" class="add-item-btn">Filter</button>
-                    <a href="/adminpage?tab=analytics" class="add-item-btn clear-btn" style="text-decoration: none; text-align: center;">Clear</a>
+                    <a href="/adminpage?tab=analytics" class="add-item-btn clear-btn clear-btn-link">Clear</a>
                 </form>
             </div>
 
@@ -195,7 +195,7 @@
                     <% if (analyticsData.salesByCategory.length > 0) { %>
                         <canvas id="salesByCategoryChart"></canvas>
                     <% } else { %>
-                        <p style="text-align: center; padding: 20px;">No sales data available to generate chart.</p>
+                        <p class="no-data-msg">No sales data available to generate chart.</p>
                     <% } %>
                 </div>
 
@@ -205,7 +205,7 @@
                     <% if (analyticsData.salesByCategory2 && analyticsData.salesByCategory2.length > 0) { %>
                         <canvas id="salesByCategory2Chart"></canvas>
                     <% } else { %>
-                        <p style="text-align: center; padding: 20px;">No data available for Category 2.</p>
+                        <p class="no-data-msg">No data available for Category 2.</p>
                     <% } %>
                 </div>
 
@@ -215,7 +215,7 @@
                     <% if (analyticsData.salesByMonth && analyticsData.salesByMonth.length > 0) { %>
                         <canvas id="salesByMonthChart"></canvas>
                     <% } else { %>
-                        <p style="text-align: center; padding: 20px;">No monthly data available.</p>
+                        <p class="no-data-msg">No monthly data available.</p>
                     <% } %>
                 </div>
 
@@ -225,7 +225,7 @@
                     <% if (analyticsData.salesByDaily && analyticsData.salesByDaily.length > 0) { %>
                         <canvas id="salesByDailyChart"></canvas>
                     <% } else { %>
-                        <p style="text-align: center; padding: 20px;">No daily data available.</p>
+                        <p class="no-data-msg">No daily data available.</p>
                     <% } %>
                 </div>
 
@@ -235,7 +235,7 @@
                     <% if (analyticsData.salesByMonthCat2 && analyticsData.salesByMonthCat2.length > 0) { %>
                         <canvas id="salesByMonthCat2Chart"></canvas>
                     <% } else { %>
-                        <p style="text-align: center; padding: 20px;">No monthly data available for Category 2.</p>
+                        <p class="no-data-msg">No monthly data available for Category 2.</p>
                     <% } %>
                 </div>
 
@@ -245,14 +245,14 @@
                     <% if (analyticsData.salesByDailyCat2 && analyticsData.salesByDailyCat2.length > 0) { %>
                         <canvas id="salesByDailyCat2Chart"></canvas>
                     <% } else { %>
-                        <p style="text-align: center; padding: 20px;">No daily data available for Category 2.</p>
+                        <p class="no-data-msg">No daily data available for Category 2.</p>
                     <% } %>
                 </div>
 
                 <!-- MOVED: Attendance Overview Chart -->
                 <div class="chart-wrapper">
                     <h3>Attendance Overview</h3>
-                    <div style="height: 300px; position: relative;">
+                    <div class="attendance-chart-wrapper">
                         <canvas id="attendanceChart"></canvas>
                     </div>
                 </div>
@@ -263,7 +263,7 @@
                     <% if (analyticsData.latesPerUser && Object.keys(analyticsData.latesPerUser).length > 0) { %>
                         <canvas id="latesPerUserChart"></canvas>
                     <% } else { %>
-                        <p style="text-align: center; padding: 20px;">No late records found.</p>
+                        <p class="no-data-msg">No late records found.</p>
                     <% } %>
                 </div>
             </div>
@@ -303,18 +303,18 @@
                                         <td><%= u.email %></td>
                                         <td><%= u.category %></td>
                                         <td><%= u.is_approved == 1 ? 'Approved' : 'Pending Approval' %></td>
-                                        <td style="font-weight: bold; color: <%= u.remarks === 'AWOL' ? 'red' : (u.remarks === 'RESIGNED' ? 'orange' : 'green') %>;">
+                                        <td class="remarks-cell <%= u.remarks === 'AWOL' ? 'low-stock' : (u.remarks === 'RESIGNED' ? 'status-warning' : 'status-present') %>">
                                             <%= u.remarks %>
                                         </td>
                                         <td>
-                                            <form action="/delete-user/<%= u.id %>?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this account?')">
+                                            <form action="/delete-user/<%= u.id %>?_method=DELETE" method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this account?')">
                                                 <button type="submit" class="action-btn-delete" title="Delete Account">
                                                     <i class='bx bx-trash'></i>
                                                 </button>
                                             </form>
                                             <!-- Iniba ang action route para sa Resigned -->
-                                            <form action="/resign-user/<%= u.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Mark this employee as Resigned?')">
-                                                <button type="submit" class="action-btn-delete" style="color: orange;" title="Mark as Resigned">
+                                            <form action="/resign-user/<%= u.id %>" method="POST" class="inline-form" onsubmit="return confirm('Mark this employee as Resigned?')">
+                                                <button type="submit" class="action-btn-delete btn-resign" title="Mark as Resigned">
                                                     <i class='bx bx-user-minus'></i>
                                                 </button>
                                             </form>
@@ -354,11 +354,11 @@
                                         <td><%= user.category %></td>
                                         <td><%= user.email %></td>
                                         <td>
-                                            <form action="/approve-user/<%= user.id %>" method="POST" style="display:inline;">
-                                                <button type="submit" class="add-item-btn" style="background: #2e7d32; width: auto; padding: 5px 15px; height: 35px;">Approve</button>
+                                            <form action="/approve-user/<%= user.id %>" method="POST" class="inline-form">
+                                                <button type="submit" class="add-item-btn btn-approve">Approve</button>
                                             </form>
-                                            <form action="/reject-user/<%= user.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to reject this registration?')">
-                                                <button type="submit" class="add-item-btn" style="background: #c62828; width: auto; padding: 5px 15px; height: 35px;">Reject</button>
+                                            <form action="/reject-user/<%= user.id %>" method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to reject this registration?')">
+                                                <button type="submit" class="add-item-btn btn-reject">Reject</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -454,9 +454,9 @@
                                     <tr>
                                         <td>
                                             <% if (menu.menu_image) { %>
-                                                <img src="<%= menu.menu_image %>" onclick="downloadMenuImage('<%= menu.menu_image %>')" alt="menu" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; cursor: pointer;" title="Click to download">
+                                                <img src="<%= menu.menu_image %>" onclick="downloadMenuImage('<%= menu.menu_image %>')" alt="menu" class="menu-img-preview" title="Click to download">
                                             <% } else { %>
-                                                <i class='bx bx-image-alt' style="font-size: 24px; color: #ccc;"></i>
+                                                <i class='bx bx-image-alt placeholder-icon'></i>
                                             <% } %>
                                         </td>
                                         <td><%= menu['Menu Name'] %></td>

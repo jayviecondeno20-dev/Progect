@@ -1262,3 +1262,48 @@ button:hover {
     background-color: #A1887F;
     color: white;
 }
+
+/* --- STYLES TRANSFERRED FROM ADMINPAGE.EJS --- */
+/* Nilipat ang mga inline styles dito para sa mas malinis na HTML at consistency */
+
+.clear-btn-link {
+    text-decoration: none;
+    text-align: center;
+}
+
+.no-data-msg {
+    text-align: center;
+    padding: 20px;
+}
+
+.attendance-chart-wrapper {
+    height: 300px;
+    position: relative;
+}
+
+.inline-form {
+    display: inline;
+}
+
+.btn-approve {
+    background: #2e7d32 !important;
+    width: auto !important;
+    padding: 5px 15px !important;
+    height: 35px !important;
+}
+
+.btn-reject {
+    background: #c62828 !important;
+    width: auto !important;
+    padding: 5px 15px !important;
+    height: 35px !important;
+}
+
+.menu-img-preview {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+    cursor: pointer;
+}
+/* --- END OF TRANSFERRED STYLES --- */
