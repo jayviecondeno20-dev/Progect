@@ -491,75 +491,11 @@
     <!-- HIDDEN INPUT FOR FACE DATA (Bridge between Server EJS and External JS) -->
     <input type="hidden" id="userFaceDescriptorData" value="<%= (typeof faceDescriptor !== 'undefined' && faceDescriptor) ? (typeof faceDescriptor === 'object' ? JSON.stringify(faceDescriptor) : faceDescriptor) : '' %>">
 
+    <!-- HIDDEN INPUT FOR TRANSACTION DATA (Bridge for Best Sellers calculation) -->
+    <input type="hidden" id="transactionDataRaw" value="<%= (typeof transactionData !== 'undefined') ? JSON.stringify(transactionData) : '[]' %>">
+
     <!-- HIDDEN INPUT FOR ATTENDANCE STATUS (Bridge between Server EJS and External JS) -->
     <input type="hidden" id="isOnDutyStatus" value="<%= (typeof isOnDuty !== 'undefined') ? isOnDuty : 'false' %>">
-
-    <script>
-        // Calculate Best Sellers based on Transaction History
-        const transactionHistory = <%- JSON.stringify(locals.transactionData || []) %>;
-        
-        const bestSellers = Object.entries(
-            transactionHistory.reduce((acc, t) => {
-                const name = (t.MENU || "").trim().toLowerCase();
-                if (name) acc[name] = (acc[name] || 0) + (Number(t.Qty) || 0);
-                return acc;
-            }, {})
-        ).sort((a, b) => b[1] - a[1])
-         .slice(0, 10)
-         .map(entry => entry[0]);
-
-        // Global state for filtering
-        let activeCategory = 'all';
-        let isInitialLoad = true;
-
-        // Function para sa Category Buttons (kasama ang Adds On)
-        function filterMenu(category) {
-            activeCategory = category;
-            isInitialLoad = false; // User interacted with filters
-            applyFilters();
-        }
-
-        // Function para sa Search Bar (onkeyup)
-        function searchMenu() {
-            applyFilters();
-        }
-
-        // Ang main engine na nagpapatakbo sa filtering
-        function applyFilters() {
-            const searchTerm = document.getElementById('menuSearch').value.toLowerCase();
-            const cards = document.querySelectorAll('.menu-card');
-            const menuHeaderElement = document.querySelector('#menu .headermenu h2');
-
-            // Update Header Text based on view
-            if (isInitialLoad && activeCategory === 'all' && searchTerm === "") {
-                menuHeaderElement.innerText = "BEST SELLERS";
-            } else {
-                menuHeaderElement.innerText = activeCategory === 'all' ? "MENU" : activeCategory.toUpperCase();
-            }
-
-            cards.forEach(card => {
-                const itemName = card.getAttribute('data-name') || "";
-                const itemCategory = card.getAttribute('data-category') || "";
-
-                const matchesSearch = itemName.toLowerCase().includes(searchTerm);
-                let matchesCategory = false;
-                const itemNameLower = itemName.trim().toLowerCase();
-
-                // Only show Best Sellers on initial load when "All" is selected and no search term is present
-                if (isInitialLoad && activeCategory === 'all' && searchTerm === "" && bestSellers.length > 0) {
-                    matchesCategory = bestSellers.includes(itemNameLower);
-                } else {
-                    matchesCategory = (activeCategory === 'all' || itemCategory.toLowerCase() === activeCategory.toLowerCase());
-                }
-
-                // Toggle visibility based on filter match
-                card.style.display = (matchesCategory && matchesSearch) ? "block" : "none";
-            });
-        }
-
-        // Run on load to show Best Sellers initially
-        window.addEventListener('DOMContentLoaded', applyFilters);
-    </script>
 
     <script src="/userpagev2_script.js"></script>
     

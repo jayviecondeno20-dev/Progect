@@ -109,20 +109,64 @@ function openEditMenu(id, name, category, category2, price) {
     }
 }
 
-// Function para i-filter ang Menu Items sa User Page
-function filterMenu(categoryName) {
+// ==========================================
+// MENU FILTERING & BEST SELLERS LOGIC
+// ==========================================
+
+// Global state for filtering
+let activeCategory = 'all';
+let isInitialLoad = true;
+let bestSellers = [];
+
+/**
+ * Function used by category buttons to update the view.
+ * Merged from userpage.ejs script block.
+ */
+function filterMenu(category) {
+    activeCategory = category;
+    isInitialLoad = false; // Flag that user has interacted with filters
+    applyFilters();
+}
+
+/**
+ * Called onkeyup from the Search Bar.
+ */
+function searchMenu() {
+    applyFilters();
+}
+
+/**
+ * The main engine that calculates visibility for menu cards based on 
+ * search terms, selected categories, and best seller status.
+ */
+function applyFilters() {
+    const searchTerm = document.getElementById('menuSearch')?.value.toLowerCase() || "";
     const cards = document.querySelectorAll('.menu-card');
-    
+    const menuHeaderElement = document.querySelector('#menu .headermenu h2');
+
+    if (!menuHeaderElement) return;
+
+    // Update Header Text based on current context
+    if (isInitialLoad && activeCategory === 'all' && searchTerm === "") {
+        menuHeaderElement.innerText = "BEST SELLERS";
+    } else {
+        menuHeaderElement.innerText = activeCategory === 'all' ? "MENU" : activeCategory.toUpperCase();
+    }
+
     cards.forEach(card => {
-        const itemCat = card.getAttribute('data-category');
-        const searchKey = categoryName.toLowerCase().trim();
-        
-        // Kung 'all' ang pinili, ipakita lahat. Kung hindi, i-match ang category.
-        if (searchKey === 'all' || (itemCat && itemCat.toLowerCase().trim() === searchKey)) {
-            card.style.display = 'block';
+        const itemName = card.getAttribute('data-name') || "";
+        const itemCategory = card.getAttribute('data-category') || "";
+        const itemNameLower = itemName.trim().toLowerCase();
+        const matchesSearch = itemName.toLowerCase().includes(searchTerm);
+
+        let matchesCategory = false;
+        if (isInitialLoad && activeCategory === 'all' && searchTerm === "" && bestSellers.length > 0) {
+            matchesCategory = bestSellers.includes(itemNameLower);
         } else {
-            card.style.display = 'none';
+            matchesCategory = (activeCategory === 'all' || itemCategory.toLowerCase() === activeCategory.toLowerCase());
         }
+
+        card.style.display = (matchesCategory && matchesSearch) ? "block" : "none";
     });
 }
 
@@ -662,5 +706,30 @@ document.addEventListener("DOMContentLoaded", function() {
     if (sub === 'Attendance') {
         toggleForm('Attendance');
     }
-    // Menu is hidden by default via CSS. filterMenu() must be called via button click.
+    
+    // --- MENU INITIALIZATION (Transferred from EJS) ---
+    const transactionDataInput = document.getElementById('transactionDataRaw');
+    if (transactionDataInput) {
+        try {
+            const transactionHistory = JSON.parse(transactionDataInput.value || '[]');
+            
+            // Logic to calculate best sellers (top 10 based on quantity sold)
+            bestSellers = Object.entries(
+                transactionHistory.reduce((acc, t) => {
+                    const name = (t.MENU || "").trim().toLowerCase();
+                    if (name) acc[name] = (acc[name] || 0) + (Number(t.Qty) || 0);
+                    return acc;
+                }, {})
+            ).sort((a, b) => b[1] - a[1])
+             .slice(0, 10)
+             .map(entry => entry[0]);
+
+             // Run initial filter to display Best Sellers if on the menu tab
+             if (currentPath.includes('/userpage')) {
+                applyFilters();
+             }
+        } catch (e) {
+            console.error("Error initializing menu data:", e);
+        }
+    }
 });
