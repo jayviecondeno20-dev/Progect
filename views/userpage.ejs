@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title >USERPAGE</title>
+    <title>USERPAGE</title>
     <link rel="icon" type="image/png" href="coffee-bean-solid-24.png">
     <link rel="stylesheet" href="userpagev2.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -62,7 +62,7 @@
                 </ul>
             </div>
 
-            <DIV class="bottom-content">
+            <div class="bottom-content">
                 <ul class="menu-links">
                     <li class="nav-links">
                         <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -72,7 +72,7 @@
                         <form id="logout-form" action="/logout?_method=DELETE" method="POST"></form>
                     </li>
                 </ul>
-            </DIV>
+            </div>
         </div>
     </aside>
 
@@ -179,7 +179,7 @@
             <div class="headermenu">
                 <h2>INVENTORY</h2>
                 <form action="" class="add">
-                    <button type="button" onclick="toggleForm('myAddItemForm')" class="add-btn">Add Item</button >
+                    <button type="button" onclick="toggleForm('myAddItemForm')" class="add-btn">Add Item</button>
                 </form>
             </div>
 
@@ -222,12 +222,12 @@
 
                         <form action="/add-item" method="POST" class="inventory-actions">
                             <div class="input-group">
-                                <label for="">Date</label>
+                                <label>Date</label>
                                 <input type="date" name="DATE" required>
                             </div>
 
                             <div class="input-group">
-                                <label for="">Item Name</label>
+                                <label>Item Name</label>
                                 <input type="text" name="ITEM_NAME" required>
                             </div>
 
@@ -257,7 +257,7 @@
                             </div>
 
                             <div class="input-group">
-                                <label for="">Stock On Hand</label>
+                                <label>Stock On Hand</label>
                                 <input type="number" name="STOCK_ONHAND" required>
                             </div>
 
@@ -422,17 +422,19 @@
                                     </tr>
                                 </thead>
                                 <tbody id="dtrTableBody">
-                                   <% if (typeof dtrData !== 'undefined' && dtrData.length > 0) { %>
+                                   <% 
+                                   // Helper to convert 24h string to AM/PM - defined once outside the loop
+                                   function formatAMPM(timeStr) {
+                                       if (!timeStr) return "--:--";
+                                       let [hours, minutes] = timeStr.split(':');
+                                       let ampm = hours >= 12 ? 'PM' : 'AM';
+                                       hours = hours % 12;
+                                       hours = hours ? hours : 12;
+                                       return hours + ':' + minutes + ' ' + ampm;
+                                   }
+
+                                   if (typeof dtrData !== 'undefined' && dtrData.length > 0) { %>
                                        <% dtrData.forEach(function(row) { 
-                                            // Helper to convert 24h string to AM/PM
-                                            function formatAMPM(timeStr) {
-                                                if (!timeStr) return "--:--";
-                                                let [hours, minutes] = timeStr.split(':');
-                                                let ampm = hours >= 12 ? 'PM' : 'AM';
-                                                hours = hours % 12;
-                                                hours = hours ? hours : 12; // the hour '0' should be '12'
-                                                return hours + ':' + minutes + ' ' + ampm;
-                                            }
                                        %>
                                            <tr data-month="<%= row.month %>">
                                                <td><%= row.formattedDate %></td>

@@ -5,35 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LOGIN</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <LINk rel="stylesheet" href="/LOGIN.CSS"></LINk>
+    <link rel="stylesheet" href="/LOGIN.CSS">
 </head>
 <body>
-    <DIV class="CONTAINER">
+    <div class="CONTAINER">
         <% if (messages.error) {%>
             <%=messages.error %>
         <% } %>
-        <FORm class="LOGIN-FORM" ACTION="/login" METHOD="POST">
+        <form class="LOGIN-FORM" action="/login" method="POST">
             <img src="/Black White Minimalist Coffee Shop Logo-Photoroom.png" alt="COFFEE LOGO" class="LOGO">
-            <H1>LOGIN</H1>
-            <DIV class="INPUT-GROUP">
-                <LABEL for="USERNAME">USERNAME</LABEL>
-                <INPUT type="text" id="USERNAME" name="USERNAME" required>
-            </DIV>
-            <DIV class="INPUT-GROUP">
-                <LABEL for="PASSWORD">PASSWORD</LABEL>
-                <INPUT type="password" id="PASSWORD" name="PASSWORD" required>
-            </DIV>
-            <DIV class="INPUT-GROUP">
-                <LABEL for="CATEGORY">CATEGORY</LABEL>
-                <SELECT id="CATEGORY" name="CATEGORY" required>
-                    <OPTION value="" disabled selected>SELECT ROLE</OPTION>
-                    <OPTION value="ADMIN">ADMIN</OPTION>
-                    <OPTION value="USER">USER</OPTION>
-                </SELECT>
-            </DIV>
-            <BUTTON type="submit" class="LOGIN-BUTTON">LOGIN</BUTTON>
-            <P>DON'T HAVE AN ACCOUNT? <A href="/register">SIGN UP</A></P>
-        </FORm>
-    </DIV>
+            <h1>LOGIN</h1>
+            <div class="INPUT-GROUP">
+                <label for="USERNAME">USERNAME</label>
+                <input type="text" id="USERNAME" name="USERNAME" required>
+            </div>
+            <div class="INPUT-GROUP">
+                <label for="PASSWORD">PASSWORD</label>
+                <input type="password" id="PASSWORD" name="PASSWORD" required>
+            </div>
+            <div class="INPUT-GROUP">
+                <label for="CATEGORY">CATEGORY</label>
+                <select id="CATEGORY" name="CATEGORY" required>
+                    <option value="" disabled selected>SELECT ROLE</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="USER">USER</option>
+                </select>
+            </div>
+            <button type="submit" class="LOGIN-BUTTON">LOGIN</button>
+            <p>DON'T HAVE AN ACCOUNT? <a href="/register">SIGN UP</a></p>
+        </form>
+    </div>
 </body>
 </html>
