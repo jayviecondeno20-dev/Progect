@@ -486,6 +486,9 @@
     <!-- HIDDEN INPUT FOR FACE DATA (Bridge between Server EJS and External JS) -->
     <input type="hidden" id="userFaceDescriptorData" value="<%= (typeof faceDescriptor !== 'undefined' && faceDescriptor) ? faceDescriptor : '' %>">
 
+    <!-- HIDDEN INPUT FOR ATTENDANCE STATUS (Bridge between Server EJS and External JS) -->
+    <input type="hidden" id="isOnDutyStatus" value="<%= isOnDuty %>">
+
     <script src="userpagev2_script.js"></script>
     
 </body>

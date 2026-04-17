@@ -277,11 +277,10 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
 
         // ON-DUTY CHECK: Mas matibay na logic para sa --:-- placeholder
         const attendanceCheck = await db(
-            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND (`TIME IN` IS NOT NULL AND `TIME IN` != "") AND (`TIME OUT` IS NULL OR TRIM(`TIME OUT`) = "" OR `TIME OUT` LIKE "%--:--%")', 
+            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND (`TIME IN` IS NOT NULL AND `TIME IN` != "") AND (`TIME OUT` IS NULL OR TRIM(`TIME OUT`) = "" OR `TIME OUT` = "--:--")', 
             [user.USERNAME, phDate]
         );
         isOnDuty = attendanceCheck.length > 0;
-        console.log(`[DEBUG] User: ${user.USERNAME} | Date: ${phDate} | On Duty: ${isOnDuty}`);
         console.log(`[ATTENDANCE DEBUG] User: ${user.USERNAME} | Date: ${phDate} | On Duty: ${isOnDuty}`);
 
         // KUNIN ANG FACE DESCRIPTOR NG USER

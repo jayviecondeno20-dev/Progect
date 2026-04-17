@@ -298,13 +298,13 @@ function renderCart() {
 // Function to handle "Place Order" and print receipt
 async function placeOrder() {
     const dutyInput = document.getElementById('isOnDutyStatus');
-    // Mas safe na conversion: tignan kung 'true' (string) o true (boolean)
-    const isOnDuty = dutyInput ? (dutyInput.value === 'true' || dutyInput.value === true) : false;
+    // Mas safe na conversion: tignan kung 'true' ang laman ng input
+    const isOnDuty = dutyInput && dutyInput.value === 'true';
     
-    console.log("Attendance Status Check:", isOnDuty);
+    console.log("[ORDER CHECK] Duty Status:", isOnDuty, "| Raw Value:", dutyInput ? dutyInput.value : 'Element Missing');
     
     if (!isOnDuty) {
-        alert("❌ TRANSACTION DENIED!\n\nYou must TIME-IN first before you can place an order. Please go to the Attendance section.");
+        alert("❌ TRANSACTION DENIED!\n\nYou must TIME-IN first (and not yet Timed-Out) before you can place an order. Please check your Attendance status.");
         return;
     }
 
