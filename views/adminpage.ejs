@@ -301,14 +301,17 @@
                                         <td><%= u.email %></td>
                                         <td><%= u.category %></td>
                                         <td><%= u.is_approved == 1 ? 'Approved' : 'Pending Approval' %></td>
-                                        <td style="font-weight: bold; color: <%= u.remarks === 'AWOL' ? 'red' : 'green' %>;"><%= u.remarks %></td>
+                                        <td style="font-weight: bold; color: <%= u.remarks === 'AWOL' ? 'red' : (u.remarks === 'RESIGNED' ? 'orange' : 'green') %>;">
+                                            <%= u.remarks %>
+                                        </td>
                                         <td>
                                             <form action="/delete-user/<%= u.id %>?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this account?')">
                                                 <button type="submit" class="action-btn-delete" title="Delete Account">
                                                     <i class='bx bx-trash'></i>
                                                 </button>
                                             </form>
-                                            <form action="/delete-user/<%= u.id %>?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Mark this employee as Resigned and remove account?')">
+                                            <!-- Iniba ang action route para sa Resigned -->
+                                            <form action="/resign-user/<%= u.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Mark this employee as Resigned?')">
                                                 <button type="submit" class="action-btn-delete" style="color: orange;" title="Mark as Resigned">
                                                     <i class='bx bx-user-minus'></i>
                                                 </button>
@@ -1154,6 +1157,13 @@
             populateDropdowns('selloutTable');
             populateDropdowns('attendanceTable');
             populateDropdowns('usersTable');
+            
+            // Tiyaking maayos ang Manning Table filter
+            const manningTable = document.getElementById('manningTable');
+            if (manningTable) {
+                manningTable.classList.add('filterable-table');
+            }
+            
             populateDropdowns('manningTable');
         });
 

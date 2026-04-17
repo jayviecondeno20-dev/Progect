@@ -526,11 +526,11 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
         // --- FETCH ALL USER ACCOUNTS (MANNING) ---
         try {
             const rawUsers = await db(`
-                SELECT a.id, a.username, a.email, a.category, a.is_approved, MAX(d.DATE) as last_in
+                SELECT a.id, a.username, a.email, a.category, a.is_approved, a.status, MAX(d.DATE) as last_in
                 FROM accounts a
                 LEFT JOIN dtr d ON a.username = d.USERNAME
                 WHERE a.category = 'USER'
-                GROUP BY a.id, a.username, a.email, a.category, a.is_approved
+                GROUP BY a.id, a.username, a.email, a.category, a.is_approved, a.status
             `);
 
             const phNow = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
@@ -538,7 +538,9 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
 
             allUsers = rawUsers.map(u => {
                 let remarks = 'ACTIVE';
-                if (!u.last_in) {
+                if (u.status === 'RESIGNED') {
+                    remarks = 'RESIGNED';
+                } else if (!u.last_in) {
                     remarks = 'AWOL';
                 } else {
                     const lastDate = new Date(u.last_in);
@@ -1555,6 +1557,20 @@ app.post('/reject-user/:id', checkAuthenticated, async (req, res) => {
     res.redirect('/adminpage?tab=users');
 });
 
+app.post('/resign-user/:id', checkAuthenticated, async (req, res) => {
+    const admin = normalizeUser(req.user);
+    if (admin.CATEGORY !== 'ADMIN') return res.redirect('/login');
+    
+    try {
+        await db("UPDATE accounts SET status = 'RESIGNED' WHERE id = ?", [req.params.id]);
+        req.flash('success', 'Employee marked as Resigned.');
+    } catch (e) {
+        console.error("Resign user error:", e);
+        req.flash('error', 'Failed to update status.');
+    }
+    res.redirect('/adminpage?tab=manning');
+});
+
 app.delete('/delete-user/:id', checkAuthenticated, async (req, res) => {
     const admin = normalizeUser(req.user);
     if (admin.CATEGORY !== 'ADMIN') return res.redirect('/login');
@@ -1845,6 +1861,14 @@ async function initializeDtrTable() {
             console.log("[DB CHECK] Added 'is_approved' column and auto-approved existing users.");
         } catch (err) {
             if (err.code !== 'ER_DUP_FIELDNAME') console.log(`[DB NOTE] Accounts table check (is_approved): ${err.message}`);
+        }
+
+        try {
+            // Add status column for Manning status (ACTIVE/RESIGNED)
+            await db("ALTER TABLE accounts ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE'");
+            console.log("[DB CHECK] Added 'status' column to accounts table.");
+        } catch (err) {
+            if (err.code !== 'ER_DUP_FIELDNAME') console.log(`[DB NOTE] Accounts status column check: ${err.message}`);
         }
 
         // 1. Siguraduhing may table na dtr
