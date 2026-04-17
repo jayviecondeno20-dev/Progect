@@ -104,7 +104,15 @@
             <div class="container-menu">
                 <div class="container8">
                     <div class="menu-filter">
-                        <!-- Gumamit ng div sa halip na form para hindi mag-submit/reload -->
+                        <!-- Search Bar Section -->
+                        <div class="search-group" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                            <div style="position: relative; flex: 1;">
+                                <i class='bx bx-search' style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #666;"></i>
+                                <input type="text" id="menuSearch" placeholder="Search menu items..." onkeyup="searchMenu()" style="width: 100%; padding: 10px 10px 10px 35px; border-radius: 8px; border: 1px solid #ddd; outline: none;">
+                            </div>
+                            <button type="button" class="add-btn" onclick="filterMenu('all')" style="white-space: nowrap;">Show All</button>
+                        </div>
+
                         <div class="menu-filter-group"> 
                             <label for="">Food :</label>
                             <button type="button" onclick="filterMenu('Fried chicken')">Fried chicken</button>
@@ -121,6 +129,11 @@
                             <button type="button" onclick="filterMenu('Soda Drinks')">Soda Drinks</button>
                             <button type="button" onclick="filterMenu('Cheese Cake Series')">Cheese Cake Series</button>
                             <button type="button" onclick="filterMenu('Smoothies')">Smoothies</button>
+                        </div>
+
+                        <div class="menu-filter-group">
+                            <label for="">Others :</label>
+                            <button type="button" onclick="filterMenu('Adds On')">Adds On</button>
                         </div>
                     </div>
 
