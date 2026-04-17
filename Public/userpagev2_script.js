@@ -1,3 +1,13 @@
+/**
+ * Function para magpakita ng confirmation bago mag-logout.
+ */
+function logoutUser() {
+    if (confirm("Are you sure you want to logout?")) {
+        const logoutForm = document.getElementById('logout-form');
+        if (logoutForm) logoutForm.submit();
+    }
+}
+
 function updateGrid() {
     const sidebar = document.querySelector(".sidebar");
     const body = document.querySelector("body");
