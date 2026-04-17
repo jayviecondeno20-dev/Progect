@@ -275,9 +275,9 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
         // Fetch DTR data for the table
         const rawDtrData = await db('SELECT * FROM dtr WHERE USERNAME = ? ORDER BY DATE DESC', [user.USERNAME]);
 
-        // REVISED ON-DUTY CHECK: Check for NULL or Empty string sa TIME OUT
+        // REVISED ON-DUTY CHECK: Isama ang check para sa "--:--" placeholder
         const attendanceCheck = await db(
-            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND (`TIME OUT` IS NULL OR `TIME OUT` = "")', 
+            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND (`TIME OUT` IS NULL OR `TIME OUT` = "" OR `TIME OUT` = "--:--")', 
             [user.USERNAME, phDate]
         );
         isOnDuty = attendanceCheck.length > 0;
@@ -1437,8 +1437,9 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
     // SECURITY CHECK: Attendance Verification sa Backend
     const phDateOnly = new Date().toLocaleString('sv', { timeZone: 'Asia/Manila' }).split(' ')[0];
     try {
+        // Isama ang check para sa "--:--" placeholder dito sa backend security check
         const attendanceStatus = await db(
-            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND (`TIME OUT` IS NULL OR `TIME OUT` = "")', 
+            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND (`TIME OUT` IS NULL OR `TIME OUT` = "" OR `TIME OUT` = "--:--")', 
             [user.USERNAME, phDateOnly]
         );
         if (attendanceStatus.length === 0) {
