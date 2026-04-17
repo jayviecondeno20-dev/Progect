@@ -384,6 +384,7 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
     let menuItems = []; // Variable para sa menu list
     let selloutData = []; // Variable para sa sellout reports
     let dtrData = []; // Variable para sa attendance reports
+    let pendingUsers = []; // Listahan ng mga accounts na naghihintay ng approval
     let analyticsData = {
         totalSales: 0,
         totalItemsSold: 0,
@@ -498,6 +499,13 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
 
         } catch (e) {
             console.log("Analytics data (sellout) could not be fetched. Table might be empty.", e.message);
+        }
+
+        // --- FETCH PENDING ACCOUNTS ---
+        try {
+            pendingUsers = await db('SELECT id, username, category, email FROM accounts WHERE is_approved = 0');
+        } catch (e) {
+            console.log("Error fetching pending accounts:", e.message);
         }
 
     } catch (e) {
@@ -666,7 +674,8 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
         employeeProfile: employeeProfile, // Ipasa ang profile data
         analyticsData: analyticsData, // Ipasa ang analytics data
         selectedMonth: selectedMonth, // Ipasa ang selected filter
-        selectedYear: selectedYear
+        selectedYear: selectedYear,
+        pendingUsers: pendingUsers // Ipasa ang listahan ng for approval sa EJS
     });
 });
 
@@ -930,8 +939,8 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
         const hashedPassword = await bcryptjs.hash(PASSWORD, 10);
 
         // Siguraduhing may 'email' column sa iyong 'accounts' table
-        const query = "INSERT INTO accounts (username, password, confirm_password, category, email, face_descriptor) VALUES (?, ?, ?, ?, ?, ?)";
-        const values = [USERNAME, hashedPassword, hashedPassword, CATEGORY, EMAIL, face_descriptor];
+        const query = "INSERT INTO accounts (username, password, confirm_password, category, email, face_descriptor, is_approved) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        const values = [USERNAME, hashedPassword, hashedPassword, CATEGORY, EMAIL, face_descriptor, 0];
 
         await db(query, values);
 
@@ -942,7 +951,7 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
         req.session.otpExpiry = null;
         req.session.emailForOtp = null;
         
-        req.flash('success', 'Registration successful! You can now log in.');
+        req.flash('success', 'Registration submitted! Please wait for admin approval before logging in.');
         res.redirect('/login');
 
     } catch (e) {
@@ -979,6 +988,13 @@ app.post('/login', (req, res, next) => {
 
         // Validate if the selected category matches the database category
         const checkUser = normalizeUser(user);
+
+        // CHECK IF ACCOUNT IS APPROVED
+        if (checkUser && checkUser.IS_APPROVED == 0) {
+            req.flash('error', 'Login failed: Your account is still waiting for approval from the Admin.');
+            return res.redirect('/login');
+        }
+
         if (req.body.CATEGORY && checkUser.CATEGORY !== req.body.CATEGORY) {
             req.flash('error', `Login failed: This account is not registered as ${req.body.CATEGORY}.`);
             return res.redirect('/login');
@@ -1712,6 +1728,12 @@ async function initializeDtrTable() {
         try {
             await db("ALTER TABLE accounts ADD COLUMN face_descriptor TEXT");
             console.log("[DB CHECK] Added 'face_descriptor' column to accounts table.");
+            
+            // Add is_approved column for Approval Workflow
+            await db("ALTER TABLE accounts ADD COLUMN is_approved TINYINT(1) DEFAULT 0");
+            // Auto-approve existing accounts para hindi ma-lock out ang mga dating users
+            await db("UPDATE accounts SET is_approved = 1");
+            console.log("[DB CHECK] Added 'is_approved' column and auto-approved existing users.");
         } catch (err) {
             if (err.code !== 'ER_DUP_FIELDNAME') console.log(`[DB NOTE] Accounts table check: ${err.message}`);
         }

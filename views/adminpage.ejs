@@ -72,6 +72,15 @@
 
                 <ul class="menu-links">
                     <li class="nav-links">
+                        <a href="#" onclick="openSection('users')">
+                            <i class='bx bx-user-check icon'></i>
+                            <span class="text nav-text">USER APPROVAL</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="menu-links">
+                    <li class="nav-links">
                         <a href="#" onclick="openSection('account')">
                             <i class='bx bxs-user-account icon' ></i>
                             <span class="text nav-text">ACCOUNT</span>
@@ -245,6 +254,48 @@
                     <% } else { %>
                         <p style="text-align: center; padding: 20px;">No late records found.</p>
                     <% } %>
+                </div>
+            </div>
+        </section>
+
+        <section id="users" class="tab-content">
+            <div class="headermenu">
+                <h2>USER REGISTRATION APPROVALS</h2>
+            </div>
+
+            <div class="container-menu">
+                <div class="container11">
+                    <table class="inventory-table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Category</th>
+                                <th>Email</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (typeof pendingUsers !== 'undefined' && pendingUsers.length > 0) { %>
+                                <% pendingUsers.forEach(function(user) { %>
+                                    <tr>
+                                        <td><%= user.username %></td>
+                                        <td><%= user.category %></td>
+                                        <td><%= user.email %></td>
+                                        <td>
+                                            <form action="/approve-user/<%= user.id %>" method="POST" style="display:inline;">
+                                                <button type="submit" class="add-item-btn" style="background: #2e7d32; width: auto; padding: 5px 15px; height: 35px;">Approve</button>
+                                            </form>
+                                            <form action="/reject-user/<%= user.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to reject this registration?')">
+                                                <button type="submit" class="add-item-btn" style="background: #c62828; width: auto; padding: 5px 15px; height: 35px;">Reject</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr><td colspan="4">No pending accounts found.</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -1035,6 +1086,7 @@
             populateDropdowns('inventoryTable');
             populateDropdowns('selloutTable');
             populateDropdowns('attendanceTable');
+            populateDropdowns('usersTable');
         });
 
         // Function to populate dropdowns automatically based on table data
