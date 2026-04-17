@@ -503,6 +503,18 @@
     <input type="hidden" id="isOnDutyStatus" value="<%= isOnDuty %>">
 
     <script>
+        // Calculate Best Sellers based on Transaction History
+        const transactionHistory = <%- JSON.stringify(typeof transactionData !== 'undefined' ? transactionData : []) %>;
+        const salesMap = {};
+        transactionHistory.forEach(t => {
+            salesMap[t.MENU] = (salesMap[t.MENU] || 0) + (parseInt(t.Qty) || 0);
+        });
+
+        // Get top 10 best selling item names
+        const bestSellers = Object.keys(salesMap)
+            .sort((a, b) => salesMap[b] - salesMap[a])
+            .slice(0, 10);
+
         // Global variable para matandaan ang piniling category
         let activeCategory = 'all';
 
@@ -521,13 +533,23 @@
         function applyFilters() {
             const searchTerm = document.getElementById('menuSearch').value.toLowerCase();
             const cards = document.querySelectorAll('.menu-card');
+            const menuHeader = document.querySelector('#menu .headermenu h2');
 
             cards.forEach(card => {
-                const itemName = (card.getAttribute('data-name') || "").toLowerCase();
+                const itemName = card.getAttribute('data-name') || "";
                 const itemCategory = card.getAttribute('data-category') || "";
 
-                const matchesCategory = (activeCategory === 'all' || itemCategory === activeCategory);
-                const matchesSearch = itemName.includes(searchTerm);
+                const matchesSearch = itemName.toLowerCase().includes(searchTerm);
+                let matchesCategory = false;
+
+                // If no filter/search, show Best Sellers. Otherwise, standard filter.
+                if (activeCategory === 'all' && searchTerm === "" && bestSellers.length > 0) {
+                    matchesCategory = bestSellers.includes(itemName);
+                    if (menuHeader) menuHeader.innerText = "BEST SELLERS";
+                } else {
+                    matchesCategory = (activeCategory === 'all' || itemCategory === activeCategory);
+                    if (menuHeader) menuHeader.innerText = activeCategory === 'all' ? "MENU" : activeCategory.toUpperCase();
+                }
 
                 // Ipapakita lang ang card kung pasok sa category AT pasok sa search term
                 if (matchesCategory && matchesSearch) {
@@ -537,6 +559,9 @@
                 }
             });
         }
+
+        // Run on load to show Best Sellers initially
+        window.addEventListener('DOMContentLoaded', applyFilters);
     </script>
 
     <script src="userpagev2_script.js"></script>
