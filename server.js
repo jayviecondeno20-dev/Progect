@@ -392,6 +392,7 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
     
     // Get Filter Parameters
     const selectedMonth = req.query.month;
+    const selectedLimit = req.query.limit ? parseInt(req.query.limit) : null; // Parse limit to integer
     const selectedYear = req.query.year;
 
     let items = [];
@@ -720,7 +721,8 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
         employeeProfile: employeeProfile, // Ipasa ang profile data
         analyticsData: analyticsData, // Ipasa ang analytics data
         selectedMonth: selectedMonth, // Ipasa ang selected filter
-        selectedYear: selectedYear,
+        selectedYear: selectedYear, 
+        limit: selectedLimit, // Pass the limit to EJS
         pendingUsers: pendingUsers, // Ipasa ang listahan ng for approval sa EJS
         allUsers: allUsers // Ipasa ang listahan ng lahat ng users para sa Manning section
     });

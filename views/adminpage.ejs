@@ -157,6 +157,8 @@
                         <option value="2025" <%= (typeof selectedYear !== 'undefined' && selectedYear == '2025') ? 'selected' : '' %>>2025</option>
                         <option value="2026" <%= (typeof selectedYear !== 'undefined' && selectedYear == '2026') ? 'selected' : '' %>>2026</option>
                     </select>
+                    <input type="number" name="limit" placeholder="Limit results" class="search-input-styled" min="1" value="<%= typeof limit !== 'undefined' ? limit : '' %>">
+                    </select>
                     <button type="submit" class="add-item-btn">Filter</button>
                     <a href="/adminpage?tab=analytics" class="add-item-btn clear-btn" style="text-decoration: none; text-align: center;">Clear</a>
                 </form>
