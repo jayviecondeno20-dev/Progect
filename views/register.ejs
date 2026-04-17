@@ -29,14 +29,20 @@
             </div>
             <div class="INPUT-GROUP">
                 <label for="PASSWORD">PASSWORD</label>
-                <input type="password" id="PASSWORD" name="PASSWORD" minlength="8" maxlength="30" 
-                    pattern="^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,30}$" 
-                    title="Dapat ay 8-30 characters at may kombinasyon ng letra at numero (alphanumeric)." 
-                    placeholder="Alphanumeric (8-30 chars)" required>
+                <div style="position: relative;">
+                    <input type="password" id="PASSWORD" name="PASSWORD" minlength="8" maxlength="30" 
+                        pattern="^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,30}$" 
+                        title="Dapat ay 8-30 characters at may kombinasyon ng letra at numero (alphanumeric)." 
+                        placeholder="Alphanumeric (8-30 chars)" required style="width: 100%; padding-right: 40px;">
+                    <i class='bx bx-hide eye-icon' onclick="togglePassword('PASSWORD', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 20px;"></i>
+                </div>
             </div>
             <div class="INPUT-GROUP">
                 <label for="confirm_password">CONFIRM PASSWORD</label>
-                <input type="password" id="confirm_password" name="confirm_password" minlength="8" maxlength="30" required>
+                <div style="position: relative;">
+                    <input type="password" id="confirm_password" name="confirm_password" minlength="8" maxlength="30" required style="width: 100%; padding-right: 40px;">
+                    <i class='bx bx-hide eye-icon' onclick="togglePassword('confirm_password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 20px;"></i>
+                </div>
             </div>
             <div class="INPUT-GROUP">
                 <label for="CATEGORY">CATEGORY</label>
@@ -76,6 +82,18 @@
     </div>
     
     <script>
+        // --- TOGGLE PASSWORD VISIBILITY ---
+        function togglePassword(inputId, icon) {
+            const passwordInput = document.getElementById(inputId);
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('bx-hide', 'bx-show');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('bx-show', 'bx-hide');
+            }
+        }
+
         // --- FACE API LOGIC FOR REGISTRATION ---
         const video = document.getElementById('register-video');
         const captureBtn = document.getElementById('captureFaceBtn');
