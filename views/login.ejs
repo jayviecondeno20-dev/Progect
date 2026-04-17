@@ -21,7 +21,10 @@
             </div>
             <div class="INPUT-GROUP">
                 <label for="PASSWORD">PASSWORD</label>
-                <input type="password" id="PASSWORD" name="PASSWORD" required>
+                <div style="position: relative;">
+                    <input type="password" id="PASSWORD" name="PASSWORD" required style="width: 100%; padding-right: 40px;">
+                    <i class='bx bx-hide eye-icon' onclick="togglePassword('PASSWORD', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 20px;"></i>
+                </div>
             </div>
             <div class="INPUT-GROUP">
                 <label for="CATEGORY">CATEGORY</label>
@@ -35,5 +38,18 @@
             <p>DON'T HAVE AN ACCOUNT? <a href="/register">SIGN UP</a></p>
         </form>
     </div>
+
+    <script>
+        function togglePassword(inputId, icon) {
+            const passwordInput = document.getElementById(inputId);
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('bx-hide', 'bx-show');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('bx-show', 'bx-hide');
+            }
+        }
+    </script>
 </body>
 </html>
