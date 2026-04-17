@@ -1728,14 +1728,18 @@ async function initializeDtrTable() {
         try {
             await db("ALTER TABLE accounts ADD COLUMN face_descriptor TEXT");
             console.log("[DB CHECK] Added 'face_descriptor' column to accounts table.");
-            
+        } catch (err) {
+            if (err.code !== 'ER_DUP_FIELDNAME') console.log(`[DB NOTE] Accounts table check (face_descriptor): ${err.message}`);
+        }
+
+        try {
             // Add is_approved column for Approval Workflow
             await db("ALTER TABLE accounts ADD COLUMN is_approved TINYINT(1) DEFAULT 0");
             // Auto-approve existing accounts para hindi ma-lock out ang mga dating users
             await db("UPDATE accounts SET is_approved = 1");
             console.log("[DB CHECK] Added 'is_approved' column and auto-approved existing users.");
         } catch (err) {
-            if (err.code !== 'ER_DUP_FIELDNAME') console.log(`[DB NOTE] Accounts table check: ${err.message}`);
+            if (err.code !== 'ER_DUP_FIELDNAME') console.log(`[DB NOTE] Accounts table check (is_approved): ${err.message}`);
         }
 
         // 1. Siguraduhing may table na dtr
