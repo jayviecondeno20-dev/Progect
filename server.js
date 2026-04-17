@@ -275,12 +275,13 @@ app.get('/userpage', checkAuthenticated, async (req, res) => {
         // Fetch DTR data for the table
         const rawDtrData = await db('SELECT * FROM dtr WHERE USERNAME = ? ORDER BY DATE DESC', [user.USERNAME]);
 
-        // REVISED ON-DUTY CHECK: Isama ang check para sa "--:--" placeholder
+        // ON-DUTY CHECK: Dapat may Time In at ang Time Out ay (NULL, Empty, o --:--) para sa araw na ito
         const attendanceCheck = await db(
-            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND (`TIME OUT` IS NULL OR `TIME OUT` = "" OR `TIME OUT` = "--:--")', 
+            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND (`TIME IN` IS NOT NULL AND `TIME IN` != "") AND (`TIME OUT` IS NULL OR `TIME OUT` = "" OR `TIME OUT` = "--:--" OR `TIME OUT` = "--:-- ")', 
             [user.USERNAME, phDate]
         );
         isOnDuty = attendanceCheck.length > 0;
+        console.log(`[ATTENDANCE DEBUG] User: ${user.USERNAME} | Date: ${phDate} | On Duty: ${isOnDuty}`);
 
         // KUNIN ANG FACE DESCRIPTOR NG USER
         try {
@@ -1437,9 +1438,9 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
     // SECURITY CHECK: Attendance Verification sa Backend
     const phDateOnly = new Date().toLocaleString('sv', { timeZone: 'Asia/Manila' }).split(' ')[0];
     try {
-        // Isama ang check para sa "--:--" placeholder dito sa backend security check
+        // Backend Security: Check attendance status ulit bago i-save ang order
         const attendanceStatus = await db(
-            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND `TIME IN` IS NOT NULL AND (`TIME OUT` IS NULL OR `TIME OUT` = "" OR `TIME OUT` = "--:--")', 
+            'SELECT * FROM dtr WHERE UPPER(TRIM(USERNAME)) = UPPER(TRIM(?)) AND DATE(`DATE`) = ? AND (`TIME IN` IS NOT NULL AND `TIME IN` != "") AND (`TIME OUT` IS NULL OR `TIME OUT` = "" OR `TIME OUT` = "--:--" OR `TIME OUT` = "--:-- ")', 
             [user.USERNAME, phDateOnly]
         );
         if (attendanceStatus.length === 0) {
