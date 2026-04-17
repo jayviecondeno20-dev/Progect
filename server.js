@@ -525,7 +525,29 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
 
         // --- FETCH ALL USER ACCOUNTS (MANNING) ---
         try {
-            allUsers = await db("SELECT id, username, email, category, is_approved FROM accounts WHERE category = 'USER'");
+            const rawUsers = await db(`
+                SELECT a.id, a.username, a.email, a.category, a.is_approved, MAX(d.DATE) as last_in
+                FROM accounts a
+                LEFT JOIN dtr d ON a.username = d.USERNAME
+                WHERE a.category = 'USER'
+                GROUP BY a.id, a.username, a.email, a.category, a.is_approved
+            `);
+
+            const phNow = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
+            phNow.setHours(0,0,0,0);
+
+            allUsers = rawUsers.map(u => {
+                let remarks = 'ACTIVE';
+                if (!u.last_in) {
+                    remarks = 'AWOL';
+                } else {
+                    const lastDate = new Date(u.last_in);
+                    const diffTime = Math.abs(phNow - lastDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    if (diffDays >= 3) remarks = 'AWOL';
+                }
+                return { ...u, remarks };
+            });
         } catch (e) {
             console.log("Error fetching users for Manning section:", e.message);
         }
@@ -1531,6 +1553,20 @@ app.post('/reject-user/:id', checkAuthenticated, async (req, res) => {
         req.flash('error', 'Rejection failed: ' + e.message);
     }
     res.redirect('/adminpage?tab=users');
+});
+
+app.delete('/delete-user/:id', checkAuthenticated, async (req, res) => {
+    const admin = normalizeUser(req.user);
+    if (admin.CATEGORY !== 'ADMIN') return res.redirect('/login');
+    
+    try {
+        await db("DELETE FROM accounts WHERE id = ?", [req.params.id]);
+        req.flash('success', 'Account has been removed from the system.');
+    } catch (e) {
+        console.error("Delete user error:", e);
+        req.flash('error', 'Failed to delete user: ' + e.message);
+    }
+    res.redirect('/adminpage?tab=manning');
 });
 
 // DOWNLOAD SELLOUT REPORT ROUTE (CSV/Excel)

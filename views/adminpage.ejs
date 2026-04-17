@@ -269,7 +269,7 @@
 
         <section id="manning" class="tab-content">
             <div class="headermenu">
-                <h2>MANNING (USER LIST)</h2>
+                <h2>MANNING</h2>
             </div>
 
             <div class="container-menu">
@@ -281,12 +281,16 @@
                                 <th>Email</th>
                                 <th>Role</th>
                                 <th>Status</th>
+                                <th>Remarks</th>
+                                <th>Action</th>
                             </tr>
                             <tr class="filter-row">
                                 <th><select class="filter-input" onchange="filterTable('manningTable')"><option value="">All</option></select></th>
                                 <th><select class="filter-input" onchange="filterTable('manningTable')"><option value="">All</option></select></th>
                                 <th><select class="filter-input" onchange="filterTable('manningTable')"><option value="">All</option></select></th>
                                 <th><select class="filter-input" onchange="filterTable('manningTable')"><option value="">All</option></select></th>
+                                <th><select class="filter-input" onchange="filterTable('manningTable')"><option value="">All</option></select></th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -297,10 +301,23 @@
                                         <td><%= u.email %></td>
                                         <td><%= u.category %></td>
                                         <td><%= u.is_approved == 1 ? 'Approved' : 'Pending Approval' %></td>
+                                        <td style="font-weight: bold; color: <%= u.remarks === 'AWOL' ? 'red' : 'green' %>;"><%= u.remarks %></td>
+                                        <td>
+                                            <form action="/delete-user/<%= u.id %>?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this account?')">
+                                                <button type="submit" class="action-btn-delete" title="Delete Account">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            </form>
+                                            <form action="/delete-user/<%= u.id %>?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Mark this employee as Resigned and remove account?')">
+                                                <button type="submit" class="action-btn-delete" style="color: orange;" title="Mark as Resigned">
+                                                    <i class='bx bx-user-minus'></i>
+                                                </button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 <% }); %>
                             <% } else { %>
-                                <tr><td colspan="4">No user accounts found.</td></tr>
+                                <tr><td colspan="6">No user accounts found.</td></tr>
                             <% } %>
                         </tbody>
                     </table>
