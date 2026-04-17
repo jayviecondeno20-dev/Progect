@@ -200,7 +200,7 @@
                            <% if (typeof items !== 'undefined' && items.length > 0) { %>
                                <% items.forEach(function(item) { %>
                                    <tr>
-                                       <td><%= new Date(item.DATE).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) %></td>
+                                       <td><%= item.DATE ? new Date(item.DATE).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A' %></td>
                                        <td><%= item.ITEM_NAME %></td>
                                        <td><%= item.ITEM_CATEGORY %></td>
                                        <td><%= item.UNIT_OF_MEASURE %></td>
@@ -293,7 +293,7 @@
                             <% if (typeof transactionData !== 'undefined' && transactionData.length > 0) { %>
                                 <% transactionData.forEach(function(trans) { %>
                                     <tr>
-                                        <td><%= new Date(trans.TIMESTAMP).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) %></td>
+                                        <td><%= trans.TIMESTAMP ? new Date(trans.TIMESTAMP).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A' %></td>
                                         <td><%= trans.MENU %></td>
                                         <td><%= trans.CATEGORY %></td>
                                         <td><%= trans['CATEGORY 2'] %></td>
@@ -500,14 +500,17 @@
     <input type="hidden" id="userFaceDescriptorData" value="<%= (typeof faceDescriptor !== 'undefined' && faceDescriptor) ? faceDescriptor : '' %>">
 
     <!-- HIDDEN INPUT FOR ATTENDANCE STATUS (Bridge between Server EJS and External JS) -->
-    <input type="hidden" id="isOnDutyStatus" value="<%= isOnDuty %>">
+    <input type="hidden" id="isOnDutyStatus" value="<%= (typeof isOnDuty !== 'undefined') ? isOnDuty : 'false' %>">
 
     <script>
         // Calculate Best Sellers based on Transaction History
-        const transactionHistory = <%- JSON.stringify(typeof transactionData !== 'undefined' ? transactionData : []) %>;
+        const transactionHistory = <%- JSON.stringify(Array.isArray(locals.transactionData) ? transactionData : []) %>;
         const salesMap = {};
         transactionHistory.forEach(t => {
-            salesMap[t.MENU] = (salesMap[t.MENU] || 0) + (parseInt(t.Qty) || 0);
+            if (t.MENU) {
+                const name = t.MENU.trim().toLowerCase();
+                salesMap[name] = (salesMap[name] || 0) + (parseInt(t.Qty) || 0);
+            }
         });
 
         // Get top 10 best selling item names
@@ -535,20 +538,28 @@
             const cards = document.querySelectorAll('.menu-card');
             const menuHeader = document.querySelector('#menu .headermenu h2');
 
+            // Update Header once based on current state
+            if (menuHeader) {
+                if (activeCategory === 'all' && searchTerm === "" && bestSellers.length > 0) {
+                    menuHeader.innerText = "BEST SELLERS";
+                } else {
+                    menuHeader.innerText = activeCategory === 'all' ? "MENU" : activeCategory.toUpperCase();
+                }
+            }
+
             cards.forEach(card => {
                 const itemName = card.getAttribute('data-name') || "";
                 const itemCategory = card.getAttribute('data-category') || "";
 
                 const matchesSearch = itemName.toLowerCase().includes(searchTerm);
                 let matchesCategory = false;
+                const itemNameLower = itemName.trim().toLowerCase();
 
                 // If no filter/search, show Best Sellers. Otherwise, standard filter.
                 if (activeCategory === 'all' && searchTerm === "" && bestSellers.length > 0) {
-                    matchesCategory = bestSellers.includes(itemName);
-                    if (menuHeader) menuHeader.innerText = "BEST SELLERS";
+                    matchesCategory = bestSellers.includes(itemNameLower);
                 } else {
-                    matchesCategory = (activeCategory === 'all' || itemCategory === activeCategory);
-                    if (menuHeader) menuHeader.innerText = activeCategory === 'all' ? "MENU" : activeCategory.toUpperCase();
+                    matchesCategory = (activeCategory === 'all' || itemCategory.toLowerCase() === activeCategory.toLowerCase());
                 }
 
                 // Ipapakita lang ang card kung pasok sa category AT pasok sa search term
