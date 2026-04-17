@@ -538,15 +538,6 @@
             const cards = document.querySelectorAll('.menu-card');
             const menuHeader = document.querySelector('#menu .headermenu h2');
 
-            // Update Header once based on current state
-            if (menuHeader) {
-                if (activeCategory === 'all' && searchTerm === "" && bestSellers.length > 0) {
-                    menuHeader.innerText = "BEST SELLERS";
-                } else {
-                    menuHeader.innerText = activeCategory === 'all' ? "MENU" : activeCategory.toUpperCase();
-                }
-            }
-
             cards.forEach(card => {
                 const itemName = card.getAttribute('data-name') || "";
                 const itemCategory = card.getAttribute('data-category') || "";
