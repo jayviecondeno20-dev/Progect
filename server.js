@@ -1464,6 +1464,37 @@ app.post('/place-order', checkAuthenticated, async (req, res) => {
     }
 });
 
+// =================================================================
+// USER APPROVAL ROUTES
+// =================================================================
+app.post('/approve-user/:id', checkAuthenticated, async (req, res) => {
+    const admin = normalizeUser(req.user);
+    if (admin.CATEGORY !== 'ADMIN') return res.redirect('/login');
+    
+    try {
+        await db("UPDATE accounts SET is_approved = 1 WHERE id = ?", [req.params.id]);
+        req.flash('success', 'User approved successfully!');
+    } catch (e) {
+        console.error("Approval error:", e);
+        req.flash('error', 'Approval failed: ' + e.message);
+    }
+    res.redirect('/adminpage?tab=users');
+});
+
+app.post('/reject-user/:id', checkAuthenticated, async (req, res) => {
+    const admin = normalizeUser(req.user);
+    if (admin.CATEGORY !== 'ADMIN') return res.redirect('/login');
+    
+    try {
+        await db("DELETE FROM accounts WHERE id = ?", [req.params.id]);
+        req.flash('success', 'User registration rejected.');
+    } catch (e) {
+        console.error("Rejection error:", e);
+        req.flash('error', 'Rejection failed: ' + e.message);
+    }
+    res.redirect('/adminpage?tab=users');
+});
+
 // DOWNLOAD SELLOUT REPORT ROUTE (CSV/Excel)
 // INALIS ang checkAuthenticated middleware para iwas sa redirect loop
 app.get('/download-sellout', async (req, res) => {
