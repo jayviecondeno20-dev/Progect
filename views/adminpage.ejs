@@ -188,37 +188,6 @@
                 </div>
             </div>
 
-            <!-- PREDICTIVE ANALYTICS SECTION -->
-            <div class="headermenu" style="margin-top: 50px;">
-                <h2 style="font-size: 40px; border-bottom: 3px solid var(--accent-gold); display: inline-block; padding-bottom: 10px;">PREDICTIVE ANALYTICS</h2>
-            </div>
-
-            <div class="charts-container">
-                <!-- Forecast 1: Future Sales Revenue -->
-                <div class="chart-wrapper">
-                    <h3>7-Day Revenue Forecast (Future)</h3>
-                    <canvas id="salesForecastChart"></canvas>
-                </div>
-
-                <!-- Forecast 2: Inventory Depletion Projection -->
-                <div class="chart-wrapper">
-                    <h3>Inventory Exhaustion (Days Remaining)</h3>
-                    <canvas id="inventoryExhaustionChart"></canvas>
-                </div>
-
-                <!-- Forecast 3: Demand Trends -->
-                <div class="chart-wrapper">
-                    <h3>Predicted Category Growth (%)</h3>
-                    <canvas id="categoryDemandChart"></canvas>
-                </div>
-
-                <!-- Forecast 4: Peak Hours Prediction -->
-                <div class="chart-wrapper">
-                    <h3>Peak Hour Probability (Next Transactions)</h3>
-                    <canvas id="peakTimePredictionChart"></canvas>
-                </div>
-            </div>
-
             <!-- Charts Container -->
             <div class="charts-container">
                 <div class="chart-wrapper">
@@ -299,36 +268,6 @@
                 </div>
             </div>
 
-            <!-- PREDICTIVE ANALYTICS SECTION -->
-            <div class="headermenu" style="margin-top: 50px;">
-                <h2 style="font-size: 40px; border-bottom: 3px solid var(--accent-gold); display: inline-block; padding-bottom: 10px;">PREDICTIVE ANALYTICS</h2>
-            </div>
-
-            <div class="charts-container">
-                <!-- Forecast 1: Sales Revenue -->
-                <div class="chart-wrapper">
-                    <h3>7-Day Revenue Forecast</h3>
-                    <canvas id="salesForecastChart"></canvas>
-                </div>
-
-                <!-- Forecast 2: Inventory Depletion -->
-                <div class="chart-wrapper">
-                    <h3>Inventory Exhaustion (Days Remaining)</h3>
-                    <canvas id="inventoryExhaustionChart"></canvas>
-                </div>
-
-                <!-- Forecast 3: Demand Trends -->
-                <div class="chart-wrapper">
-                    <h3>Predicted Category Growth (%)</h3>
-                    <canvas id="categoryDemandChart"></canvas>
-                </div>
-
-                <!-- Forecast 4: Peak Hours -->
-                <div class="chart-wrapper">
-                    <h3>Peak Hour Probability</h3>
-                    <canvas id="peakTimePredictionChart"></canvas>
-                </div>
-            </div>
         </section>
 
         <section id="manning" class="tab-content">
@@ -878,7 +817,6 @@
     <script id="salesByMonthCat2Data" type="application/json"><%- JSON.stringify(analyticsData.salesByMonthCat2 || []) %></script>
     <script id="salesByDailyCat2Data" type="application/json"><%- JSON.stringify(analyticsData.salesByDailyCat2 || []) %></script>
     <script id="latesPerUserData" type="application/json"><%- JSON.stringify(analyticsData.latesPerUser || {}) %></script>
-    <script id="predictiveData" type="application/json"><%- JSON.stringify(analyticsData.predictiveData || {}) %></script>
 
     <script>
         // Data from server - stored in data attributes to avoid JS parser issues

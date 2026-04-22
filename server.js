@@ -422,8 +422,7 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
         salesByMonthCat2: [], // NEW: Monthly trend for Category 2
         salesByDailyCat2: [], // NEW: Daily trend for Category 2
         attendanceStats: { Present: 0, Late: 0, Undertime: 0, HalfDay: 0 }, // Initialize attendance stats
-        latesPerUser: {}, // NEW: Track lates per user
-        predictiveData: { salesForecast: [], inventoryExhaustion: [], categoryDemand: [], peakHours: [] }
+        latesPerUser: {} // NEW: Track lates per user
     };
     let employeeProfile = {}; // Variable para sa profile data
     
