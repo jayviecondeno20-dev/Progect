@@ -816,7 +816,6 @@
     <script id="attendanceStatsData" type="application/json"><%- JSON.stringify(analyticsData.attendanceStats || { Present: 0, Late: 0, Undertime: 0, HalfDay: 0 }) %></script>
     <script id="salesByMonthCat2Data" type="application/json"><%- JSON.stringify(analyticsData.salesByMonthCat2 || []) %></script>
     <script id="salesByDailyCat2Data" type="application/json"><%- JSON.stringify(analyticsData.salesByDailyCat2 || []) %></script>
-    <script id="latesPerUserData" type="application/json"><%- JSON.stringify(analyticsData.latesPerUser || {}) %></script>
 
     <script>
         // Data from server - stored in data attributes to avoid JS parser issues

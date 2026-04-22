@@ -521,44 +521,6 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
             // NEW: Daily Sales Trend for Category 2
             analyticsData.salesByDailyCat2 = await db(`SELECT DATE_FORMAT(TIMESTAMP, '%Y-%m-%d') as dateLabel, \`CATEGORY 2\` as category, SUM(\`Total Sellout\`) as totalSales FROM sellout WHERE \`CATEGORY 2\` IS NOT NULL AND \`CATEGORY 2\` != '' ${dateFilterSql} GROUP BY dateLabel, category ORDER BY dateLabel ASC`, [...dateParams]);
 
-            // --- PREDICTIVE ANALYTICS CALCULATIONS ---
-            // 1. Sales Forecast (Next 7 Days)
-            if (analyticsData.salesByDaily.length > 0) {
-                const avgDaily = analyticsData.totalSales / (analyticsData.salesByDaily.length || 1);
-                for (let i = 1; i <= 7; i++) {
-                    const futureDate = new Date();
-                    futureDate.setDate(futureDate.getDate() + i);
-                    analyticsData.predictiveData.salesForecast.push({
-                        date: futureDate.toISOString().split('T')[0],
-                        forecast: (avgDaily * (1 + (i * 0.015))).toFixed(2) // Simulating 1.5% daily growth trend
-                    });
-                }
-            }
-
-            // 2. Inventory Exhaustion (Top 5 Items)
-            const inventoryUsage = await db(`SELECT MENU, SUM(Qty) as totalSold, COUNT(DISTINCT DATE(TIMESTAMP)) as daysActive FROM sellout GROUP BY MENU`);
-            items.slice(0, 5).forEach(item => {
-                const usage = inventoryUsage.find(u => u.MENU.toLowerCase() === item.ITEM_NAME.toLowerCase());
-                const dailyRate = usage ? (usage.totalSold / (usage.daysActive || 1)) : 0.5;
-                const daysRemaining = Math.max(0, Math.round(item.STOCK_ONHAND / (dailyRate || 1)));
-                analyticsData.predictiveData.inventoryExhaustion.push({
-                    name: item.ITEM_NAME,
-                    days: daysRemaining
-                });
-            });
-
-            // 3. Predicted Category Growth
-            analyticsData.predictiveData.categoryDemand = analyticsData.salesByCategory.map(cat => ({
-                category: cat.CATEGORY,
-                growth: (Math.random() * 15 + 5).toFixed(2) // Simulated growth projection
-            }));
-
-            // 4. Peak Hour Probability
-            const hourStats = await db(`SELECT HOUR(TIMESTAMP) as hour, COUNT(*) as count FROM sellout GROUP BY hour ORDER BY hour`);
-            analyticsData.predictiveData.peakHours = hourStats.map(h => ({
-                hour: h.hour,
-                probability: ((h.count / (analyticsData.transactionCount || 1)) * 100).toFixed(1)
-            }));
         } catch (e) {
             console.log("Analytics data (sellout) could not be fetched. Table might be empty.", e.message);
         }
