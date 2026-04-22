@@ -541,12 +541,52 @@ function closeCameraModal() {
     modal.style.display = 'none';
 }
 
+// Helper function to get current geolocation
+async function getCurrentLocation() {
+    return new Promise((resolve) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    });
+                },
+                (error) => {
+                    console.warn("Geolocation error:", error);
+                    let errorMessage = "Location unavailable.";
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = "Location access denied.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = "Location information unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = "Location request timed out.";
+                            break;
+                    }
+                    resolve({ error: errorMessage });
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            resolve({ error: "Geolocation not supported by this browser." });
+        }
+    });
+}
+
 async function captureAndSubmit() {
     const video = document.getElementById('camera-stream');
     const canvas = document.getElementById('camera-canvas');
     const form = document.getElementById('attendance-form');
 
     if (!video.srcObject) return;
+
+    // Get current Philippine timestamp
+    const timestamp = new Date().toLocaleString("en-GB", { timeZone: "Asia/Manila", hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    let locationText = "Location: N/A";
 
     // --- FACE RECOGNITION CHECK ---
     if (window.userFaceDescriptor) {
@@ -581,16 +621,42 @@ async function captureAndSubmit() {
         alert("⚠️ Warning: Bypassing Face ID (No registered data).");
     }
 
+    // Get location data
+    const locationData = await getCurrentLocation();
+    if (locationData.latitude && locationData.longitude) {
+        locationText = `Lat: ${locationData.latitude.toFixed(4)}, Lon: ${locationData.longitude.toFixed(4)}`;
+    } else if (locationData.error) {
+        locationText = `Location: ${locationData.error}`;
+    }
+
     // Set canvas dimensions to match video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
     // Draw image
     const ctx = canvas.getContext('2d');
+    
     // Flip horizontally to match the mirrored video preview
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Reset transformation for text drawing
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // Draw timestamp and location on the image
+    ctx.font = 'bold 20px Arial'; // Adjust font size and style as needed
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'left';
+    
+    // Add a semi-transparent background for better readability
+    const textPadding = 5;
+    const textHeight = 20 + textPadding * 2; // Approx font height + padding
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Semi-transparent black background
+    ctx.fillRect(0, canvas.height - textHeight * 2 - textPadding, canvas.width, textHeight * 2 + textPadding * 2);
+    ctx.fillStyle = 'white'; // Reset text color
+    ctx.fillText(timestamp, textPadding, canvas.height - textHeight - textPadding);
+    ctx.fillText(locationText, textPadding, canvas.height - textPadding);
 
     // Convert to blob and submit
     canvas.toBlob(blob => {
