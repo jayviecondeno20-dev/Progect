@@ -546,12 +546,23 @@ async function getCurrentLocation() {
     return new Promise((resolve) => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    resolve({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                        accuracy: position.coords.accuracy
-                    });
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    let address = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+
+                    try {
+                        // Reverse Geocoding gamit ang Nominatim (OpenStreetMap)
+                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+                        const data = await response.json();
+                        if (data && data.display_name) {
+                            address = data.display_name;
+                        }
+                    } catch (err) {
+                        console.warn("Address lookup failed, using coordinates instead.");
+                    }
+
+                    resolve({ latitude: lat, longitude: lon, address: address });
                 },
                 (error) => {
                     console.warn("Geolocation error:", error);
@@ -623,8 +634,8 @@ async function captureAndSubmit() {
 
     // Get location data
     const locationData = await getCurrentLocation();
-    if (locationData.latitude && locationData.longitude) {
-        locationText = `Lat: ${locationData.latitude.toFixed(4)}, Lon: ${locationData.longitude.toFixed(4)}`;
+    if (locationData.address) {
+        locationText = locationData.address;
     } else if (locationData.error) {
         locationText = `Location: ${locationData.error}`;
     }
@@ -644,19 +655,44 @@ async function captureAndSubmit() {
     // Reset transformation for text drawing
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-    // Draw timestamp and location on the image
-    ctx.font = 'bold 20px Arial'; // Adjust font size and style as needed
+    // --- Draw Timestamp and Wrapped Address ---
+    const fontSize = 16;
+    ctx.font = `bold ${fontSize}px Arial`;
     ctx.fillStyle = 'white';
     ctx.textAlign = 'left';
     
-    // Add a semi-transparent background for better readability
-    const textPadding = 5;
-    const textHeight = 20 + textPadding * 2; // Approx font height + padding
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Semi-transparent black background
-    ctx.fillRect(0, canvas.height - textHeight * 2 - textPadding, canvas.width, textHeight * 2 + textPadding * 2);
-    ctx.fillStyle = 'white'; // Reset text color
-    ctx.fillText(timestamp, textPadding, canvas.height - textHeight - textPadding);
-    ctx.fillText(locationText, textPadding, canvas.height - textPadding);
+    const padding = 10;
+    const maxWidth = canvas.width - (padding * 2);
+    const lineHeight = fontSize + 4;
+
+    // Helper function para sa pag-wrap ng mahabang address
+    const words = (timestamp + " | " + locationText).split(' ');
+    let line = '';
+    let lines = [];
+
+    for (let n = 0; n < words.length; n++) {
+        let testLine = line + words[n] + ' ';
+        let metrics = ctx.measureText(testLine);
+        let testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+            lines.push(line);
+            line = words[n] + ' ';
+        } else {
+            line = testLine;
+        }
+    }
+    lines.push(line);
+
+    // Draw semi-transparent background box sa ilalim
+    const boxHeight = (lines.length * lineHeight) + (padding * 2);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
+
+    // Draw lines of text
+    ctx.fillStyle = 'white';
+    lines.forEach((l, i) => {
+        ctx.fillText(l, padding, (canvas.height - boxHeight) + padding + (lineHeight * (i + 1)));
+    });
 
     // Convert to blob and submit
     canvas.toBlob(blob => {
