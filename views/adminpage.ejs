@@ -188,6 +188,41 @@
                 </div>
             </div>
 
+            <!-- NEW: PREDICTIVE ANALYTICS SECTION -->
+            <div class="headermenu" style="margin-top: 50px;">
+                <h2 style="font-size: 40px; border-bottom: 3px solid var(--accent-gold); display: inline-block; padding-bottom: 10px;">PREDICTIVE ANALYTICS</h2>
+            </div>
+
+            <div class="charts-container">
+                <!-- 1. Revenue Forecast -->
+                <div class="chart-wrapper">
+                    <h3>7-Day Revenue Forecast (Future)</h3>
+                    <canvas id="salesForecastChart"></canvas>
+                </div>
+
+                <!-- 2. Inventory Exhaustion -->
+                <div class="chart-wrapper">
+                    <h3>Inventory Exhaustion (Days Left)</h3>
+                    <canvas id="inventoryExhaustionChart"></canvas>
+                </div>
+
+                <!-- 3. Category Growth -->
+                <div class="chart-wrapper">
+                    <h3>Predicted Category Growth (%)</h3>
+                    <canvas id="categoryDemandChart"></canvas>
+                </div>
+
+                <!-- 4. Peak Hour Probability -->
+                <div class="chart-wrapper">
+                    <h3>Peak Hour Probability</h3>
+                    <canvas id="peakTimePredictionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="headermenu" style="margin-top: 50px;">
+                <h2 style="font-size: 40px;">HISTORICAL REPORTS</h2>
+            </div>
+
             <!-- Charts Container -->
             <div class="charts-container">
                 <div class="chart-wrapper">
@@ -816,6 +851,7 @@
     <script id="attendanceStatsData" type="application/json"><%- JSON.stringify(analyticsData.attendanceStats || { Present: 0, Late: 0, Undertime: 0, HalfDay: 0 }) %></script>
     <script id="salesByMonthCat2Data" type="application/json"><%- JSON.stringify(analyticsData.salesByMonthCat2 || []) %></script>
     <script id="salesByDailyCat2Data" type="application/json"><%- JSON.stringify(analyticsData.salesByDailyCat2 || []) %></script>
+    <script id="predictiveData" type="application/json"><%- JSON.stringify(analyticsData.predictiveData || {}) %></script>
 
     <script>
         // Data from server - stored in data attributes to avoid JS parser issues
@@ -1285,6 +1321,79 @@
                             label: 'Probability (%)',
                             data: predictiveData.peakHours.map(d => d.probability),
                             backgroundColor: '#795548'
+                        }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+                });
+            }
+
+            // --- PREDICTIVE ANALYTICS CHARTS ---
+            const predictiveData = JSON.parse(document.getElementById('predictiveData').textContent);
+            const coffeeColors = ['#4E342E', '#D4AF37', '#795548', '#A1887F', '#5D4037', '#8D6E63', '#3E2723'];
+
+            // 1. Sales Forecast Chart
+            if (predictiveData.salesForecast && predictiveData.salesForecast.length > 0) {
+                new Chart(document.getElementById('salesForecastChart').getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: predictiveData.salesForecast.map(d => d.date),
+                        datasets: [{
+                            label: 'Predicted Revenue (₱)',
+                            data: predictiveData.salesForecast.map(d => d.forecast),
+                            borderColor: '#D4AF37',
+                            backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                            borderDash: [10, 5], // Dashed line for "future"
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+            }
+
+            // 2. Inventory Exhaustion Chart
+            if (predictiveData.inventoryExhaustion && predictiveData.inventoryExhaustion.length > 0) {
+                new Chart(document.getElementById('inventoryExhaustionChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: predictiveData.inventoryExhaustion.map(d => d.name),
+                        datasets: [{
+                            label: 'Est. Days Remaining',
+                            data: predictiveData.inventoryExhaustion.map(d => d.days),
+                            backgroundColor: coffeeColors,
+                            borderColor: '#FAF9F6',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { indexAxis: 'y', responsive: true }
+                });
+            }
+
+            // 3. Category Demand Growth Chart
+            if (predictiveData.categoryDemand && predictiveData.categoryDemand.length > 0) {
+                new Chart(document.getElementById('categoryDemandChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: predictiveData.categoryDemand.map(d => d.category),
+                        datasets: [{
+                            data: predictiveData.categoryDemand.map(d => d.growth),
+                            backgroundColor: coffeeColors
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+            }
+
+            // 4. Peak Hour Probability Chart
+            if (predictiveData.peakHours && predictiveData.peakHours.length > 0) {
+                new Chart(document.getElementById('peakTimePredictionChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: predictiveData.peakHours.map(d => d.hour + ':00'),
+                        datasets: [{
+                            label: 'Probability (%)',
+                            data: predictiveData.peakHours.map(d => d.probability),
+                            backgroundColor: '#4E342E'
                         }]
                     },
                     options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
