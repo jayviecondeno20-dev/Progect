@@ -1125,18 +1125,24 @@ app.post('/add-item', checkAuthenticated, async (req, res) => {
     const user = normalizeUser(req.user);
     const username = user.USERNAME;
 
-    // Kunin ang data mula sa form body
-    // Gumamit ng fallback (||) para tanggapin kahit small letters ang name sa HTML
-    const dateVal = req.body.DATE || req.body.date;
+    // AUTOMATIC PHILIPPINE TIMESTAMP (UTC+8)
+    const now = new Date();
+    const phTimestamp = new Intl.DateTimeFormat('en-CA', { 
+        timeZone: 'Asia/Manila', 
+        year: 'numeric', month: '2-digit', day: '2-digit', 
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, hourCycle: 'h23'
+    }).format(now).replace(/, /g, ' ');
+
+    // Kunin ang ibang data mula sa form body
     const nameVal = req.body.ITEM_NAME || req.body.item_name || req.body.itemName;
     const catVal = req.body.ITEM_CATEGORY || req.body.item_category || req.body.category;
     const unitVal = req.body.UNIT_OF_MEASURE || req.body.unit_of_measure || req.body.unit;
     const stockVal = req.body.STOCK_ONHAND || req.body.stock_onhand || req.body.stock;
 
     // 2. CHECK: Kung may kulang na data
-    if (!dateVal || !nameVal) {
-        console.error("❌ ERROR: Missing Date or Item Name!");
-        req.flash('error', 'Please complete the form (Date and Item Name are required).');
+    if (!nameVal) {
+        console.error("❌ ERROR: Missing Item Name!");
+        req.flash('error', 'Please complete the form (Item Name is required).');
         return res.redirect('/userpage');
     }
 
@@ -1144,7 +1150,7 @@ app.post('/add-item', checkAuthenticated, async (req, res) => {
     const sql = `INSERT INTO inventory 
                  (\`DATE\`, \`ITEM_NAME\`, \`ITEM_CATEGORY\`, \`UNIT_OF_MEASURE\`, \`STOCK_ONHAND\`, \`USERNAME\`) 
                  VALUES (?, ?, ?, ?, ?, ?)`;
-    const values = [dateVal, nameVal, catVal, unitVal, stockVal, username];
+    const values = [phTimestamp, nameVal, catVal, unitVal, stockVal, username];
 
     try {
         await db(sql, values);
