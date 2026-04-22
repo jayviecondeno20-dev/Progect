@@ -423,7 +423,7 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
         salesByDailyCat2: [], // NEW: Daily trend for Category 2
         attendanceStats: { Present: 0, Late: 0, Undertime: 0, HalfDay: 0 }, // Initialize attendance stats
         latesPerUser: {}, // NEW: Track lates per user
-        predictiveData: { salesForecast: [], inventoryExhaustion: [], categoryDemand: [], peakHours: [] }
+        predictiveData: { salesForecast: [], salesVolumeForecast: [], categoryDemand: [], peakHours: [] }
     };
     let employeeProfile = {}; // Variable para sa profile data
     
@@ -536,15 +536,13 @@ app.get('/adminpage', checkAuthenticated, async (req, res) => {
                 }
             }
 
-            // 2. Inventory Exhaustion (Days Remaining)
-            const inventoryUsage = await db(`SELECT MENU, SUM(Qty) as totalSold, COUNT(DISTINCT DATE(TIMESTAMP)) as daysActive FROM sellout GROUP BY MENU`);
-            items.slice(0, 5).forEach(item => {
-                const usage = inventoryUsage.find(u => u.MENU.toLowerCase() === item.ITEM_NAME.toLowerCase());
-                const dailyRate = usage ? (usage.totalSold / (usage.daysActive || 1)) : 0.5;
-                const daysRemaining = Math.max(0, Math.round(item.STOCK_ONHAND / (dailyRate || 1)));
-                analyticsData.predictiveData.inventoryExhaustion.push({
-                    name: item.ITEM_NAME,
-                    days: daysRemaining
+            // 2. Projected Sales Volume (Next 7 Days - Top 5 Items)
+            const salesVolume = await db(`SELECT MENU, SUM(Qty) as totalSold FROM sellout GROUP BY MENU ORDER BY totalSold DESC LIMIT 5`);
+            salesVolume.forEach(item => {
+                const avgDaily = item.totalSold / (analyticsData.salesByDaily.length || 1);
+                analyticsData.predictiveData.salesVolumeForecast.push({
+                    name: item.MENU,
+                    forecastedQty: Math.round(avgDaily * 7 * 1.1) // Simulating 10% volume growth for prediction
                 });
             });
 

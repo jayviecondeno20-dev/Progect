@@ -189,8 +189,8 @@
             </div>
 
             <!-- NEW: PREDICTIVE ANALYTICS SECTION -->
-            <div class="headermenu" style="margin-top: 50px;">
-                <h2 style="font-size: 40px; border-bottom: 3px solid var(--accent-gold); display: inline-block; padding-bottom: 10px;">PREDICTIVE ANALYTICS</h2>
+             <div class="headermenu" style="margin-top: 50px;">
+                <h2 style="font-size: 40px;">PREDICTIVE ANALYTICS</h2>
             </div>
 
             <div class="charts-container">
@@ -200,10 +200,10 @@
                     <canvas id="salesForecastChart"></canvas>
                 </div>
 
-                <!-- 2. Inventory Exhaustion -->
+                <!-- 2. Sales Volume Forecast -->
                 <div class="chart-wrapper">
-                    <h3>Inventory Exhaustion (Days Left)</h3>
-                    <canvas id="inventoryExhaustionChart"></canvas>
+                    <h3>Projected Sales Volume (Top 5 Items)</h3>
+                    <canvas id="salesVolumeForecastChart"></canvas>
                 </div>
 
                 <!-- 3. Category Growth -->
@@ -1206,15 +1206,15 @@
                 });
             }
 
-            // 2. Inventory Exhaustion Chart
-            if (predictiveData.inventoryExhaustion && predictiveData.inventoryExhaustion.length > 0) {
-                new Chart(document.getElementById('inventoryExhaustionChart').getContext('2d'), {
+            // 2. Projected Sales Volume (Next 7 Days)
+            if (predictiveData.salesVolumeForecast && predictiveData.salesVolumeForecast.length > 0) {
+                new Chart(document.getElementById('salesVolumeForecastChart').getContext('2d'), {
                     type: 'bar',
                     data: {
-                        labels: predictiveData.inventoryExhaustion.map(d => d.name),
+                        labels: predictiveData.salesVolumeForecast.map(d => d.name),
                         datasets: [{
-                            label: 'Est. Days Remaining',
-                            data: predictiveData.inventoryExhaustion.map(d => d.days),
+                            label: 'Forecasted Qty (Next 7 Days)',
+                            data: predictiveData.salesVolumeForecast.map(d => d.forecastedQty),
                             backgroundColor: coffeeColors,
                             borderColor: '#FAF9F6',
                             borderWidth: 1
