@@ -631,6 +631,15 @@ async function captureAndSubmit() {
 // ==========================================
 document.addEventListener("DOMContentLoaded", function() {
 
+    // --- DISABLE CTRL+P (PRINT PREVENTION) ---
+    window.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.keyCode === 80)) {
+            e.preventDefault();
+            alert("❌ PRINTING DISABLED: Printing sensitive history records is not allowed for security reasons.");
+            return false;
+        }
+    });
+
     // --- SIDEBAR LOGIC (for userpage/adminpage) ---
     const sidebar = document.querySelector(".sidebar");
     const body = document.querySelector("body");

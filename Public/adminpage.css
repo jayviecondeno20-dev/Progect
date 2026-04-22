@@ -1306,4 +1306,15 @@ button:hover {
     border-radius: 5px;
     cursor: pointer;
 }
+
+/* --- PRINT PREVENTION --- */
+/* Itatago ang lahat ng content kapag sinubukang i-print via browser menu */
+@media print {
+    body {
+        display: none !important;
+    }
+    * {
+        visibility: hidden !important;
+    }
+}
 /* --- END OF TRANSFERRED STYLES --- */
