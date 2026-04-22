@@ -190,7 +190,7 @@
                            <% if (typeof items !== 'undefined' && items.length > 0) { %>
                                <% items.forEach(function(item) { %>
                                    <tr>
-                                       <td><%= item.DATE ? new Date(item.DATE).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A' %></td>
+                                       <td><%= item.DATE ? new Date(item.DATE).toLocaleString('en-PH', { timeZone: 'Asia/Manila', hour12: true }) : 'N/A' %></td>
                                        <td><%= item.ITEM_NAME %></td>
                                        <td><%= item.ITEM_CATEGORY %></td>
                                        <td><%= item.UNIT_OF_MEASURE %></td>
@@ -211,11 +211,6 @@
                     <div class="container3" >
 
                         <form action="/add-item" method="POST" class="inventory-actions">
-                            <div class="input-group">
-                                <label>Date</label>
-                                <input type="date" name="DATE" required>
-                            </div>
-
                             <div class="input-group">
                                 <label>Item Name</label>
                                 <input type="text" name="ITEM_NAME" required>
