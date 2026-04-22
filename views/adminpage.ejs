@@ -851,11 +851,14 @@
     <script id="attendanceStatsData" type="application/json"><%- JSON.stringify(analyticsData.attendanceStats || { Present: 0, Late: 0, Undertime: 0, HalfDay: 0 }) %></script>
     <script id="salesByMonthCat2Data" type="application/json"><%- JSON.stringify(analyticsData.salesByMonthCat2 || []) %></script>
     <script id="salesByDailyCat2Data" type="application/json"><%- JSON.stringify(analyticsData.salesByDailyCat2 || []) %></script>
+    <script id="latesPerUserData" type="application/json"><%- JSON.stringify(analyticsData.latesPerUser || {}) %></script>
     <script id="predictiveData" type="application/json"><%- JSON.stringify(analyticsData.predictiveData || {}) %></script>
 
     <script>
         // Data from server - stored in data attributes to avoid JS parser issues
         const salesByCategoryData = JSON.parse(document.getElementById('salesByCategoryData').textContent);
+        const coffeeColors = ['#4E342E', '#D4AF37', '#795548', '#A1887F', '#5D4037', '#8D6E63', '#3E2723'];
+
         // Script para basahin ang ?tab= parameter sa URL
         document.addEventListener("DOMContentLoaded", function() {
             // --- CHART.JS INITIALIZATION ---
@@ -1155,7 +1158,6 @@
 
             if (latesUsers.length > 0) {
                 const ctxLates = document.getElementById('latesPerUserChart').getContext('2d');
-                const coffeeColors = ['#4E342E', '#D4AF37', '#795548', '#A1887F', '#5D4037', '#8D6E63', '#3E2723'];
 
                 // Create a separate dataset for each user so they appear in the Legend
                 const datasetsLates = latesUsers.map((user, index) => {
@@ -1184,7 +1186,6 @@
 
             // --- PREDICTIVE ANALYTICS CHARTS ---
             const predictiveData = JSON.parse(document.getElementById('predictiveData').textContent);
-            const coffeeColors = ['#4E342E', '#D4AF37', '#795548', '#A1887F', '#5D4037', '#8D6E63', '#3E2723'];
             // 1. Sales Forecast Chart
             if (predictiveData.salesForecast && predictiveData.salesForecast.length > 0) {
                 new Chart(document.getElementById('salesForecastChart').getContext('2d'), {
