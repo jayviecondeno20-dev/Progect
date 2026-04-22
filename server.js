@@ -1922,6 +1922,15 @@ async function initializeDtrTable() {
             }
         }
 
+        // 3.6. INVENTORY TABLE CHECK
+        // Siguraduhin na DATETIME ang DATE column para makuha ang buong timestamp (oras at petsa)
+        try {
+            await db("ALTER TABLE inventory MODIFY COLUMN `DATE` DATETIME");
+            console.log("[DB CHECK] Enforced DATETIME type on inventory table.");
+        } catch (err) {
+            if (err.code !== 'ER_BAD_FIELD_ERROR' && err.code !== 'ER_DUP_FIELDNAME') console.log(`[DB NOTE] Inventory DATE column modification: ${err.message}`);
+        }
+
         // 3.1 FORCE DATE COLUMN TYPE
         // Ito ay para siguraduhin na ang DATE column ay talagang 'DATE' type at hindi 'VARCHAR' o 'DATETIME'
         try {

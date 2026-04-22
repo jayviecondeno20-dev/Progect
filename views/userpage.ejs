@@ -190,7 +190,7 @@
                            <% if (typeof items !== 'undefined' && items.length > 0) { %>
                                <% items.forEach(function(item) { %>
                                    <tr>
-                                       <td><%= item.DATE ? new Date(item.DATE).toLocaleString('en-PH', { timeZone: 'Asia/Manila', hour12: true }) : 'N/A' %></td>
+                                       <td><%= item.DATE ? new Date(item.DATE).toLocaleString('en-PH', { hour12: true }) : 'N/A' %></td>
                                        <td><%= item.ITEM_NAME %></td>
                                        <td><%= item.ITEM_CATEGORY %></td>
                                        <td><%= item.UNIT_OF_MEASURE %></td>
@@ -278,7 +278,7 @@
                             <% if (typeof transactionData !== 'undefined' && transactionData.length > 0) { %>
                                 <% transactionData.forEach(function(trans) { %>
                                     <tr>
-                                        <td><%= trans.TIMESTAMP ? new Date(trans.TIMESTAMP).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A' %></td>
+                                        <td><%= trans.TIMESTAMP ? new Date(trans.TIMESTAMP).toLocaleString('en-PH', { hour12: true }) : 'N/A' %></td>
                                         <td><%= trans.MENU %></td>
                                         <td><%= trans.CATEGORY %></td>
                                         <td><%= trans['CATEGORY 2'] %></td>
